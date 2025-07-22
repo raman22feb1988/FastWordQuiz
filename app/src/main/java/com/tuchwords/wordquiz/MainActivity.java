@@ -1394,6 +1394,19 @@ public class MainActivity extends AppCompatActivity {
 
         EditText e13 = yourCustomView.findViewById(R.id.edittext29);
         EditText e14 = yourCustomView.findViewById(R.id.edittext30);
+        EditText e15 = yourCustomView.findViewById(R.id.edittext33);
+
+        TextView t9 = yourCustomView.findViewById(R.id.textview85);
+        t9.setText(db.getSchema());
+
+        Button b14 = yourCustomView.findViewById(R.id.button81);
+        b14.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Help help = new Help();
+                db.messageBox("Example custom queries", help.getCustomHelp(), MainActivity.this);
+            }
+        });
 
         AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
                 .setTitle(subanagram ? "Search for subanagrams" : "Search for anagrams")
@@ -1436,7 +1449,7 @@ public class MainActivity extends AppCompatActivity {
                                     char occurrences = (char) (myIndex + 97);
                                     theQuery.append(myIndex == 0 ? "" : " + ").append("ABS(_no_").append(occurrences).append("_ - ").append(occurrence[myIndex]).append(")");
                                 }
-                                theQuery.append(" <= ").append((2 * blanks) + letter.length()).append(" - _length_ ORDER BY _length_ DESC");
+                                theQuery.append(" <= ").append((2 * blanks) + letter.length()).append(" - _length_");
                             } else {
                                 char[] myCharacter = letter.toCharArray();
                                 Arrays.sort(myCharacter);
@@ -1449,7 +1462,17 @@ public class MainActivity extends AppCompatActivity {
                                 theQuery.append("_length_ = ").append(letter.length() + blanks).append(" AND _alphagram_ LIKE '").append(empty).append("'");
                             }
 
-                            System.out.println("The query: " + theQuery);
+                            String extra = (e15.getText()).toString();
+                            if (extra.length() > 0)
+                            {
+                                theQuery.append(" AND (").append(db.addUnderscores(extra)).append(")");
+                            }
+
+                            if (subanagram)
+                            {
+                                theQuery.append(" ORDER BY _length_ DESC");
+                            }
+
                             String customQuery = new String(theQuery);
                             Cursor resultSet = db.getCustomQuiz(customQuery, MainActivity.this, true);
 

@@ -1099,6 +1099,19 @@ public class Report extends AppCompatActivity {
 
         EditText e10 = yourCustomView.findViewById(R.id.edittext31);
         EditText e11 = yourCustomView.findViewById(R.id.edittext32);
+        EditText e12 = yourCustomView.findViewById(R.id.edittext34);
+
+        TextView t7 = yourCustomView.findViewById(R.id.textview87);
+        t7.setText(db.getSchema());
+
+        Button b11 = yourCustomView.findViewById(R.id.button82);
+        b11.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Help help = new Help();
+                db.messageBox("Example custom queries", help.getCustomHelp(), Report.this);
+            }
+        });
 
         final int[] solved = {0};
         Spinner s8 = yourCustomView.findViewById(R.id.spinner22);
@@ -1169,6 +1182,12 @@ public class Report extends AppCompatActivity {
                                 empties.append("%");
                                 String empty = new String(empties);
                                 theQuery.append("_length_ = ").append(letter.length() + blanks).append(" AND _alphagram_ LIKE '").append(empty).append("'");
+                            }
+
+                            String extra = (e12.getText()).toString();
+                            if (extra.length() > 0)
+                            {
+                                theQuery.append(" AND (").append(db.addUnderscores(extra)).append(")");
                             }
 
                             String customQuery = new String(theQuery);
