@@ -63,7 +63,7 @@ public class sqliteDB extends SQLiteOpenHelper {
                 "create table words(_word_ text collate nocase, _length_ integer, _alphagram_ text collate nocase, _definition_ text collate nocase, _probability_ real, _time_ real, _solved_ integer, _back_ text collate nocase, _front_ text collate nocase, _tag_ text collate nocase, _page_ integer, _answers_ integer, _csw24_ integer, _csw21_ integer, _csw19_ integer, _csw15_ integer, _csw12_ integer, _csw07_ integer, _nwl23_ integer, _nwl20_ integer, _nwl18_ integer, _twl06_ integer, _nswl23_ integer, _nswl20_ integer, _nswl18_ integer, _wims_ integer, _cel21_ integer, _serial_ integer, _position_ integer, _timestamp_ text collate nocase, _incorrect_ integer, _wrong_ text collate nocase, _reverse_ text collate nocase, _anagram_ text collate nocase, _no_a_ integer, _no_b_ integer, _no_c_ integer, _no_d_ integer, _no_e_ integer, _no_f_ integer, _no_g_ integer, _no_h_ integer, _no_i_ integer, _no_j_ integer, _no_k_ integer, _no_l_ integer, _no_m_ integer, _no_n_ integer, _no_o_ integer, _no_p_ integer, _no_q_ integer, _no_r_ integer, _no_s_ integer, _no_t_ integer, _no_u_ integer, _no_v_ integer, _no_w_ integer, _no_x_ integer, _no_y_ integer, _no_z_ integer, _vowels_ integer, _consonants_ integer, _points_ integer, _power_ integer)"
         );
         db.execSQL(
-                "create table scores(_length_ integer, _score_ integer, _counter_ integer, _page_ integer, _query_ text collate nocase, _solved_ integer, _unsolved_ integer, _blank_ integer)"
+                "create table scores(_length_ integer, _score_ integer, _counter_ integer, _page_ integer, _query_ text collate nocase, _solved_ integer, _unsolved_ integer, _complete_ integer, _incomplete_ integer, _blank_ integer)"
         );
         db.execSQL(
                 "create table colours(_tag_ text collate nocase, _colour_ text collate nocase)"
@@ -897,6 +897,8 @@ public class sqliteDB extends SQLiteOpenHelper {
                             contentValue.put("_query_", "*");
                             contentValue.put("_solved_", 0);
                             contentValue.put("_unsolved_", 0);
+                            contentValue.put("_complete_", 0);
+                            contentValue.put("_incomplete_", 0);
                             contentValue.put("_blank_", blank);
 
                             db.insert("scores", null, contentValue);
@@ -1264,6 +1266,8 @@ public class sqliteDB extends SQLiteOpenHelper {
         contentValues.put("_query_", label);
         contentValues.put("_solved_", 0);
         contentValues.put("_unsolved_", 0);
+        contentValues.put("_complete_", 0);
+        contentValues.put("_incomplete_", 0);
         contentValues.put("_blank_", 0);
 
         db.insert("scores", null, contentValues);
@@ -1343,10 +1347,10 @@ public class sqliteDB extends SQLiteOpenHelper {
         return Integer.parseInt(data);
     }
 
-    public int getCounter(int letters, String label)
+    public int getCounter(int letters, String label, int solvedStatus)
     {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT _counter_ FROM scores WHERE _blank_ = 0 AND _length_ = " + letters + " AND _query_ = \"" + label + "\"", null);
+        Cursor cursor = db.rawQuery("SELECT " + (solvedStatus == 2 ? "_counter_" : (solvedStatus == 1 ? "_incomplete_" : "_complete_")) + " FROM scores WHERE _blank_ = 0 AND _length_ = " + letters + " AND _query_ = \"" + label + "\"", null);
 
         String data = null;
 
@@ -1718,21 +1722,21 @@ public class sqliteDB extends SQLiteOpenHelper {
                 new String[] {Integer.toString(letters), label, "0"});
     }
 
-    public int updateCounter(int letters, String label, int counter) {
+    public int updateCounter(int letters, String label, int counter, int solvedStatus) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put("_counter_", counter);
+        values.put(solvedStatus == 2 ? "_counter_" : (solvedStatus == 1 ? "_incomplete_" : "_complete_"), counter);
 
         return db.update("scores", values, "_length_ = ? AND _query_ = ? AND _blank_ = ?",
                 new String[] {Integer.toString(letters), label, "0"});
     }
 
-    public int updatePage(int letters, int counter, String label, int solvedStatus) {
+    public int updatePage(int letters, String label, int counter, int solvedStatus) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put((solvedStatus == 2 ? "_page_" : (solvedStatus == 1 ? "_unsolved_" : "_solved_")), counter);
+        values.put(solvedStatus == 2 ? "_page_" : (solvedStatus == 1 ? "_unsolved_" : "_solved_"), counter);
 
         return db.update("scores", values, "_length_ = ? AND _query_ = ? AND _blank_ = ?",
                 new String[] {Integer.toString(letters), label, "0"});
@@ -2105,6 +2109,7 @@ public class sqliteDB extends SQLiteOpenHelper {
         }
         argumentQuery = argumentQuery.replace("_time_stamp", "_timestamp_");
         argumentQuery = argumentQuery.replace("un_solved_", "_unsolved_");
+        argumentQuery = argumentQuery.replace("in_complete_", "_incomplete_");
         for (String tableName : tablesList)
         {
             Cursor cursor = db.query(tableName, null, null, null, null, null, null);
@@ -3009,7 +3014,7 @@ public class sqliteDB extends SQLiteOpenHelper {
         TextView t31 = yourCustomView.findViewById(R.id.textview75);
         TextView t32 = yourCustomView.findViewById(R.id.textview76);
         TextView t33 = yourCustomView.findViewById(R.id.textview77);
-        Spinner s11 = yourCustomView.findViewById(R.id.spinner21);
+        Spinner s11 = yourCustomView.findViewById(R.id.spinner9);
 
         List<RowItem> insertList;
         ArrayList<String> queryList = new ArrayList<>();

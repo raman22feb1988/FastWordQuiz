@@ -483,6 +483,12 @@ public class Report extends AppCompatActivity {
                                         counter = db.getPage(letters, label, solvedStatus);
                                     }
 
+                                    int highest = (words - 1) / rows;
+                                    if (counter > highest && words > 0) {
+                                        counter = highest;
+                                        db.updatePage(letters, label, counter, solvedStatus);
+                                    }
+
                                     nextWord();
                                 }
                             }
@@ -682,6 +688,12 @@ public class Report extends AppCompatActivity {
         words = anagrams.getCount();
         counter = db.getPage(letters, label, solvedStatus);
 
+        int high = (words - 1) / rows;
+        if (counter > high && words > 0) {
+            counter = high;
+            db.updatePage(letters, label, counter, solvedStatus);
+        }
+
         nextWord();
     }
 
@@ -691,6 +703,12 @@ public class Report extends AppCompatActivity {
         anagrams = db.getLabelledWords(letters, label, solvedStatus);
         words = anagrams.getCount();
         counter = db.getPage(letters, label, solvedStatus);
+
+        int summit = (words - 1) / rows;
+        if (counter > summit && words > 0) {
+            counter = summit;
+            db.updatePage(letters, label, counter, solvedStatus);
+        }
 
         nextWord();
     }
@@ -741,7 +759,7 @@ public class Report extends AppCompatActivity {
                     if (counter < 0) {
                         counter = (words - 1) / rows;
                     }
-                    db.updatePage(letters, counter, label, solvedStatus);
+                    db.updatePage(letters, label, counter, solvedStatus);
                     nextWord();
                 }
             }
@@ -755,7 +773,7 @@ public class Report extends AppCompatActivity {
                     if (counter == ((words - 1) / rows) + 1) {
                         counter = 0;
                     }
-                    db.updatePage(letters, counter, label, solvedStatus);
+                    db.updatePage(letters, label, counter, solvedStatus);
                     nextWord();
                 }
             }
@@ -785,7 +803,7 @@ public class Report extends AppCompatActivity {
                                 else
                                 {
                                     counter = page - 1;
-                                    db.updatePage(letters, counter, label, solvedStatus);
+                                    db.updatePage(letters, label, counter, solvedStatus);
                                     nextWord();
                                 }
                             }
@@ -819,6 +837,12 @@ public class Report extends AppCompatActivity {
                         db.insertLabel(letters, 0, label);
                     } else {
                         counter = db.getPage(letters, label, solvedStatus);
+                    }
+
+                    int peak = (words - 1) / rows;
+                    if (counter > peak && words > 0) {
+                        counter = peak;
+                        db.updatePage(letters, label, counter, solvedStatus);
                     }
 
                     nextWord();
@@ -1095,16 +1119,16 @@ public class Report extends AppCompatActivity {
     public void getAllSubanagrams(boolean subanagram)
     {
         LayoutInflater inflater = LayoutInflater.from(Report.this);
-        final View yourCustomView = inflater.inflate(R.layout.anagram, null);
+        final View yourCustomView = inflater.inflate(R.layout.subanagram, null);
 
-        EditText e10 = yourCustomView.findViewById(R.id.edittext31);
-        EditText e11 = yourCustomView.findViewById(R.id.edittext32);
-        EditText e12 = yourCustomView.findViewById(R.id.edittext34);
+        EditText e10 = yourCustomView.findViewById(R.id.edittext19);
+        EditText e11 = yourCustomView.findViewById(R.id.edittext20);
+        EditText e12 = yourCustomView.findViewById(R.id.edittext29);
 
-        TextView t7 = yourCustomView.findViewById(R.id.textview87);
+        TextView t7 = yourCustomView.findViewById(R.id.textview32);
         t7.setText(db.getSchema());
 
-        Button b11 = yourCustomView.findViewById(R.id.button82);
+        Button b11 = yourCustomView.findViewById(R.id.button81);
         b11.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -1114,7 +1138,7 @@ public class Report extends AppCompatActivity {
         });
 
         final int[] solved = {0};
-        Spinner s8 = yourCustomView.findViewById(R.id.spinner22);
+        Spinner s8 = yourCustomView.findViewById(R.id.spinner10);
         ArrayAdapter<String> solvedAdapter = new ArrayAdapter(Report.this, android.R.layout.simple_spinner_item, solvedList);
         solvedAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s8.setAdapter(solvedAdapter);
@@ -1135,7 +1159,7 @@ public class Report extends AppCompatActivity {
                 .setView(yourCustomView)
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        String letter = ((e10.getText()).toString()).toUpperCase();
+                        String letter = (((e10.getText()).toString()).trim()).toUpperCase();
                         boolean flag = false;
                         for (int digits = 0; digits < letter.length(); digits++) {
                             int flags = (int) letter.charAt(digits);
@@ -1184,7 +1208,7 @@ public class Report extends AppCompatActivity {
                                 theQuery.append("_length_ = ").append(letter.length() + blanks).append(" AND _alphagram_ LIKE '").append(empty).append("'");
                             }
 
-                            String extra = (e12.getText()).toString();
+                            String extra = ((e12.getText()).toString()).replace("\"", "'");
                             if (extra.length() > 0)
                             {
                                 theQuery.append(" AND (").append(db.addUnderscores(extra)).append(")");
@@ -1210,6 +1234,12 @@ public class Report extends AppCompatActivity {
                                     db.insertLabel(letters, 0, label);
                                 } else {
                                     counter = db.getPage(letters, label, solvedStatus);
+                                }
+
+                                int apex = (words - 1) / rows;
+                                if (counter > apex && words > 0) {
+                                    counter = apex;
+                                    db.updatePage(letters, label, counter, solvedStatus);
                                 }
 
                                 nextWord();

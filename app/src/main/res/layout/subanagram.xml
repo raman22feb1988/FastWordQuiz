@@ -6,18 +6,27 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/rectangle">
+            <Spinner
+                android:id="@+id/spinner10"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </FrameLayout>
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <TextView
-                android:id="@+id/textview80"
+                android:id="@+id/textview29"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Letters:">
             </TextView>
             <EditText
-                android:id="@+id/edittext29"
+                android:id="@+id/edittext19"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/rectangle">
@@ -28,13 +37,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <TextView
-                android:id="@+id/textview81"
+                android:id="@+id/textview30"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Number of blanks:">
             </TextView>
             <EditText
-                android:id="@+id/edittext30"
+                android:id="@+id/edittext20"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/rectangle"
@@ -42,10 +51,10 @@
             </EditText>
         </LinearLayout>
         <TextView
-            android:id="@+id/textview84"
+            android:id="@+id/textview31"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Additional SQL conditions (Optional):">
+            android:text="Additional word filters (Optional):">
         </TextView>
         <RelativeLayout
             android:layout_width="match_parent"
@@ -58,7 +67,7 @@
                 android:text="Examples">
             </Button>
             <EditText
-                android:id="@+id/edittext33"
+                android:id="@+id/edittext29"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_toLeftOf="@+id/button81"
@@ -67,7 +76,7 @@
             </EditText>
         </RelativeLayout>
         <TextView
-            android:id="@+id/textview85"
+            android:id="@+id/textview32"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
         </TextView>

@@ -45,7 +45,10 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     sqliteDB db;
     int letters = 0;
+    int point;
+    int points;
     String label = "*";
+    int solvedStatus = 0;
     boolean hidden;
     boolean detail;
     boolean started;
@@ -54,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
     HashMap<String, String> dictionary;
     HashMap<String, Integer> anagramsList;
     HashMap<String, String> lexicon;
+    ArrayList<String> solvedList;
     CustomAdapter cusadapter;
     SharedPreferences pref;
 
@@ -175,19 +179,37 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.button21:
                         // Show a Toast message for the Custom quiz item
                         LayoutInflater inflater2 = LayoutInflater.from(MainActivity.this);
-                        final View yourCustomView2 = inflater2.inflate(R.layout.query, null);
+                        final View yourCustomView2 = inflater2.inflate(R.layout.sqlquery, null);
 
-                        TextView t4 = yourCustomView2.findViewById(R.id.textview14);
+                        TextView t4 = yourCustomView2.findViewById(R.id.textview27);
                         t4.setText(db.getSchema());
 
-                        EditText e7 = yourCustomView2.findViewById(R.id.edittext8);
+                        EditText e7 = yourCustomView2.findViewById(R.id.edittext18);
 
-                        Button b13 = yourCustomView2.findViewById(R.id.button73);
+                        Button b13 = yourCustomView2.findViewById(R.id.button74);
                         b13.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
                                 Help help = new Help();
                                 db.messageBox("Example custom queries", help.getCustomHelp(), MainActivity.this);
+                            }
+                        });
+
+                        final int[] solved = {2};
+                        Spinner s8 = yourCustomView2.findViewById(R.id.spinner7);
+                        ArrayAdapter<String> solvedAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_spinner_item, solvedList);
+                        solvedAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                        s8.setAdapter(solvedAdapter);
+                        s8.setSelection(2);
+
+                        s8.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                            @Override
+                            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                                solved[0] = i;
+                            }
+
+                            @Override
+                            public void onNothingSelected(AdapterView<?> adapterView) {
                             }
                         });
 
@@ -204,6 +226,7 @@ public class MainActivity extends AppCompatActivity {
                                             letters = 1;
                                             ultimate = null;
                                             mode = 0;
+                                            solvedStatus = solved[0];
                                             skipUnderscores = false;
 
                                             closeCursor();
@@ -212,19 +235,24 @@ public class MainActivity extends AppCompatActivity {
                                             score = db.getCustomScore(label);
                                             number = db.getCustomNumber(label);
 
+                                            if (db.getScore(letters, label) != score)
+                                            {
+                                                db.updateScore(letters, score, label);
+                                            }
+
                                             boolean exists = db.existLabel(letters, label);
 
                                             if (!exists) {
                                                 counter = 0;
                                                 db.insertLabel(letters, score, label);
                                             } else {
-                                                counter = db.getCounter(letters, label);
+                                                counter = db.getCounter(letters, label, solvedStatus);
                                             }
 
                                             int highest = (words - 1) / (rows * columns);
                                             if (counter > highest && words > 0) {
                                                 counter = highest;
-                                                db.updateCounter(letters, label, counter);
+                                                db.updateCounter(letters, label, counter, solvedStatus);
                                             }
 
                                             nextWord();
@@ -428,16 +456,15 @@ public class MainActivity extends AppCompatActivity {
 
         db = new sqliteDB(MainActivity.this, version, null, false);
 
-        if (prepared) {
-            getWordLength();
-        } else {
-            promptDictionary();
-        }
-
         ArrayList<Integer> dimensions = db.getZoom("Main");
         rows = dimensions.get(0);
         columns = dimensions.get(1);
         font = dimensions.get(2);
+
+        solvedList = new ArrayList<>();
+        solvedList.add("Solved words only");
+        solvedList.add("Unsolved words only");
+        solvedList.add("Solved words and unsolved words");
 
         b3.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -462,6 +489,12 @@ public class MainActivity extends AppCompatActivity {
                 e2.setText("");
             }
         });
+
+        if (prepared) {
+            getWordLength();
+        } else {
+            promptDictionary();
+        }
     }
 
     public void promptDictionary()
@@ -584,10 +617,28 @@ public class MainActivity extends AppCompatActivity {
     public void getWordLength()
     {
         LayoutInflater inflater = LayoutInflater.from(MainActivity.this);
-        final View yourCustomView = inflater.inflate(R.layout.input, null);
+        final View yourCustomView = inflater.inflate(R.layout.solve, null);
 
-        EditText e1 = yourCustomView.findViewById(R.id.edittext1);
+        EditText e1 = yourCustomView.findViewById(R.id.edittext17);
         e1.setHint("Enter a value between 2 and 58");
+
+        final int[] solved = {2};
+        Spinner s5 = yourCustomView.findViewById(R.id.spinner5);
+        ArrayAdapter<String> solvedAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_spinner_item, solvedList);
+        solvedAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        s5.setAdapter(solvedAdapter);
+        s5.setSelection(2);
+
+        s5.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                solved[0] = i;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
 
         AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
                 .setTitle("Word length")
@@ -608,6 +659,7 @@ public class MainActivity extends AppCompatActivity {
                             label = "*";
                             ultimate = null;
                             mode = 0;
+                            solvedStatus = solved[0];
                             skipUnderscores = false;
                             start();
                         }
@@ -666,14 +718,14 @@ public class MainActivity extends AppCompatActivity {
             db.updateScore(letters, actual, label);
         }
 
-        counter = db.getCounter(letters, label);
+        counter = db.getCounter(letters, label, solvedStatus);
         number = db.getNumber(letters, label);
 
         int high = (words - 1) / (rows * columns);
         if (counter > high && words > 0)
         {
             counter = high;
-            db.updateCounter(letters, label, counter);
+            db.updateCounter(letters, label, counter, solvedStatus);
         }
 
         nextWord();
@@ -732,7 +784,7 @@ public class MainActivity extends AppCompatActivity {
         b10.setEnabled(true);
 
         t1.setText("Page " + (counter + 1) + " out of " + (((words - 1) / (rows * columns)) + 1));
-        t2.setText("Score: " + score + "/" + number);
+        t2.setText("Score: " + point + "/" + points);
         if (ultimate == null) {
             t5.setText("");
         }
@@ -786,11 +838,12 @@ public class MainActivity extends AppCompatActivity {
                     t5.setText(Html.fromHtml(amount));
                     replies.remove(guess);
                     score++;
+                    point++;
                     db.updateScore(letters, score, label);
                     int index = grid.get(guess);
                     totals.set(index, totals.get(index) - 1);
                     cusadapter.notifyItemChanged(index);
-                    t2.setText("Score: " + score + "/" + number);
+                    t2.setText("Score: " + point + "/" + points);
                 }
                 else
                 {
@@ -833,7 +886,7 @@ public class MainActivity extends AppCompatActivity {
                 else {
                     counter++;
                 }
-                db.updateCounter(letters, label, counter);
+                db.updateCounter(letters, label, counter, solvedStatus);
                 cumulativeTime(begin, delay, replies);
                 nextWord();
             }
@@ -858,7 +911,7 @@ public class MainActivity extends AppCompatActivity {
                 else {
                     counter--;
                 }
-                db.updateCounter(letters, label, counter);
+                db.updateCounter(letters, label, counter, solvedStatus);
                 cumulativeTime(begin, delay, replies);
                 nextWord();
             }
@@ -952,11 +1005,12 @@ public class MainActivity extends AppCompatActivity {
                                     displayDefinition(cardbox);
                                     replies.remove(guess);
                                     score++;
+                                    point++;
                                     db.updateScore(letters, score, label);
                                     int index = grid.get(guess);
                                     totals.set(index, totals.get(index) - 1);
                                     cusadapter.notifyItemChanged(index);
-                                    t2.setText("Score: " + score + "/" + number);
+                                    t2.setText("Score: " + point + "/" + points);
                                 }
                             }).create();
                     dialog.show();
@@ -1078,7 +1132,7 @@ public class MainActivity extends AppCompatActivity {
                                     ultimate = null;
 
                                     counter = page - 1;
-                                    db.updateCounter(letters, label, counter);
+                                    db.updateCounter(letters, label, counter, solvedStatus);
                                     cumulativeTime(begin, delay, replies);
                                     nextWord();
                                 }
@@ -1155,13 +1209,13 @@ public class MainActivity extends AppCompatActivity {
                 anagrams = (letters == 1 ? db.getCustomQuiz(label, MainActivity.this, skipUnderscores) : db.getAllAnagrams(letters, label));
                 words = anagrams.getCount();
 
-                counter = db.getCounter(letters, label);
+                counter = db.getCounter(letters, label, solvedStatus);
                 number = (letters == 1 ? db.getCustomNumber(label) : db.getNumber(letters, label));
 
                 int peak = (words - 1) / (rows * columns);
                 if (counter > peak && words > 0) {
                     counter = peak;
-                    db.updateCounter(letters, label, counter);
+                    db.updateCounter(letters, label, counter, solvedStatus);
                 }
 
                 nextWord();
@@ -1292,15 +1346,33 @@ public class MainActivity extends AppCompatActivity {
     public void filterByLabel()
     {
         LayoutInflater inflater = LayoutInflater.from(MainActivity.this);
-        final View yourCustomView = inflater.inflate(R.layout.sieve, null);
+        final View yourCustomView = inflater.inflate(R.layout.filter, null);
 
-        EditText e11 = yourCustomView.findViewById(R.id.edittext19);
-        EditText e12 = yourCustomView.findViewById(R.id.edittext20);
-        TextView t7 = yourCustomView.findViewById(R.id.textview32);
+        EditText e11 = yourCustomView.findViewById(R.id.edittext6);
+        EditText e12 = yourCustomView.findViewById(R.id.edittext7);
+        TextView t7 = yourCustomView.findViewById(R.id.textview12);
 
         e12.setHint("Enter a value between 2 and 58");
 
-        Spinner s3 = yourCustomView.findViewById(R.id.spinner9);
+        final int[] solved = {2};
+        Spinner s6 = yourCustomView.findViewById(R.id.spinner6);
+        ArrayAdapter<String> solvedAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_spinner_item, solvedList);
+        solvedAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        s6.setAdapter(solvedAdapter);
+        s6.setSelection(2);
+
+        s6.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                solved[0] = i;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
+
+        Spinner s3 = yourCustomView.findViewById(R.id.spinner1);
         List<RowItem> tagsList = db.getAllLabels();
         tagsList.add(0, new RowItem("(All Tags)", null));
 
@@ -1324,7 +1396,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         final int[] lengthIndex = new int[1];
-        Spinner s4 = yourCustomView.findViewById(R.id.spinner10);
+        Spinner s4 = yourCustomView.findViewById(R.id.spinner8);
         ArrayList<String> lengthList = new ArrayList<>();
         lengthList.add(0, "Specific length");
         lengthList.add(1, "All lengths");
@@ -1380,6 +1452,7 @@ public class MainActivity extends AppCompatActivity {
                                 db.insertLabel(letters, 0, label);
                             }
 
+                            solvedStatus = solved[0];
                             start();
                         }
                     }
@@ -1392,11 +1465,11 @@ public class MainActivity extends AppCompatActivity {
         LayoutInflater inflater = LayoutInflater.from(MainActivity.this);
         final View yourCustomView = inflater.inflate(R.layout.subanagram, null);
 
-        EditText e13 = yourCustomView.findViewById(R.id.edittext29);
-        EditText e14 = yourCustomView.findViewById(R.id.edittext30);
-        EditText e15 = yourCustomView.findViewById(R.id.edittext33);
+        EditText e13 = yourCustomView.findViewById(R.id.edittext19);
+        EditText e14 = yourCustomView.findViewById(R.id.edittext20);
+        EditText e15 = yourCustomView.findViewById(R.id.edittext29);
 
-        TextView t9 = yourCustomView.findViewById(R.id.textview85);
+        TextView t9 = yourCustomView.findViewById(R.id.textview32);
         t9.setText(db.getSchema());
 
         Button b14 = yourCustomView.findViewById(R.id.button81);
@@ -1408,12 +1481,30 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        final int[] solved = {2};
+        Spinner s7 = yourCustomView.findViewById(R.id.spinner10);
+        ArrayAdapter<String> solvedAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_spinner_item, solvedList);
+        solvedAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        s7.setAdapter(solvedAdapter);
+        s7.setSelection(2);
+
+        s7.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                solved[0] = i;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
+
         AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
                 .setTitle(subanagram ? "Search for subanagrams" : "Search for anagrams")
                 .setView(yourCustomView)
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        String letter = ((e13.getText()).toString()).toUpperCase();
+                        String letter = (((e13.getText()).toString()).trim()).toUpperCase();
                         boolean flag = false;
                         for (int digits = 0; digits < letter.length(); digits++) {
                             int flags = (int) letter.charAt(digits);
@@ -1462,7 +1553,7 @@ public class MainActivity extends AppCompatActivity {
                                 theQuery.append("_length_ = ").append(letter.length() + blanks).append(" AND _alphagram_ LIKE '").append(empty).append("'");
                             }
 
-                            String extra = (e15.getText()).toString();
+                            String extra = ((e15.getText()).toString()).replace("\"", "'");
                             if (extra.length() > 0)
                             {
                                 theQuery.append(" AND (").append(db.addUnderscores(extra)).append(")");
@@ -1481,6 +1572,7 @@ public class MainActivity extends AppCompatActivity {
                                 letters = 1;
                                 ultimate = null;
                                 mode = 0;
+                                solvedStatus = solved[0];
                                 skipUnderscores = true;
 
                                 closeCursor();
@@ -1489,19 +1581,24 @@ public class MainActivity extends AppCompatActivity {
                                 score = db.getCustomScore(label);
                                 number = db.getCustomNumber(label);
 
+                                if (db.getScore(letters, label) != score)
+                                {
+                                    db.updateScore(letters, score, label);
+                                }
+
                                 boolean exists = db.existLabel(letters, label);
 
                                 if (!exists) {
                                     counter = 0;
                                     db.insertLabel(letters, score, label);
                                 } else {
-                                    counter = db.getCounter(letters, label);
+                                    counter = db.getCounter(letters, label, solvedStatus);
                                 }
 
-                                int highest = (words - 1) / (rows * columns);
-                                if (counter > highest && words > 0) {
-                                    counter = highest;
-                                    db.updateCounter(letters, label, counter);
+                                int apex = (words - 1) / (rows * columns);
+                                if (counter > apex && words > 0) {
+                                    counter = apex;
+                                    db.updateCounter(letters, label, counter, solvedStatus);
                                 }
 
                                 nextWord();
