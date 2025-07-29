@@ -385,7 +385,7 @@ public class Report extends AppCompatActivity {
         solvedList = new ArrayList<>();
         solvedList.add("Solved words only");
         solvedList.add("Unsolved words only");
-        solvedList.add("Solved words and unsolved words");
+        solvedList.add("All words");
 
         b3.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -478,7 +478,7 @@ public class Report extends AppCompatActivity {
 
                                     if (!exists) {
                                         counter = 0;
-                                        db.insertLabel(letters, 0, label);
+                                        db.insertLabel(letters, label);
                                     } else {
                                         counter = db.getPage(letters, label, solvedStatus);
                                     }
@@ -657,7 +657,7 @@ public class Report extends AppCompatActivity {
 
                             if (!exist)
                             {
-                                db.insertLabel(letters, 0, label);
+                                db.insertLabel(letters, label);
                                 solvedStatus = solved[0];
                                 begin();
                             }
@@ -834,7 +834,7 @@ public class Report extends AppCompatActivity {
 
                     if (!exists) {
                         counter = 0;
-                        db.insertLabel(letters, 0, label);
+                        db.insertLabel(letters, label);
                     } else {
                         counter = db.getPage(letters, label, solvedStatus);
                     }
@@ -1231,7 +1231,7 @@ public class Report extends AppCompatActivity {
 
                                 if (!exists) {
                                     counter = 0;
-                                    db.insertLabel(letters, 0, label);
+                                    db.insertLabel(letters, label);
                                 } else {
                                     counter = db.getPage(letters, label, solvedStatus);
                                 }
