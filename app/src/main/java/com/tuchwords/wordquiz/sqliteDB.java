@@ -1276,7 +1276,7 @@ public class sqliteDB extends SQLiteOpenHelper {
     {
         SQLiteDatabase db = this.getReadableDatabase();
         String theQuery = "(" + addUnderscores(customQuery) + ")";
-        Cursor cursor = db.rawQuery("SELECT COUNT(_word_) FROM words WHERE _solved_ = 1 AND _alphagram_ IN (SELECT DISTINCT(_alphagram_) FROM words WHERE " + (solvedStatus == 2 ? "" : (solvedStatus == 1 ? "_solved_ = 0 AND " : "_solved_ = 1 AND ")) + theQuery + ")", null);
+        Cursor cursor = db.rawQuery("SELECT COUNT(_word_) FROM words WHERE _solved_ = 1 AND _alphagram_ IN (SELECT _alphagram_ FROM words WHERE " + solvedCondition(solvedStatus) + (solvedStatus == 2 ? "" : " AND ") + theQuery + " GROUP BY _alphagram_)", null);
 
         String data = null;
 
@@ -1292,7 +1292,7 @@ public class sqliteDB extends SQLiteOpenHelper {
     public int getScore(int letters, String label, int solvedStatus)
     {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT COUNT(_word_) FROM words WHERE _solved_ = 1 AND _alphagram_ IN (SELECT DISTINCT(_alphagram_) FROM words" + ((letters > 1 || !label.equals("*") || solvedStatus < 2) ? " WHERE " : "") + (solvedStatus == 2 ? "" : (solvedStatus == 1 ? "_solved_ = 0" : "_solved_ = 1")) + (((letters > 1 || !label.equals("*")) && solvedStatus < 2) ? " AND " : "") + (letters > 1 ? "_length_ = " + letters : "") + (((letters > 1 || solvedStatus < 2) && !label.equals("*")) ? " AND " : "") + (!label.equals("*") ? "_tag_ = \"" + label + "\"" : "") + ")", null);
+        Cursor cursor = db.rawQuery("SELECT COUNT(_word_) FROM words WHERE _solved_ = 1 AND _alphagram_ IN (SELECT _alphagram_ FROM words" + ((letters > 1 || !label.equals("*") || solvedStatus < 2) ? " WHERE " : "") + solvedCondition(solvedStatus) + (((letters > 1 || !label.equals("*")) && solvedStatus < 2) ? " AND " : "") + (letters > 1 ? "_length_ = " + letters : "") + (((letters > 1 || solvedStatus < 2) && !label.equals("*")) ? " AND " : "") + (!label.equals("*") ? "_tag_ = \"" + label + "\"" : "") + " GROUP BY _alphagram_)", null);
 
         String data = null;
 
@@ -1309,7 +1309,7 @@ public class sqliteDB extends SQLiteOpenHelper {
     {
         SQLiteDatabase db = this.getReadableDatabase();
         String theQuery = "(" + addUnderscores(customQuery) + ")";
-        Cursor cursor = db.rawQuery("SELECT COUNT(_word_) FROM words WHERE _alphagram_ IN (SELECT DISTINCT(_alphagram_) FROM words WHERE " + (solvedStatus == 2 ? "" : (solvedStatus == 1 ? "_solved_ = 0 AND " : "_solved_ = 1 AND ")) + theQuery + ")", null);
+        Cursor cursor = db.rawQuery("SELECT COUNT(_word_) FROM words WHERE _alphagram_ IN (SELECT _alphagram_ FROM words WHERE " + solvedCondition(solvedStatus) + (solvedStatus == 2 ? "" : " AND ") + theQuery + " GROUP BY _alphagram_)", null);
 
         String data = null;
 
@@ -1345,10 +1345,24 @@ public class sqliteDB extends SQLiteOpenHelper {
         }
     }
 
+    public String solvedCondition(int solvedStatus)
+    {
+        switch (solvedStatus)
+        {
+            case 0: return " HAVING SUM(_solved_) = _answers_";
+            case 1: return " HAVING SUM(_solved_) < _answers_";
+            case 3: return " HAVING SUM(_solved_) > 0";
+            case 4: return " HAVING SUM(_solved_) = 0";
+            case 5: return " HAVING (SUM(_solved_) > 0 AND SUM(_solved_) < _answers_)";
+            case 6: return " HAVING (SUM(_solved_) = 0 OR SUM(_solved_) = _answers_)";
+            default: return "";
+        }
+    }
+
     public Cursor getAllAnagrams(int letters, String label, int solvedStatus)
     {
         SQLiteDatabase db = this.getReadableDatabase();
-        return db.rawQuery("SELECT DISTINCT(_alphagram_) FROM words" + ((letters > 1 || !label.equals("*") || solvedStatus < 2) ? " WHERE " : "") + (solvedStatus == 2 ? "" : (solvedStatus == 1 ? "_solved_ = 0" : "_solved_ = 1")) + (((letters > 1 || !label.equals("*")) && solvedStatus < 2) ? " AND " : "") + (letters > 1 ? "_length_ = " + letters : "") + (((letters > 1 || solvedStatus < 2) && !label.equals("*")) ? " AND " : "") + (!label.equals("*") ? "_tag_ = \"" + label + "\"" : "") + " ORDER BY _probability_ DESC", null);
+        return db.rawQuery("SELECT _alphagram_ FROM words" + ((letters > 1 || !label.equals("*") || solvedStatus < 2) ? " WHERE " : "") + solvedCondition(solvedStatus) + (((letters > 1 || !label.equals("*")) && solvedStatus < 2) ? " AND " : "") + (letters > 1 ? "_length_ = " + letters : "") + (((letters > 1 || solvedStatus < 2) && !label.equals("*")) ? " AND " : "") + (!label.equals("*") ? "_tag_ = \"" + label + "\"" : "") + " GROUP BY _alphagram_ ORDER BY _probability_ DESC", null);
     }
 
     public Cursor getCustomQuiz(String customQuery, Context activity, int solvedStatus, boolean skipUnderscores)
@@ -1356,7 +1370,7 @@ public class sqliteDB extends SQLiteOpenHelper {
         try {
             SQLiteDatabase db = this.getReadableDatabase();
             String theQuery = "(" + (skipUnderscores ? customQuery : addUnderscores(customQuery)) + ")";
-            return db.rawQuery("SELECT DISTINCT(_alphagram_) FROM words WHERE " + (solvedStatus == 2 ? "" : (solvedStatus == 1 ? "_solved_ = 0 AND " : "_solved_ = 1 AND ")) + theQuery + ")", null);
+            return db.rawQuery("SELECT _alphagram_ FROM words WHERE " + solvedCondition(solvedStatus) + (solvedStatus == 2 ? "" : " AND ") + theQuery + " GROUP BY _alphagram_", null);
         }
         catch (SQLiteException e) {
             alertBox("Error", e.toString(), activity);
@@ -1791,7 +1805,7 @@ public class sqliteDB extends SQLiteOpenHelper {
     public int getNumber(int letters, String label, int solvedStatus)
     {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT COUNT(_word_) FROM words WHERE _alphagram_ IN (SELECT DISTINCT(_alphagram_) FROM words" + ((letters > 1 || !label.equals("*") || solvedStatus < 2) ? " WHERE " : "") + (solvedStatus == 2 ? "" : (solvedStatus == 1 ? "_solved_ = 0" : "_solved_ = 1")) + (((letters > 1 || !label.equals("*")) && solvedStatus < 2) ? " AND " : "") + (letters > 1 ? "_length_ = " + letters : "") + (((letters > 1 || solvedStatus < 2) && !label.equals("*")) ? " AND " : "") + (!label.equals("*") ? "_tag_ = \"" + label + "\"" : "") + ")", null);
+        Cursor cursor = db.rawQuery("SELECT COUNT(_word_) FROM words WHERE _alphagram_ IN (SELECT _alphagram_ FROM words" + ((letters > 1 || !label.equals("*") || solvedStatus < 2) ? " WHERE " : "") + solvedCondition(solvedStatus) + (((letters > 1 || !label.equals("*")) && solvedStatus < 2) ? " AND " : "") + (letters > 1 ? "_length_ = " + letters : "") + (((letters > 1 || solvedStatus < 2) && !label.equals("*")) ? " AND " : "") + (!label.equals("*") ? "_tag_ = \"" + label + "\"" : "") + " GROUP BY _alphagram_)", null);
 
         String data = null;
 
