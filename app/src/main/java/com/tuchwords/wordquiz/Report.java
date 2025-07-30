@@ -16,6 +16,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -56,7 +57,7 @@ public class Report extends AppCompatActivity {
     HashMap<String, String> lexicon;
     ArrayList<String> jumbles;
     HashMap<String, String> colourList;
-    List<RowItem> labelsList;
+    List<Pair<String, String>> labelsList;
     ArrayList<String> solvedList;
     ReportAdapter reportAdapter;
     SharedPreferences pref;
@@ -157,9 +158,10 @@ public class Report extends AppCompatActivity {
                                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int whichButton) {
                                         String sqlQuery = (e5.getText()).toString();
-                                        db.myQuery(sqlQuery, Report.this, false);
 
-                                        refresh();
+                                        if (sqlQuery.length() > 0) {
+                                            db.myQuery(sqlQuery, Report.this, false);
+                                        }
                                     }
                                 }).create();
                         dialog1.show();
@@ -194,7 +196,7 @@ public class Report extends AppCompatActivity {
                         EditText e4 = yourCustomView2.findViewById(R.id.edittext4);
 
                         Spinner s2 = yourCustomView2.findViewById(R.id.spinner2);
-                        List<RowItem> tagList = new ArrayList<>(labelsList.subList(1, labelsList.size()));
+                        List<Pair<String, String>> tagList = new ArrayList<>(labelsList.subList(1, labelsList.size()));
 
                         ColourAdapter spinnerAdapter = new ColourAdapter(Report.this, R.layout.colour, R.id.textview62, tagList, Report.this, true);
                         s2.setAdapter(spinnerAdapter);
@@ -202,7 +204,7 @@ public class Report extends AppCompatActivity {
                         s2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                             @Override
                             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                                e4.setText((tagList.get(i)).getTag());
+                                e4.setText((tagList.get(i)).first);
                             }
 
                             @Override
@@ -461,7 +463,8 @@ public class Report extends AppCompatActivity {
                         .setView(yourCustomView)
                         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
-                                String customQuery = ((e2.getText()).toString()).replace("\"", "'");
+                                String temporaryQuery = ((e2.getText()).toString()).replace("\"", "'");
+                                String customQuery = (temporaryQuery.length() == 0 ? "1" : temporaryQuery);
                                 Cursor resultSet = db.getSqlQuery(customQuery, Report.this, solved[0], false);
 
                                 if (resultSet != null) {
@@ -583,8 +586,8 @@ public class Report extends AppCompatActivity {
         });
 
         Spinner s1 = yourCustomView.findViewById(R.id.spinner1);
-        List<RowItem> labelList = new ArrayList<>(labelsList.subList(1, labelsList.size()));
-        labelList.add(0, new RowItem("(All Tags)", null));
+        List<Pair<String, String>> labelList = new ArrayList<>(labelsList.subList(1, labelsList.size()));
+        labelList.add(0, new Pair<>("(All Tags)", null));
 
         ColourAdapter spinnerAdapter = new ColourAdapter(Report.this, R.layout.colour, R.id.textview62, labelList, Report.this, true);
         s1.setAdapter(spinnerAdapter);
@@ -596,7 +599,7 @@ public class Report extends AppCompatActivity {
                     e6.setText("*");
                 }
                 else {
-                    e6.setText((labelList.get(i)).getTag());
+                    e6.setText((labelList.get(i)).first);
                 }
             }
 
@@ -861,7 +864,7 @@ public class Report extends AppCompatActivity {
     public void refreshSpinner()
     {
         labelsList = db.getAllLabels();
-        labelsList.add(0, new RowItem("(No Action)", null));
+        labelsList.add(0, new Pair<>("(No Action)", null));
         colourList = db.getColours();
 
         ColourAdapter comboBoxAdapter = new ColourAdapter(Report.this, R.layout.colour, R.id.textview62, labelsList, Report.this, true);
@@ -870,7 +873,7 @@ public class Report extends AppCompatActivity {
         s3.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                tag = (labelsList.get(i)).getTag();
+                tag = (labelsList.get(i)).first;
             }
 
             @Override

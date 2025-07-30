@@ -18,6 +18,7 @@ import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Html;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -167,9 +168,10 @@ public class MainActivity extends AppCompatActivity {
                                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int whichButton) {
                                         String sqlQuery = ((e6.getText()).toString()).replace("\"", "'");
-                                        db.myQuery(sqlQuery, MainActivity.this, true);
 
-                                        refresh();
+                                        if (sqlQuery.length() > 0) {
+                                            db.myQuery(sqlQuery, MainActivity.this, true);
+                                        }
                                     }
                                 }).create();
                         dialog1.show();
@@ -216,7 +218,8 @@ public class MainActivity extends AppCompatActivity {
                                 .setView(yourCustomView2)
                                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int whichButton) {
-                                        String customQuery = ((e7.getText()).toString()).replace("\"", "'");
+                                        String temporaryQuery = ((e7.getText()).toString()).replace("\"", "'");
+                                        String customQuery = (temporaryQuery.length() == 0 ? "1" : temporaryQuery);
                                         Cursor resultSet = db.getCustomQuiz(customQuery, MainActivity.this, solved[0], false);
 
                                         if (resultSet != null) {
@@ -230,8 +233,9 @@ public class MainActivity extends AppCompatActivity {
                                             closeCursor();
                                             anagrams = resultSet;
                                             words = anagrams.getCount();
-                                            score = db.getCustomScore(label, solved[0]);
-                                            number = db.getCustomNumber(label, solved[0]);
+                                            int[] pair1 = db.getCustomScore(label, solved[0]);
+                                            score = pair1[0];
+                                            number = pair1[1];
 
                                             boolean exists = db.existLabel(letters, label);
 
@@ -725,9 +729,10 @@ public class MainActivity extends AppCompatActivity {
         closeCursor();
         anagrams = db.getAllAnagrams(letters, label, solvedStatus);
         words = anagrams.getCount();
-        score = db.getScore(letters, label, solvedStatus);
+        int[] pair2 = db.getScore(letters, label, solvedStatus);
+        score = pair2[0];
         counter = db.getCounter(letters, label, solvedStatus);
-        number = db.getNumber(letters, label, solvedStatus);
+        number = pair2[1];
 
         int high = (words - 1) / (rows * columns);
         if (counter > high && words > 0)
@@ -959,7 +964,7 @@ public class MainActivity extends AppCompatActivity {
                     final int[] selection = {0};
 
                     Spinner s2 = yourCustomView.findViewById(R.id.spinner3);
-                    List<RowItem> labelsList = db.getAllLabels();
+                    List<Pair<String, String>> labelsList = db.getAllLabels();
 
                     ColourAdapter comboBoxAdapter = new ColourAdapter(MainActivity.this, R.layout.colour, R.id.textview62, labelsList, MainActivity.this, true);
                     s2.setAdapter(comboBoxAdapter);
@@ -979,7 +984,7 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             }
                             else {
-                                e5.setText((labelsList.get(i)).getTag());
+                                e5.setText((labelsList.get(i)).first);
                             }
                         }
 
@@ -1058,7 +1063,7 @@ public class MainActivity extends AppCompatActivity {
                 EditText e4 = yourCustomView.findViewById(R.id.edittext4);
 
                 Spinner s1 = yourCustomView.findViewById(R.id.spinner2);
-                List<RowItem> labelList = db.getAllLabels();
+                List<Pair<String, String>> labelList = db.getAllLabels();
 
                 ColourAdapter spinnerAdapter = new ColourAdapter(MainActivity.this, R.layout.colour, R.id.textview62, labelList, MainActivity.this, true);
                 s1.setAdapter(spinnerAdapter);
@@ -1066,7 +1071,7 @@ public class MainActivity extends AppCompatActivity {
                 s1.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     @Override
                     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                        e4.setText((labelList.get(i)).getTag());
+                        e4.setText((labelList.get(i)).first);
                     }
 
                     @Override
@@ -1202,14 +1207,15 @@ public class MainActivity extends AppCompatActivity {
         {
             if (started) {
                 t6.setText("");
-                score = (letters == 1 ? db.getCustomScore(label, solvedStatus) : db.getScore(letters, label, solvedStatus));
+                int[] pair3 = (letters == 1 ? db.getCustomScore(label, solvedStatus) : db.getScore(letters, label, solvedStatus));
+                score = pair3[0];
 
                 closeCursor();
                 anagrams = (letters == 1 ? db.getCustomQuiz(label, MainActivity.this, solvedStatus, skipUnderscores) : db.getAllAnagrams(letters, label, solvedStatus));
                 words = anagrams.getCount();
 
                 counter = db.getCounter(letters, label, solvedStatus);
-                number = (letters == 1 ? db.getCustomNumber(label, solvedStatus) : db.getNumber(letters, label, solvedStatus));
+                number = pair3[1];
 
                 int peak = (words - 1) / (rows * columns);
                 if (counter > peak && words > 0) {
@@ -1372,8 +1378,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
         Spinner s3 = yourCustomView.findViewById(R.id.spinner1);
-        List<RowItem> tagsList = db.getAllLabels();
-        tagsList.add(0, new RowItem("(All Tags)", null));
+        List<Pair<String, String>> tagsList = db.getAllLabels();
+        tagsList.add(0, new Pair<>("(All Tags)", null));
 
         ColourAdapter spinnerAdapter = new ColourAdapter(MainActivity.this, R.layout.colour, R.id.textview62, tagsList, MainActivity.this, true);
         s3.setAdapter(spinnerAdapter);
@@ -1385,7 +1391,7 @@ public class MainActivity extends AppCompatActivity {
                     e11.setText("*");
                 }
                 else {
-                    e11.setText((tagsList.get(i)).getTag());
+                    e11.setText((tagsList.get(i)).first);
                 }
             }
 
@@ -1577,8 +1583,9 @@ public class MainActivity extends AppCompatActivity {
                                 closeCursor();
                                 anagrams = resultSet;
                                 words = anagrams.getCount();
-                                score = db.getCustomScore(label, solved[0]);
-                                number = db.getCustomNumber(label, solved[0]);
+                                int[] pair4 = db.getCustomScore(label, solved[0]);
+                                score = pair4[0];
+                                number = pair4[1];
 
                                 boolean exists = db.existLabel(letters, label);
 
