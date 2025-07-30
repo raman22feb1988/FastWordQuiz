@@ -621,6 +621,7 @@ public class MainActivity extends AppCompatActivity {
         final View yourCustomView = inflater.inflate(R.layout.solve, null);
 
         EditText e1 = yourCustomView.findViewById(R.id.edittext17);
+        TextView t10 = yourCustomView.findViewById(R.id.textview80);
         e1.setHint("Enter a value between 2 and 58");
 
         final int[] solved = {2};
@@ -641,15 +642,45 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        final int[] lengthIndex = new int[1];
+        Spinner s10 = yourCustomView.findViewById(R.id.spinner21);
+        ArrayList<String> lengthList = new ArrayList<>();
+        lengthList.add(0, "Specific word length");
+        lengthList.add(1, "All word lengths");
+
+        ArrayAdapter<String> lengthAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_spinner_item, lengthList);
+        lengthAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        s10.setAdapter(lengthAdapter);
+
+        s10.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                if (i == 0) {
+                    e1.setVisibility(View.VISIBLE);
+                    t10.setVisibility(View.VISIBLE);
+                    lengthIndex[0] = 0;
+                }
+                else {
+                    e1.setVisibility(View.INVISIBLE);
+                    t10.setVisibility(View.INVISIBLE);
+                    lengthIndex[0] = 1;
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
+
         AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
-                .setTitle("Word length")
+                .setTitle("Change word length")
                 .setView(yourCustomView)
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        String alphabet = (e1.getText()).toString();
+                        String alphabet = (lengthIndex[0] == 0 ? (e1.getText()).toString() : "-1");
                         int precursor = (alphabet.length() == 0 ? 0 : Integer.parseInt(alphabet));
 
-                        if (precursor < 2)
+                        if (lengthIndex[0] == 0 && precursor < 2)
                         {
                             Toast.makeText(MainActivity.this, "Enter a value between 2 and 58", Toast.LENGTH_LONG).show();
                             getWordLength();
@@ -675,6 +706,7 @@ public class MainActivity extends AppCompatActivity {
         final View yourCustomView = inflater.inflate(R.layout.solve, null);
 
         EditText e16 = yourCustomView.findViewById(R.id.edittext17);
+        TextView t11 = yourCustomView.findViewById(R.id.textview80);
         e16.setHint("Enter a value between 2 and 58");
 
         final int[] solved = {2};
@@ -695,15 +727,45 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        final int[] lengthIndex = new int[1];
+        Spinner s11 = yourCustomView.findViewById(R.id.spinner21);
+        ArrayList<String> lengthList = new ArrayList<>();
+        lengthList.add(0, "Specific word length");
+        lengthList.add(1, "All word lengths");
+
+        ArrayAdapter<String> lengthAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_spinner_item, lengthList);
+        lengthAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        s11.setAdapter(lengthAdapter);
+
+        s11.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                if (i == 0) {
+                    e16.setVisibility(View.VISIBLE);
+                    t11.setVisibility(View.VISIBLE);
+                    lengthIndex[0] = 0;
+                }
+                else {
+                    e16.setVisibility(View.INVISIBLE);
+                    t11.setVisibility(View.INVISIBLE);
+                    lengthIndex[0] = 1;
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
+
         AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
-                .setTitle("Word length")
+                .setTitle("Change word length")
                 .setView(yourCustomView)
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        String alphabets = (e16.getText()).toString();
+                        String alphabets = (lengthIndex[0] == 0 ? (e16.getText()).toString() : "-1");
                         int precursor = (alphabets.length() == 0 ? 0 : Integer.parseInt(alphabets));
 
-                        if (precursor < 2)
+                        if (lengthIndex[0] == 0 && precursor < 2)
                         {
                             Toast.makeText(MainActivity.this, "Enter a value between 2 and 58", Toast.LENGTH_LONG).show();
                             wordLength(begin, delay, replies);
@@ -1403,11 +1465,11 @@ public class MainActivity extends AppCompatActivity {
         final int[] lengthIndex = new int[1];
         Spinner s4 = yourCustomView.findViewById(R.id.spinner8);
         ArrayList<String> lengthList = new ArrayList<>();
-        lengthList.add(0, "Specific length");
-        lengthList.add(1, "All lengths");
+        lengthList.add(0, "Specific word length");
+        lengthList.add(1, "All word lengths");
 
         ArrayAdapter<String> lengthAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_spinner_item, lengthList);
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        lengthAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s4.setAdapter(lengthAdapter);
 
         s4.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
