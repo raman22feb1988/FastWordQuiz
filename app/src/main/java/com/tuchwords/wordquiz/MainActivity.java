@@ -456,9 +456,9 @@ public class MainActivity extends AppCompatActivity {
 
         solvedList = new ArrayList<>();
         solvedList.add("Fully solved anagrams only");
-        solvedList.add("At least one unsolved anagrams only");
+        solvedList.add("Partially solved and fully unsolved only");
         solvedList.add("All anagrams");
-        solvedList.add("At least one solved anagrams only");
+        solvedList.add("Partially solved and fully solved only");
         solvedList.add("Fully unsolved anagrams only");
         solvedList.add("Partially solved anagrams only");
         solvedList.add("Fully solved and fully unsolved only");
