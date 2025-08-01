@@ -500,9 +500,7 @@ public class Report extends AppCompatActivity {
             }
         });
 
-        if (prepared) {
-            getWordLength();
-        } else {
+        if (!prepared) {
             promptDictionary();
         }
     }
@@ -1112,11 +1110,10 @@ public class Report extends AppCompatActivity {
 
         try {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(getAssets().open(international ? "CSW2024.txt" : "NWL2023.txt"), "UTF-8"));
-            String s = bufferedReader.readLine();
 
             while (true)
             {
-                s = bufferedReader.readLine();
+                String s = bufferedReader.readLine();
                 if (s == null)
                 {
                     break;
@@ -1144,10 +1141,6 @@ public class Report extends AppCompatActivity {
     public void prepareDatabase()
     {
         db.insertWord(this, false, dictionary, anagramsList, lexicon);
-
-        SharedPreferences.Editor editor = pref.edit();
-        editor.putBoolean("prepared", true);
-        editor.apply();
     }
 
     public void getAllSubanagrams(boolean subanagram)

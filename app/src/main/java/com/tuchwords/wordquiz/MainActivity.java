@@ -479,7 +479,13 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent1 = new Intent(MainActivity.this, Report.class);
                 startActivity(intent1);
-                closeCursor();
+                finish();
+            }
+        });
+
+        b6.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
                 finish();
             }
         });
@@ -491,9 +497,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        if (prepared) {
-            getWordLength();
-        } else {
+        if (!prepared) {
             promptDictionary();
         }
     }
@@ -577,11 +581,10 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(getAssets().open(international ? "CSW2024.txt" : "NWL2023.txt"), "UTF-8"));
-            String s = bufferedReader.readLine();
 
             while (true)
             {
-                s = bufferedReader.readLine();
+                String s = bufferedReader.readLine();
                 if (s == null)
                 {
                     break;
@@ -609,10 +612,6 @@ public class MainActivity extends AppCompatActivity {
     public void prepareDatabase()
     {
         db.insertWord(this, true, dictionary, anagramsList, lexicon);
-
-        SharedPreferences.Editor editor = pref.edit();
-        editor.putBoolean("prepared", true);
-        editor.apply();
     }
 
     public void getWordLength()
@@ -852,7 +851,6 @@ public class MainActivity extends AppCompatActivity {
         b1.setEnabled(true);
         b2.setEnabled(true);
         b4.setEnabled(true);
-        b6.setEnabled(true);
         b7.setEnabled(true);
         b8.setEnabled(true);
         b9.setEnabled(true);

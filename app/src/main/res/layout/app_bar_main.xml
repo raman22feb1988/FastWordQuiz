@@ -146,7 +146,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Exit"
-                    android:enabled="false"
                     android:id="@+id/button10">
                 </Button>
             </LinearLayout>

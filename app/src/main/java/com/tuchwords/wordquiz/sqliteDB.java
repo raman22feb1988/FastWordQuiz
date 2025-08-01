@@ -61,7 +61,7 @@ public class sqliteDB extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         // TODO Auto-generated method stub
         db.execSQL(
-                "create table words(_word_ text collate nocase, _length_ integer, _alphagram_ text collate nocase, _definition_ text collate nocase, _probability_ real, _time_ real, _solved_ integer, _back_ text collate nocase, _front_ text collate nocase, _tag_ text collate nocase, _page_ integer, _answers_ integer, _csw24_ integer, _csw21_ integer, _csw19_ integer, _csw15_ integer, _csw12_ integer, _csw07_ integer, _nwl23_ integer, _nwl20_ integer, _nwl18_ integer, _twl06_ integer, _nswl23_ integer, _nswl20_ integer, _nswl18_ integer, _wims_ integer, _cel21_ integer, _serial_ integer, _position_ integer, _timestamp_ text collate nocase, _incorrect_ integer, _wrong_ text collate nocase, _reverse_ text collate nocase, _anagram_ text collate nocase, _no_a_ integer, _no_b_ integer, _no_c_ integer, _no_d_ integer, _no_e_ integer, _no_f_ integer, _no_g_ integer, _no_h_ integer, _no_i_ integer, _no_j_ integer, _no_k_ integer, _no_l_ integer, _no_m_ integer, _no_n_ integer, _no_o_ integer, _no_p_ integer, _no_q_ integer, _no_r_ integer, _no_s_ integer, _no_t_ integer, _no_u_ integer, _no_v_ integer, _no_w_ integer, _no_x_ integer, _no_y_ integer, _no_z_ integer, _vowels_ integer, _consonants_ integer, _points_ integer, _power_ integer)"
+                "create table words(_word_ text collate nocase, _length_ integer, _alphagram_ text collate nocase, _definition_ text collate nocase, _probability_ real, _time_ real, _solved_ integer, _back_ text collate nocase, _front_ text collate nocase, _tag_ text collate nocase, _page_ integer, _answers_ integer, _csw24_ integer, _csw21_ integer, _csw19_ integer, _csw15_ integer, _csw12_ integer, _csw07_ integer, _nwl23_ integer, _nwl20_ integer, _nwl18_ integer, _twl06_ integer, _nswl23_ integer, _nswl20_ integer, _nswl18_ integer, _wims_ integer, _cel21_ integer, _serial_ integer, _position_ integer, _timestamp_ text collate nocase, _incorrect_ integer, _wrong_ text collate nocase, _reverse_ text collate nocase, _zetagram_ text collate nocase, _no_a_ integer, _no_b_ integer, _no_c_ integer, _no_d_ integer, _no_e_ integer, _no_f_ integer, _no_g_ integer, _no_h_ integer, _no_i_ integer, _no_j_ integer, _no_k_ integer, _no_l_ integer, _no_m_ integer, _no_n_ integer, _no_o_ integer, _no_p_ integer, _no_q_ integer, _no_r_ integer, _no_s_ integer, _no_t_ integer, _no_u_ integer, _no_v_ integer, _no_w_ integer, _no_x_ integer, _no_y_ integer, _no_z_ integer, _vowels_ integer, _consonants_ integer, _points_ integer, _power_ integer)"
         );
         db.execSQL(
                 "create table scores(_length_ integer, _query_ text collate nocase, _blank_ integer, _complete_ integer, _incomplete_ integer, _counter_ integer, _something_ integer, _nothing_ integer, _partial_ integer, _total_ integer, _solved_ integer, _unsolved_ integer, _page_ integer)"
@@ -79,7 +79,7 @@ public class sqliteDB extends SQLiteOpenHelper {
                 "create table suffixes(_suffix_ text collate nocase, _after_ text collate nocase)"
         );
         db.execSQL(
-                "create table blanks(_word_ text collate nocase, _length_ integer, _alphagram_ text collate nocase, _definition_ text collate nocase, _probability_ real, _time_ real, _solved_ integer, _back_ text collate nocase, _front_ text collate nocase, _tag_ text collate nocase, _page_ integer, _answers_ integer, _csw24_ integer, _csw21_ integer, _csw19_ integer, _csw15_ integer, _csw12_ integer, _csw07_ integer, _nwl23_ integer, _nwl20_ integer, _nwl18_ integer, _twl06_ integer, _nswl23_ integer, _nswl20_ integer, _nswl18_ integer, _wims_ integer, _cel21_ integer, _serial_ integer, _position_ integer, _timestamp_ text collate nocase, _incorrect_ integer, _wrong_ text collate nocase, _reverse_ text collate nocase, _anagram_ text collate nocase, _no_a_ integer, _no_b_ integer, _no_c_ integer, _no_d_ integer, _no_e_ integer, _no_f_ integer, _no_g_ integer, _no_h_ integer, _no_i_ integer, _no_j_ integer, _no_k_ integer, _no_l_ integer, _no_m_ integer, _no_n_ integer, _no_o_ integer, _no_p_ integer, _no_q_ integer, _no_r_ integer, _no_s_ integer, _no_t_ integer, _no_u_ integer, _no_v_ integer, _no_w_ integer, _no_x_ integer, _no_y_ integer, _no_z_ integer, _vowels_ integer, _consonants_ integer, _points_ integer, _power_ integer)"
+                "create table blanks(_word_ text collate nocase, _length_ integer, _alphagram_ text collate nocase, _definition_ text collate nocase, _probability_ real, _time_ real, _solved_ integer, _back_ text collate nocase, _front_ text collate nocase, _tag_ text collate nocase, _page_ integer, _answers_ integer, _csw24_ integer, _csw21_ integer, _csw19_ integer, _csw15_ integer, _csw12_ integer, _csw07_ integer, _nwl23_ integer, _nwl20_ integer, _nwl18_ integer, _twl06_ integer, _nswl23_ integer, _nswl20_ integer, _nswl18_ integer, _wims_ integer, _cel21_ integer, _serial_ integer, _position_ integer, _timestamp_ text collate nocase, _incorrect_ integer, _wrong_ text collate nocase, _reverse_ text collate nocase, _zetagram_ text collate nocase, _no_a_ integer, _no_b_ integer, _no_c_ integer, _no_d_ integer, _no_e_ integer, _no_f_ integer, _no_g_ integer, _no_h_ integer, _no_i_ integer, _no_j_ integer, _no_k_ integer, _no_l_ integer, _no_m_ integer, _no_n_ integer, _no_o_ integer, _no_p_ integer, _no_q_ integer, _no_r_ integer, _no_s_ integer, _no_t_ integer, _no_u_ integer, _no_v_ integer, _no_w_ integer, _no_x_ integer, _no_y_ integer, _no_z_ integer, _vowels_ integer, _consonants_ integer, _points_ integer, _power_ integer)"
         );
     }
 
@@ -769,7 +769,7 @@ public class sqliteDB extends SQLiteOpenHelper {
                         contentValues.put("_incorrect_", 0);
                         contentValues.put("_wrong_", "");
                         contentValues.put("_reverse_", ((new StringBuilder(word)).reverse()).toString());
-                        contentValues.put("_anagram_", ((new StringBuilder(anagram)).reverse()).toString());
+                        contentValues.put("_zetagram_", ((new StringBuilder(anagram)).reverse()).toString());
 
                         int[] point = {1, 3, 3, 2, 1, 4, 2, 4, 1, 8, 5, 1, 3, 1, 1, 3, 10, 1, 1, 1, 1, 4, 4, 8, 4, 10};
                         boolean[] vowel = {true, false, false, false, true, false, false, false, true, false, false, false, false, false, true, false, false, false, false, false, true, false, false, false, false, false};
@@ -1151,7 +1151,8 @@ public class sqliteDB extends SQLiteOpenHelper {
                     }
 
                     db.execSQL("UPDATE words SET _serial_ = ((_page_ - 1) * 100) + _position_");
-                    getWordLength(myContext, yourParent);
+                    uiThreadRefresh(myContext, yourParent, true);
+                    uiThreadBox("Prepare regular database", "Regular database preparation complete.", myContext, yourParent);
                     db.setTransactionSuccessful();
                 } catch (Exception e) {
                     myDialog.dismiss();
@@ -1286,7 +1287,7 @@ public class sqliteDB extends SQLiteOpenHelper {
     public int[] getCustomScore(String customQuery, int solvedStatus)
     {
         SQLiteDatabase db = this.getReadableDatabase();
-        String theQuery = "(" + addUnderscores(customQuery) + ")";
+        String theQuery = addUnderscores(customQuery);
         Cursor cursor = db.rawQuery("SELECT SUM(_solved_), COUNT(_word_) FROM words WHERE _alphagram_ IN (SELECT _alphagram_ FROM words WHERE " + theQuery + " GROUP BY _alphagram_" + solvedCondition(solvedStatus) + ")", null);
 
         int[] answer = new int[2];
@@ -1391,7 +1392,7 @@ public class sqliteDB extends SQLiteOpenHelper {
     {
         try {
             SQLiteDatabase db = this.getReadableDatabase();
-            String theQuery = "(" + (skipUnderscores ? customQuery : addUnderscores(customQuery)) + ")";
+            String theQuery = (skipUnderscores ? customQuery : addUnderscores(customQuery));
             return db.rawQuery("SELECT _alphagram_ FROM words WHERE " + theQuery + " GROUP BY _alphagram_" + solvedCondition(solvedStatus), null);
         }
         catch (SQLiteException e) {
@@ -1446,7 +1447,7 @@ public class sqliteDB extends SQLiteOpenHelper {
 
         try {
             SQLiteDatabase db = this.getReadableDatabase();
-            String theQuery = "(" + (skipUnderscores ? query : addUnderscores(query)) + ")";
+            String theQuery = (skipUnderscores ? query : addUnderscores(query));
             return db.rawQuery("SELECT _word_ FROM words WHERE " + status + theQuery + " ORDER BY " + (solvedStatus == 0 ? "_time_" : "_probability_") + " DESC", null);
         }
         catch (SQLiteException e) {
@@ -2093,6 +2094,7 @@ public class sqliteDB extends SQLiteOpenHelper {
         argumentQuery = argumentQuery.replace("_time_stamp", "_timestamp_");
         argumentQuery = argumentQuery.replace("un_solved_", "_unsolved_");
         argumentQuery = argumentQuery.replace("in_complete_", "_incomplete_");
+        argumentQuery = argumentQuery.replace("ze_tag_ram", "_zetagram_");
         for (String tableName : tablesList)
         {
             Cursor cursor = db.query(tableName, null, null, null, null, null, null);
@@ -3417,32 +3419,6 @@ public class sqliteDB extends SQLiteOpenHelper {
                     progressBar.setProgress(percentage);
                     leftText.setText(percentage + "%");
                     rightText.setText(fraction);
-                }
-            });
-        }
-    }
-
-    public void getWordLength(Context yourContext, boolean parent)
-    {
-        if (parent)
-        {
-            MainActivity homeActivity = (MainActivity) yourContext;
-
-            homeActivity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    homeActivity.getWordLength();
-                }
-            });
-        }
-        else
-        {
-            Report homeActivity = (Report) yourContext;
-
-            homeActivity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    homeActivity.getWordLength();
                 }
             });
         }
