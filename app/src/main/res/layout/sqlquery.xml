@@ -3,39 +3,30 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <FrameLayout
+    <EditText
+        android:id="@+id/edittext8"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/rectangle">
-        <Spinner
-            android:id="@+id/spinner7"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-    </FrameLayout>
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <Button
-            android:id="@+id/button74"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:text="Examples">
-        </Button>
-        <EditText
-            android:id="@+id/edittext18"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_toLeftOf="@+id/button74"
-            android:layout_centerVertical="true"
-            android:background="@drawable/rectangle">
-        </EditText>
-    </RelativeLayout>
+    </EditText>
+    <CheckBox
+        android:id="@+id/checkbox3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:text="Automatically add underscores before and after column names">
+    </CheckBox>
+    <Button
+        android:id="@+id/button73"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Examples">
+    </Button>
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <TextView
-            android:id="@+id/textview27"
+            android:id="@+id/textview14"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
         </TextView>

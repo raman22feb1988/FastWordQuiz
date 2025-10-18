@@ -22,6 +22,19 @@
                 android:title="Search for subanagrams" />
         </menu>
     </item>
+    <item android:title="Settings">
+        <menu>
+            <item
+                android:id="@+id/button35"
+                android:title="Change rows and font size" />
+            <item
+                android:id="@+id/button37"
+                android:title="Hide number of answers" />
+            <item
+                android:id="@+id/button52"
+                android:title="Show full details" />
+        </menu>
+    </item>
     <item android:title="Tag manager">
         <menu>
             <item
@@ -50,25 +63,8 @@
                 android:title="Delete all tags" />
         </menu>
     </item>
-    <item android:title="Zoom in and out">
-        <menu>
-            <item
-                android:id="@+id/button35"
-                android:title="Change rows and font size" />
-        </menu>
-    </item>
-    <item android:title="Hide and show">
-        <menu>
-            <item
-                android:id="@+id/button37"
-                android:title="Hide number of answers" />
-        </menu>
-    </item>
     <item android:title="Prefixes and suffixes">
         <menu>
-            <item
-                android:id="@+id/button52"
-                android:title="Show full details" />
             <item
                 android:id="@+id/button60"
                 android:title="View all prefixes and suffixes" />

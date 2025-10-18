@@ -20,6 +20,49 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Order by:"
+                android:id="@+id/textview84">
+            </TextView>
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/rectangle">
+                <Spinner
+                    android:id="@+id/spinner31"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </FrameLayout>
+        </LinearLayout>
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/rectangle">
+                <Spinner
+                    android:id="@+id/spinner32"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </FrameLayout>
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/rectangle">
+                <Spinner
+                    android:id="@+id/spinner33"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </FrameLayout>
+        </LinearLayout>
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
                 android:id="@+id/textview29"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -56,25 +99,25 @@
             android:layout_height="wrap_content"
             android:text="Additional word filters (Optional):">
         </TextView>
-        <RelativeLayout
+        <EditText
+            android:id="@+id/edittext29"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <Button
-                android:id="@+id/button81"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:text="Examples">
-            </Button>
-            <EditText
-                android:id="@+id/edittext29"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_toLeftOf="@+id/button81"
-                android:layout_centerVertical="true"
-                android:background="@drawable/rectangle">
-            </EditText>
-        </RelativeLayout>
+            android:layout_height="wrap_content"
+            android:background="@drawable/rectangle">
+        </EditText>
+        <CheckBox
+            android:id="@+id/checkbox4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Automatically add underscores before and after column names">
+        </CheckBox>
+        <Button
+            android:id="@+id/button81"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Examples">
+        </Button>
         <TextView
             android:id="@+id/textview32"
             android:layout_width="match_parent"

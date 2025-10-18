@@ -51,19 +51,34 @@
         <entry key="..\:/Users/raman/AndroidStudioProjects/WordQuiz2/app/src/main/res/layout/query.xml" value="0.11979166666666667" />
         <entry key="..\:/Users/raman/AndroidStudioProjects/WordQuiz2/app/src/main/res/layout/report.xml" value="0.11979166666666667" />
         <entry key="..\:/Users/raman/Documents/GitHub/FastWordQuiz/app/src/main/res/layout/activity_main.xml" value="0.12158054711246201" />
+        <entry key="..\:/Users/raman/Documents/GitHub/FastWordQuiz/app/src/main/res/layout/add.xml" value="0.16576086956521738" />
         <entry key="..\:/Users/raman/Documents/GitHub/FastWordQuiz/app/src/main/res/layout/anagram.xml" value="0.12158054711246201" />
+        <entry key="..\:/Users/raman/Documents/GitHub/FastWordQuiz/app/src/main/res/layout/app_bar_report.xml" value="0.16576086956521738" />
+        <entry key="..\:/Users/raman/Documents/GitHub/FastWordQuiz/app/src/main/res/layout/cell.xml" value="0.16576086956521738" />
         <entry key="..\:/Users/raman/Documents/GitHub/FastWordQuiz/app/src/main/res/layout/change.xml" value="0.1" />
+        <entry key="..\:/Users/raman/Documents/GitHub/FastWordQuiz/app/src/main/res/layout/colour.xml" value="0.16576086956521738" />
+        <entry key="..\:/Users/raman/Documents/GitHub/FastWordQuiz/app/src/main/res/layout/delete.xml" value="0.16576086956521738" />
         <entry key="..\:/Users/raman/Documents/GitHub/FastWordQuiz/app/src/main/res/layout/display.xml" value="0.12158054711246201" />
         <entry key="..\:/Users/raman/Documents/GitHub/FastWordQuiz/app/src/main/res/layout/filter.xml" value="0.1" />
         <entry key="..\:/Users/raman/Documents/GitHub/FastWordQuiz/app/src/main/res/layout/input.xml" value="0.12158054711246201" />
+        <entry key="..\:/Users/raman/Documents/GitHub/FastWordQuiz/app/src/main/res/layout/label.xml" value="0.16576086956521738" />
+        <entry key="..\:/Users/raman/Documents/GitHub/FastWordQuiz/app/src/main/res/layout/magnify.xml" value="0.16576086956521738" />
         <entry key="..\:/Users/raman/Documents/GitHub/FastWordQuiz/app/src/main/res/layout/message.xml" value="0.12158054711246201" />
+        <entry key="..\:/Users/raman/Documents/GitHub/FastWordQuiz/app/src/main/res/layout/modify.xml" value="0.16576086956521738" />
+        <entry key="..\:/Users/raman/Documents/GitHub/FastWordQuiz/app/src/main/res/layout/output.xml" value="0.16576086956521738" />
+        <entry key="..\:/Users/raman/Documents/GitHub/FastWordQuiz/app/src/main/res/layout/path.xml" value="0.16576086956521738" />
+        <entry key="..\:/Users/raman/Documents/GitHub/FastWordQuiz/app/src/main/res/layout/progressbar.xml" value="0.16576086956521738" />
+        <entry key="..\:/Users/raman/Documents/GitHub/FastWordQuiz/app/src/main/res/layout/prompt.xml" value="0.16576086956521738" />
         <entry key="..\:/Users/raman/Documents/GitHub/FastWordQuiz/app/src/main/res/layout/query.xml" value="0.1" />
         <entry key="..\:/Users/raman/Documents/GitHub/FastWordQuiz/app/src/main/res/layout/remove.xml" value="0.1" />
+        <entry key="..\:/Users/raman/Documents/GitHub/FastWordQuiz/app/src/main/res/layout/rename.xml" value="0.16576086956521738" />
         <entry key="..\:/Users/raman/Documents/GitHub/FastWordQuiz/app/src/main/res/layout/reset.xml" value="0.1" />
         <entry key="..\:/Users/raman/Documents/GitHub/FastWordQuiz/app/src/main/res/layout/sieve.xml" value="0.1" />
         <entry key="..\:/Users/raman/Documents/GitHub/FastWordQuiz/app/src/main/res/layout/solve.xml" value="0.12158054711246201" />
         <entry key="..\:/Users/raman/Documents/GitHub/FastWordQuiz/app/src/main/res/layout/sqlquery.xml" value="0.1" />
         <entry key="..\:/Users/raman/Documents/GitHub/FastWordQuiz/app/src/main/res/layout/subanagram.xml" value="0.1" />
+        <entry key="..\:/Users/raman/Documents/GitHub/FastWordQuiz/app/src/main/res/layout/word.xml" value="0.16576086956521738" />
+        <entry key="..\:/Users/raman/Documents/GitHub/FastWordQuiz/app/src/main/res/layout/zoom.xml" value="0.16576086956521738" />
         <entry key="..\:/Users/raman/Documents/GitHub/FastWordQuiz/app/src/main/res/menu/navigation_menu_main.xml" value="0.17407407407407408" />
         <entry key="..\:/Users/raman/Documents/GitHub/FastWordQuiz/app/src/main/res/menu/navigation_menu_report.xml" value="0.17407407407407408" />
       </map>
