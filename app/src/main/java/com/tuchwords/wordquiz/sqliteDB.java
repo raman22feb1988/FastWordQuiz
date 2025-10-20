@@ -655,9 +655,9 @@ public class sqliteDB extends SQLiteOpenHelper {
         {
             char ch = st.charAt(j);
             int ord = ((int) ch) - 65;
-            chance *= frequency[ord];
+            chance *= (ch == '?' ? 2 : frequency[ord]);
             chance /= count;
-            if (frequency[ord] > 0) {
+            if (ord >= 0 && frequency[ord] > 0) {
                 frequency[ord]--;
             }
             count--;
