@@ -29,8 +29,10 @@ import com.google.android.material.slider.Slider;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -698,7 +700,6 @@ public class sqliteDB extends SQLiteOpenHelper {
                         char[] c = word.toCharArray();
                         Arrays.sort(c);
                         String anagram = new String(c);
-                        int solutions = anagramsList.get(anagram);
                         String definition = entry.getValue();
                         StringBuilder back = new StringBuilder();
                         StringBuilder front = new StringBuilder();
@@ -772,6 +773,7 @@ public class sqliteDB extends SQLiteOpenHelper {
                                     Arrays.sort(subcharacter);
                                     String subletter = new String(subcharacter);
                                     String subalphagram = subletter + "?";
+                                    int solutions = anagramsList.get(subalphagram);
 
                                     ContentValues contentValues = new ContentValues();
 
@@ -834,6 +836,7 @@ public class sqliteDB extends SQLiteOpenHelper {
                             }
                         }
                         else {
+                            int solutions = anagramsList.get(anagram);
                             ContentValues contentValues = new ContentValues();
 
                             contentValues.put("_word_", word);
@@ -887,7 +890,7 @@ public class sqliteDB extends SQLiteOpenHelper {
                         myLine++;
                         if (myLine % myStep1 < 1 || myLine == 1.0)
                         {
-                            updateProgressBar(myContext, yourParent, p5, t43, t44, myDialog, myLine / myStep1, ((int) myLine) + "/" + dictionary.size(), joker);
+                            updateProgressBar(myContext, yourParent, p5, t43, t44, myDialog, myLine / (joker ? myStep1 * 10 : myStep1), ((int) myLine) + "/" + dictionary.size(), joker);
                         }
                     }
 
@@ -942,7 +945,7 @@ public class sqliteDB extends SQLiteOpenHelper {
 
                         if (positionNumber % myStep2 < 1 || positionNumber == 1)
                         {
-                            updateProgressBar(myContext, yourParent, p5, t43, t44, myDialog, 40 + (positionNumber / myStep2), positionNumber + "/" + pageHash.size(), joker);
+                            updateProgressBar(myContext, yourParent, p5, t43, t44, myDialog, 40 + (positionNumber / (joker ? myStep2 * 10 : myStep2)), positionNumber + "/" + pageHash.size(), joker);
                         }
                     }
 
@@ -959,7 +962,7 @@ public class sqliteDB extends SQLiteOpenHelper {
 
                         if (cellNumber % myStep3 < 1 || cellNumber == 1)
                         {
-                            updateProgressBar(myContext, yourParent, p5, t43, t44, myDialog, 90 + (cellNumber / myStep3), cellNumber + "/" + cellHash.size(), joker);
+                            updateProgressBar(myContext, yourParent, p5, t43, t44, myDialog, 90 + (cellNumber / (joker ? myStep3 * 10 : myStep3)), cellNumber + "/" + cellHash.size(), joker);
                         }
                     }
 
@@ -1442,7 +1445,7 @@ public class sqliteDB extends SQLiteOpenHelper {
 
         if (orderBy.charAt(0) == ' ')
         {
-            return db.rawQuery((blank ? "SELECT DISTINCT(_anagram_) FROM blanks" : "SELECT _alphagram_ FROM words") + ((letters > 1 || !label.equals("*")) ? " WHERE " : "") + (letters > 1 ? "_length_ = " + letters : "") + ((letters > 1 && !label.equals("*")) ? " AND " : "") + (!label.equals("*") ? "_tag_ = \"" + label + "\"" : "") + " GROUP BY _alphagram_" + solvedCondition(solvedStatus) + orderBy, null);
+            return db.rawQuery((blank ? "SELECT _anagram_ FROM blanks" : "SELECT _alphagram_ FROM words") + ((letters > 1 || !label.equals("*")) ? " WHERE " : "") + (letters > 1 ? "_length_ = " + letters : "") + ((letters > 1 && !label.equals("*")) ? " AND " : "") + (!label.equals("*") ? "_tag_ = \"" + label + "\"" : "") + (blank ? " GROUP BY _anagram_" : " GROUP BY _alphagram_") + solvedCondition(solvedStatus) + orderBy, null);
         }
         else
         {
@@ -3462,7 +3465,7 @@ public class sqliteDB extends SQLiteOpenHelper {
                     }
 
                     progressBar.setProgress((int) Math.round(percentage));
-                    leftText.setText(joker ? String.format("%.1f%%", percentage) : String.format("%d%%", percentage));
+                    leftText.setText(joker ? String.format("%.1f%%", percentage) : String.format("%.0f%%", percentage));
                     rightText.setText(fraction);
                 }
             });
@@ -3479,7 +3482,7 @@ public class sqliteDB extends SQLiteOpenHelper {
                     }
 
                     progressBar.setProgress((int) Math.round(percentage));
-                    leftText.setText(joker ? String.format("%.1f%%", percentage) : String.format("%d%%", percentage));
+                    leftText.setText(joker ? String.format("%.1f%%", percentage) : String.format("%.0f%%", percentage));
                     rightText.setText(fraction);
                 }
             });

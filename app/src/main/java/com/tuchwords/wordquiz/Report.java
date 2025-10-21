@@ -1169,6 +1169,10 @@ public class Report extends AppCompatActivity {
                 .setView(yourCustomView)
                 .setPositiveButton("CSW24", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
+                        if (joker) {
+                            Toast.makeText(Report.this, "Loading all blank anagrams into memory. Just a minute...", Toast.LENGTH_LONG).show();
+                        }
+
                         if (c1.isChecked()) {
                             db.dropTable(Report.this, false);
                         }
@@ -1177,6 +1181,10 @@ public class Report extends AppCompatActivity {
                 })
                 .setNegativeButton("NWL23", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
+                        if (joker) {
+                            Toast.makeText(Report.this, "Loading all blank anagrams into memory. Just a minute...", Toast.LENGTH_LONG).show();
+                        }
+
                         if (c1.isChecked()) {
                             db.dropTable(Report.this, false);
                         }
@@ -1225,7 +1233,7 @@ public class Report extends AppCompatActivity {
                                 String subword = t[0].substring(0, letterIndex) + t[0].substring(letterIndex + 1);
                                 char[] subcharacter = subword.toCharArray();
                                 Arrays.sort(subcharacter);
-                                String solution = Arrays.toString(subcharacter) + "?";
+                                String solution = new String(subcharacter) + "?";
 
                                 if (anagramsList.containsKey(solution)) {
                                     anagramsList.put(solution, anagramsList.get(solution) + 1);
