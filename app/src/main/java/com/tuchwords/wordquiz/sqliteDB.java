@@ -1436,17 +1436,17 @@ public class sqliteDB extends SQLiteOpenHelper {
         }
     }
 
-    public Cursor getAllAnagrams(int letters, String label, int solvedStatus, String orderBy, boolean joker)
+    public Cursor getAllAnagrams(int letters, String label, int solvedStatus, String orderBy, boolean blank)
     {
         SQLiteDatabase db = this.getReadableDatabase();
 
         if (orderBy.charAt(0) == ' ')
         {
-            return db.rawQuery((joker ? "SELECT DISTINCT(_anagram_) FROM blanks" : "SELECT _alphagram_ FROM words") + ((letters > 1 || !label.equals("*")) ? " WHERE " : "") + (letters > 1 ? "_length_ = " + letters : "") + ((letters > 1 && !label.equals("*")) ? " AND " : "") + (!label.equals("*") ? "_tag_ = \"" + label + "\"" : "") + " GROUP BY _alphagram_" + solvedCondition(solvedStatus) + orderBy, null);
+            return db.rawQuery((blank ? "SELECT DISTINCT(_anagram_) FROM blanks" : "SELECT _alphagram_ FROM words") + ((letters > 1 || !label.equals("*")) ? " WHERE " : "") + (letters > 1 ? "_length_ = " + letters : "") + ((letters > 1 && !label.equals("*")) ? " AND " : "") + (!label.equals("*") ? "_tag_ = \"" + label + "\"" : "") + " GROUP BY _alphagram_" + solvedCondition(solvedStatus) + orderBy, null);
         }
         else
         {
-            return db.rawQuery((joker ? "SELECT DISTINCT(_anagram_) FROM blanks" : "SELECT DISTINCT(_alphagram_) FROM words") + ((letters > 1 || !label.equals("*")) ? " WHERE " : "") + (letters > 1 ? "_length_ = " + letters : "") + ((letters > 1 && !label.equals("*")) ? " AND " : "") + (!label.equals("*") ? "_tag_ = \"" + label + "\"" : "") + solvedCondition(solvedStatus), null);
+            return db.rawQuery((blank ? "SELECT DISTINCT(_anagram_) FROM blanks" : "SELECT DISTINCT(_alphagram_) FROM words") + ((letters > 1 || !label.equals("*")) ? " WHERE " : "") + (letters > 1 ? "_length_ = " + letters : "") + ((letters > 1 && !label.equals("*")) ? " AND " : "") + (!label.equals("*") ? "_tag_ = \"" + label + "\"" : "") + solvedCondition(solvedStatus), null);
         }
     }
 
