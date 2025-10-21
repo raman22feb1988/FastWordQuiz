@@ -42,6 +42,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -464,7 +465,7 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     case R.id.button75:
                         // Show a Toast message for the Prepare regular database item
-                        promptDictionary(true);
+                        promptDictionary(true, false);
                         break;
                     case R.id.button77:
                         // Show a Toast message for the Search for anagrams item
@@ -473,6 +474,10 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.button78:
                         // Show a Toast message for the Search for subanagrams item
                         getAllSubanagrams(true);
+                        break;
+                    case R.id.button82:
+                        // Show a Toast message for the Prepare blank database item
+                        promptDictionary(false, true);
                         break;
                 }
 
@@ -585,11 +590,11 @@ public class MainActivity extends AppCompatActivity {
         });
 
         if (!prepared) {
-            promptDictionary(false);
+            promptDictionary(false, false);
         }
     }
 
-    public void promptDictionary(boolean deleteTable)
+    public void promptDictionary(boolean deleteTable, boolean joker)
     {
         LayoutInflater inflater = LayoutInflater.from(MainActivity.this);
         final View yourCustomView = inflater.inflate(R.layout.prompt, null);
@@ -608,7 +613,7 @@ public class MainActivity extends AppCompatActivity {
                         if (c1.isChecked()) {
                             db.dropTable(MainActivity.this, true);
                         }
-                        prepareDictionary(true);
+                        prepareDictionary(true, joker);
                     }
                 })
                 .setNegativeButton("NWL23", new DialogInterface.OnClickListener() {
@@ -616,13 +621,13 @@ public class MainActivity extends AppCompatActivity {
                         if (c1.isChecked()) {
                             db.dropTable(MainActivity.this, true);
                         }
-                        prepareDictionary(false);
+                        prepareDictionary(false, joker);
                     }
                 }).create();
         dialog.show();
     }
 
-    public void prepareDictionary(boolean international)
+    public void prepareDictionary(boolean international, boolean joker)
     {
         dictionary = new HashMap<>();
         anagramsList = new HashMap<>();
@@ -649,17 +654,38 @@ public class MainActivity extends AppCompatActivity {
                         dictionary.put(t[0], t[1]);
                     }
 
-                    char[] jumbled = t[0].toCharArray();
-                    Arrays.sort(jumbled);
-                    String solution = new String(jumbled);
+                    if (joker) {
+                        HashSet<Character> used = new HashSet<>();
 
-                    if (anagramsList.containsKey(solution))
-                    {
-                        anagramsList.put(solution, anagramsList.get(solution) + 1);
+                        for (int letterIndex = 0; letterIndex < t[0].length(); letterIndex++) {
+                            char character = t[0].charAt(letterIndex);
+                            if (used.contains(character)) {
+                                continue;
+                            } else {
+                                used.add(character);
+                                String subword = t[0].substring(0, letterIndex) + t[0].substring(letterIndex + 1);
+                                char[] subcharacter = subword.toCharArray();
+                                Arrays.sort(subcharacter);
+                                String solution = Arrays.toString(subcharacter) + "?";
+
+                                if (anagramsList.containsKey(solution)) {
+                                    anagramsList.put(solution, anagramsList.get(solution) + 1);
+                                } else {
+                                    anagramsList.put(solution, 1);
+                                }
+                            }
+                        }
                     }
-                    else
-                    {
-                        anagramsList.put(solution, 1);
+                    else {
+                        char[] jumbled = t[0].toCharArray();
+                        Arrays.sort(jumbled);
+                        String solution = new String(jumbled);
+
+                        if (anagramsList.containsKey(solution)) {
+                            anagramsList.put(solution, anagramsList.get(solution) + 1);
+                        } else {
+                            anagramsList.put(solution, 1);
+                        }
                     }
                 }
             }
@@ -700,12 +726,12 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        prepareDatabase();
+        prepareDatabase(joker);
     }
 
-    public void prepareDatabase()
+    public void prepareDatabase(boolean joker)
     {
-        db.insertWord(this, true, dictionary, anagramsList, lexicon);
+        db.insertWord(this, true, dictionary, anagramsList, lexicon, joker);
     }
 
     public void getWordLength()
@@ -1008,7 +1034,7 @@ public class MainActivity extends AppCompatActivity {
             db.insertLabel(letters, label, orderBy);
         }
 
-        anagrams = db.getAllAnagrams(letters, label, solvedStatus, orderBy);
+        anagrams = db.getAllAnagrams(letters, label, solvedStatus, orderBy, false);
         words = anagrams.getCount();
         int[] pair2 = db.getScore(letters, label, solvedStatus);
         score = pair2[0];
@@ -1039,7 +1065,7 @@ public class MainActivity extends AppCompatActivity {
         int open = rows * columns * counter;
         int close = (Math.min((rows * columns * counter) + (rows * columns), words));
 
-        if(orderBy.equals("DESC"))
+        if (orderBy.equals("DESC"))
         {
             if (anagrams.moveToPosition(words - 1 - open)) {
                 do {
@@ -1504,7 +1530,7 @@ public class MainActivity extends AppCompatActivity {
                 score = pair3[0];
 
                 closeCursor();
-                anagrams = (letters == 1 ? db.getCustomQuiz(label, MainActivity.this, solvedStatus, orderBy) : db.getAllAnagrams(letters, label, solvedStatus, orderBy));
+                anagrams = (letters == 1 ? db.getCustomQuiz(label, MainActivity.this, solvedStatus, orderBy) : db.getAllAnagrams(letters, label, solvedStatus, orderBy, false));
                 words = anagrams.getCount();
 
                 counter = db.getCounter(letters, label, solvedStatus, orderBy);

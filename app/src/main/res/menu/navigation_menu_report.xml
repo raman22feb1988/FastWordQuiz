@@ -7,6 +7,9 @@
             <item
                 android:id="@+id/button76"
                 android:title="Prepare regular database" />
+            <item
+                android:id="@+id/button83"
+                android:title="Prepare blank database" />
         </menu>
     </item>
     <item android:title="Word filter">
