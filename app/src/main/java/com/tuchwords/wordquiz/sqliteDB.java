@@ -29,10 +29,8 @@ import com.google.android.material.slider.Slider;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -898,7 +896,7 @@ public class sqliteDB extends SQLiteOpenHelper {
                     HashMap<Integer, ArrayList<String>> cellHash = new HashMap<>();
 
                     for (int lengths = 2; lengths <= 58; lengths++) {
-                        Cursor anagramList = getAllAnagrams(lengths, "*", 2, " ORDER BY _probability_ DESC", joker);
+                        Cursor anagramList = joker ? getAllBlankAnagrams(lengths) : getAllAnagrams(lengths, "*", 2, " ORDER BY _probability_ DESC", joker);
                         int wordLength = anagramList.getCount();
                         int pages = (((wordLength - 1) / 50) + 1);
 
@@ -1451,6 +1449,12 @@ public class sqliteDB extends SQLiteOpenHelper {
         {
             return db.rawQuery((blank ? "SELECT DISTINCT(_anagram_) FROM blanks" : "SELECT DISTINCT(_alphagram_) FROM words") + ((letters > 1 || !label.equals("*")) ? " WHERE " : "") + (letters > 1 ? "_length_ = " + letters : "") + ((letters > 1 && !label.equals("*")) ? " AND " : "") + (!label.equals("*") ? "_tag_ = \"" + label + "\"" : "") + solvedCondition(solvedStatus), null);
         }
+    }
+
+    public Cursor getAllBlankAnagrams(int letters)
+    {
+        SQLiteDatabase db = this.getReadableDatabase();
+        return db.rawQuery("SELECT DISTINCT(_anagram_) FROM blanks WHERE _length_ = " + letters + " ORDER BY _probability_ DESC", null);
     }
 
     public Cursor getCustomQuiz(String customQuery, Context activity, int solvedStatus, String orderBy)
