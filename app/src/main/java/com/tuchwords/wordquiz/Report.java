@@ -84,6 +84,7 @@ public class Report extends AppCompatActivity {
 
     int rows;
     int font;
+    int maximumWordLength;
 
     // Declare the DrawerLayout, NavigationView and Toolbar
     private DrawerLayout drawerLayout;
@@ -390,6 +391,7 @@ public class Report extends AppCompatActivity {
         ArrayList<Integer> dimensions = db.getZoom("Report");
         rows = dimensions.get(0);
         font = dimensions.get(2);
+        maximumWordLength = db.getMaximumWordLength();
 
         refreshSpinner();
 
@@ -575,7 +577,7 @@ public class Report extends AppCompatActivity {
 
         EditText e1 = yourCustomView.findViewById(R.id.edittext17);
         TextView t8 = yourCustomView.findViewById(R.id.textview80);
-        e1.setHint("Enter a value between 2 and 58");
+        e1.setHint("Enter a value between 2 and " + db.getMaximumWordLength());
 
         final int[] sortIndex = new int[2];
         Spinner s10 = yourCustomView.findViewById(R.id.spinner22);
@@ -673,7 +675,7 @@ public class Report extends AppCompatActivity {
 
                         if (lengthIndex[0] == 0 && precursor < 2)
                         {
-                            Toast.makeText(Report.this, "Enter a value between 2 and 58 for word length", Toast.LENGTH_LONG).show();
+                            Toast.makeText(Report.this, "Enter a value between 2 and " + db.getMaximumWordLength() + " for word length", Toast.LENGTH_LONG).show();
                             getWordLength();
                         }
                         else
@@ -697,7 +699,7 @@ public class Report extends AppCompatActivity {
         EditText e6 = yourCustomView.findViewById(R.id.edittext6);
         EditText e7 = yourCustomView.findViewById(R.id.edittext7);
         TextView t4 = yourCustomView.findViewById(R.id.textview12);
-        e7.setHint("Enter a value between 2 and 58");
+        e7.setHint("Enter a value between 2 and " + db.getMaximumWordLength());
 
         final int[] sortIndex = new int[2];
         Spinner s13 = yourCustomView.findViewById(R.id.spinner25);
@@ -819,7 +821,7 @@ public class Report extends AppCompatActivity {
 
                         if (lengthIndex[0] == 0 && temporary < 2)
                         {
-                            Toast.makeText(Report.this, "Enter a value between 2 and 58 for word length", Toast.LENGTH_LONG).show();
+                            Toast.makeText(Report.this, "Enter a value between 2 and " + db.getMaximumWordLength() + " for word length", Toast.LENGTH_LONG).show();
                             filterByLabel();
                         }
                         else

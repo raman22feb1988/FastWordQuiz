@@ -646,6 +646,21 @@ public class sqliteDB extends SQLiteOpenHelper {
         dialog.show();
     }
 
+    public int getMaximumWordLength()
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery("SELECT MAX(_length_) FROM words", null);
+        int maximumWordLength = 0;
+
+        if (cursor.moveToFirst()) {
+            do {
+                maximumWordLength = cursor.getInt(0);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return maximumWordLength;
+    }
+
     public double probability(String st)
     {
         int[] frequency = new int[] {9, 2, 2, 4, 12, 2, 3, 2, 9, 1, 1, 4, 2, 6, 8, 2, 1, 6, 4, 6, 4, 2, 2, 1, 2, 1};
@@ -892,49 +907,40 @@ public class sqliteDB extends SQLiteOpenHelper {
                         }
                     }
 
-                    HashMap<Integer, ArrayList<String>> pageHash = new HashMap<>();
-                    HashMap<Integer, ArrayList<String>> cellHash = new HashMap<>();
+                    Cursor[] anagramList = new Cursor[getMaximumWordLength() - 1];
+                    int[] wordLength = new int[anagramList.length];
+                    int[] pages = new int[anagramList.length];
+                    int maximumPages = 0;
 
-                    for (int lengths = 2; lengths <= 58; lengths++) {
-                        Cursor anagramList = joker ? getAllBlankAnagrams(lengths) : getAllAnagrams(lengths, "*", 2, " ORDER BY _probability_ DESC", joker);
-                        int wordLength = anagramList.getCount();
-                        int pages = (((wordLength - 1) / 50) + 1);
+                    for (int lengths = 0; lengths < anagramList.length; lengths++) {
+                        anagramList[lengths] = (joker ? getAllBlankAnagrams(lengths + 2) : getAllRegularAnagrams(lengths + 2));
+                        wordLength[lengths] = anagramList[lengths].getCount();
+                        pages[lengths] = (((wordLength[lengths] - 1) / 50) + 1);
 
-                        for (int pageNumber = 0; pageNumber < pages; pageNumber++) {
-                            if (!pageHash.containsKey(pageNumber + 1)) {
-                                pageHash.put(pageNumber + 1, new ArrayList<>());
-                            }
-
-                            int open = pageNumber * 50;
-                            int close = Math.min((pageNumber + 1) * 50, wordLength);
-
-                            if (anagramList.moveToPosition(open)) {
-                                do {
-                                    (pageHash.get(pageNumber + 1)).add(anagramList.getString(0));
-                                } while (anagramList.moveToNext() && anagramList.getPosition() < close);
-                            }
+                        if (pages[lengths] > maximumPages) {
+                            maximumPages = pages[lengths];
                         }
-
-                        for (int cellValue = 0; cellValue < 50; cellValue++) {
-                            if (!cellHash.containsKey(cellValue + 1)) {
-                                cellHash.put(cellValue + 1, new ArrayList<>());
-                            }
-
-                            if (anagramList.moveToPosition(cellValue)) {
-                                do {
-                                    (cellHash.get(cellValue + 1)).add(anagramList.getString(0));
-                                } while (anagramList.move(50));
-                            }
-                        }
-
-                        anagramList.close();
                     }
 
                     uiThreadTitle("Setting page numbers", myDialog, myContext, yourParent);
-                    double myStep2 = pageHash.size() / (joker ? 500.0 : 50.0);
-                    for (int positionNumber = 1; positionNumber <= pageHash.size(); positionNumber++) {
-                        String pageString = ((((pageHash.get(positionNumber)).toString()).replace("[", "(\"")).replace("]", "\")")).replace(", ", "\", \"");
+                    double myStep2 = maximumPages / (joker ? 500.0 : 50.0);
+                    for (int positionNumber = 1; positionNumber <= maximumPages; positionNumber++) {
+                        ArrayList<String> pageHash = new ArrayList<>();
 
+                        for (int lengths = 0; lengths < anagramList.length; lengths++) {
+                            if(pages[lengths] <= positionNumber) {
+                                int open = (positionNumber - 1) * 50;
+                                int close = Math.min(positionNumber * 50, wordLength[lengths]);
+
+                                if (anagramList[lengths].moveToPosition(open)) {
+                                    do {
+                                        pageHash.add(anagramList[lengths].getString(0));
+                                    } while (anagramList[lengths].moveToNext() && anagramList[lengths].getPosition() < close);
+                                }
+                            }
+                        }
+
+                        String pageString = ((((pageHash).toString()).replace("[", "(\"")).replace("]", "\")")).replace(", ", "\", \"");
                         ContentValues values = new ContentValues();
                         values.put("_page_", positionNumber);
 
@@ -943,15 +949,24 @@ public class sqliteDB extends SQLiteOpenHelper {
 
                         if (positionNumber % myStep2 < 1 || positionNumber == 1)
                         {
-                            updateProgressBar(myContext, yourParent, p5, t43, t44, myDialog, 40 + (positionNumber / (joker ? myStep2 * 10 : myStep2)), positionNumber + "/" + pageHash.size(), joker);
+                            updateProgressBar(myContext, yourParent, p5, t43, t44, myDialog, 40 + (positionNumber / (joker ? myStep2 * 10 : myStep2)), positionNumber + "/" + maximumPages, joker);
                         }
                     }
 
                     uiThreadTitle("Setting grid numbers", myDialog, myContext, yourParent);
-                    double myStep3 = cellHash.size() / (joker ? 100.0 : 10.0);
-                    for (int cellNumber = 1; cellNumber <= cellHash.size(); cellNumber++) {
-                        String cellString = ((((cellHash.get(cellNumber)).toString()).replace("[", "(\"")).replace("]", "\")")).replace(", ", "\", \"");
+                    double myStep3 = (joker ? 0.5 : 5.0);
+                    for (int cellNumber = 1; cellNumber <= 50.0; cellNumber++) {
+                        ArrayList<String> cellHash = new ArrayList<>();
 
+                        for (int lengths = 0; lengths < anagramList.length; lengths++) {
+                            if (anagramList[lengths].moveToPosition(cellNumber - 1)) {
+                                do {
+                                    cellHash.add(anagramList[lengths].getString(0));
+                                } while (anagramList[lengths].move(50));
+                            }
+                        }
+
+                        String cellString = ((((cellHash).toString()).replace("[", "(\"")).replace("]", "\")")).replace(", ", "\", \"");
                         ContentValues values = new ContentValues();
                         values.put("_position_", cellNumber);
 
@@ -960,8 +975,12 @@ public class sqliteDB extends SQLiteOpenHelper {
 
                         if (cellNumber % myStep3 < 1 || cellNumber == 1)
                         {
-                            updateProgressBar(myContext, yourParent, p5, t43, t44, myDialog, 90 + (cellNumber / (joker ? myStep3 * 10 : myStep3)), cellNumber + "/" + cellHash.size(), joker);
+                            updateProgressBar(myContext, yourParent, p5, t43, t44, myDialog, 90 + (cellNumber / (joker ? myStep3 * 10 : myStep3)), cellNumber + "/50", joker);
                         }
+                    }
+
+                    for (int lengths = 0; lengths < anagramList.length; lengths++) {
+                        anagramList[lengths].close();
                     }
 
                     if (!joker) {
@@ -1203,9 +1222,9 @@ public class sqliteDB extends SQLiteOpenHelper {
                             suffixValues.put("_after_", columnItem.second);
                             db.insert("suffixes", null, suffixValues);
                         }
-
-                        db.execSQL("UPDATE words SET _serial_ = ((_page_ - 1) * 100) + _position_");
                     }
+
+                    db.execSQL("UPDATE " + (joker ? "blanks" : "words") + " SET _serial_ = ((_page_ - 1) * 50) + _position_");
                     uiThreadRefresh(myContext, yourParent, true);
                     uiThreadBox(joker ? "Prepare blank database" : "Prepare regular database", joker ? "Blank database preparation complete." : "Regular database preparation complete.", myContext, yourParent);
                     db.setTransactionSuccessful();
@@ -1455,6 +1474,12 @@ public class sqliteDB extends SQLiteOpenHelper {
     {
         SQLiteDatabase db = this.getReadableDatabase();
         return db.rawQuery("SELECT DISTINCT(_anagram_) FROM blanks WHERE _length_ = " + letters + " ORDER BY _probability_ DESC", null);
+    }
+
+    public Cursor getAllRegularAnagrams(int letters)
+    {
+        SQLiteDatabase db = this.getReadableDatabase();
+        return db.rawQuery("SELECT DISTINCT(_alphagram_) FROM words WHERE _length_ = " + letters + " ORDER BY _probability_ DESC", null);
     }
 
     public Cursor getCustomQuiz(String customQuery, Context activity, int solvedStatus, String orderBy)
@@ -2361,7 +2386,7 @@ public class sqliteDB extends SQLiteOpenHelper {
         EditText e5 = yourCustomView.findViewById(R.id.edittext22);
         TextView t5 = yourCustomView.findViewById(R.id.textview36);
 
-        e5.setHint("Enter a value between 2 and 58");
+        e5.setHint("Enter a value between 2 and " + getMaximumWordLength());
 
         Spinner s1 = yourCustomView.findViewById(R.id.spinner11);
         List<Pair<String, String>> tagsList = getAllLabels();
