@@ -928,7 +928,7 @@ public class sqliteDB extends SQLiteOpenHelper {
                         ArrayList<String> pageHash = new ArrayList<>();
 
                         for (int lengths = 0; lengths < anagramList.length; lengths++) {
-                            if(pages[lengths] <= positionNumber) {
+                            if (positionNumber <= pages[lengths]) {
                                 int open = (positionNumber - 1) * 50;
                                 int close = Math.min(positionNumber * 50, wordLength[lengths]);
 
@@ -959,10 +959,12 @@ public class sqliteDB extends SQLiteOpenHelper {
                         ArrayList<String> cellHash = new ArrayList<>();
 
                         for (int lengths = 0; lengths < anagramList.length; lengths++) {
-                            if (anagramList[lengths].moveToPosition(cellNumber - 1)) {
-                                do {
-                                    cellHash.add(anagramList[lengths].getString(0));
-                                } while (anagramList[lengths].move(50));
+                            if (cellNumber <= wordLength[lengths]) {
+                                if (anagramList[lengths].moveToPosition(cellNumber - 1)) {
+                                    do {
+                                        cellHash.add(anagramList[lengths].getString(0));
+                                    } while (anagramList[lengths].move(50));
+                                }
                             }
                         }
 
