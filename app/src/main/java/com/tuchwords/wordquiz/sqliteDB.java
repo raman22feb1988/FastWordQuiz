@@ -366,8 +366,7 @@ public class sqliteDB extends SQLiteOpenHelper {
                             }
                             csvWrite.writeNext(arrStr);
                             myLine++;
-                            if (myLine % myStep < 1 || myLine == 1.0)
-                            {
+                            if (myLine % myStep < 1 || myLine == 1.0) {
                                 updateProgressBar(situation, parent, p4, t41, t42, myDialog, myLine / myStep, ((int) myLine) + "/" + curCSV.getCount(), false);
                             }
                         }
@@ -944,7 +943,7 @@ public class sqliteDB extends SQLiteOpenHelper {
                         ContentValues values = new ContentValues();
                         values.put("_page_", positionNumber);
 
-                        success[0] &= db.update(joker ? "blanks" : "words", values, (joker ? "_identity_ IN" : "_alphagram_ IN ") + pageString,
+                        success[0] &= db.update(joker ? "blanks" : "words", values, (joker ? "_anagram_ IN" : "_alphagram_ IN ") + pageString,
                                 new String[] {});
 
                         if (positionNumber % myStep2 < 1 || positionNumber == 1)
@@ -972,7 +971,7 @@ public class sqliteDB extends SQLiteOpenHelper {
                         ContentValues values = new ContentValues();
                         values.put("_position_", cellNumber);
 
-                        success[0] &= db.update(joker ? "blanks" : "words", values, (joker ? "_identity_ IN" : "_alphagram_ IN ") + cellString,
+                        success[0] &= db.update(joker ? "blanks" : "words", values, (joker ? "_anagram_ IN" : "_alphagram_ IN ") + cellString,
                                 new String[] {});
 
                         if (cellNumber % myStep3 < 1 || cellNumber == 1)
