@@ -372,7 +372,7 @@ public class sqliteDB extends SQLiteOpenHelper {
                         }
                         csvWrite.close();
                         curCSV.close();
-                        outputDir.append("\nSaved " + table + " table to " + file.getAbsolutePath() + ".");
+                        outputDir.append("\nSaved ").append(table).append(" table to ").append(file.getAbsolutePath()).append(".");
                         uiThreadBox("Export CSV", "Export CSV complete." + new String(outputDir), situation, parent);
                     }
                 } catch (Exception sqlEx) {
@@ -679,7 +679,7 @@ public class sqliteDB extends SQLiteOpenHelper {
         return chance;
     }
 
-    public int insertWord(Context myContext, boolean yourParent, HashMap<String, String> dictionary, HashMap<String, Integer> anagramsList, HashMap<String, String> lexicon, boolean joker)
+    public void insertWord(Context myContext, boolean yourParent, HashMap<String, String> dictionary, HashMap<String, Integer> anagramsList, HashMap<String, String> lexicon, boolean joker)
     {
         LayoutInflater myInflater = LayoutInflater.from(myContext);
         final View myCustomView = myInflater.inflate(R.layout.progressbar, null);
@@ -695,7 +695,6 @@ public class sqliteDB extends SQLiteOpenHelper {
         myDialog.show();
 
         SQLiteDatabase db = this.getWritableDatabase();
-        final int[] success = {1};
 
         Thread thread5 = new Thread(new Runnable() {
             @Override
@@ -776,9 +775,7 @@ public class sqliteDB extends SQLiteOpenHelper {
                             for (int letterIndex = 0; letterIndex < word.length(); letterIndex++) {
                                 char character = word.charAt(letterIndex);
                                 int ascii = character - 65;
-                                if (used.contains(character)) {
-                                    continue;
-                                } else {
+                                if (!used.contains(character)) {
                                     used.add(character);
                                     String subword = word.substring(0, letterIndex) + word.substring(letterIndex + 1);
                                     char[] subcharacter = subword.toCharArray();
@@ -943,7 +940,7 @@ public class sqliteDB extends SQLiteOpenHelper {
                         ContentValues values = new ContentValues();
                         values.put("_page_", positionNumber);
 
-                        success[0] &= db.update(joker ? "blanks" : "words", values, (joker ? "_anagram_ IN" : "_alphagram_ IN ") + pageString,
+                        db.update(joker ? "blanks" : "words", values, (joker ? "_anagram_ IN" : "_alphagram_ IN ") + pageString,
                                 new String[] {});
 
                         if (positionNumber % myStep2 < 1 || positionNumber == 1)
@@ -971,7 +968,7 @@ public class sqliteDB extends SQLiteOpenHelper {
                         ContentValues values = new ContentValues();
                         values.put("_position_", cellNumber);
 
-                        success[0] &= db.update(joker ? "blanks" : "words", values, (joker ? "_anagram_ IN" : "_alphagram_ IN ") + cellString,
+                        db.update(joker ? "blanks" : "words", values, (joker ? "_anagram_ IN" : "_alphagram_ IN ") + cellString,
                                 new String[] {});
 
                         if (cellNumber % myStep3 < 1 || cellNumber == 1)
@@ -980,8 +977,8 @@ public class sqliteDB extends SQLiteOpenHelper {
                         }
                     }
 
-                    for (int lengths = 0; lengths < anagramList.length; lengths++) {
-                        anagramList[lengths].close();
+                    for (Cursor cursors : anagramList) {
+                        cursors.close();
                     }
 
                     if (!joker) {
@@ -1006,9 +1003,7 @@ public class sqliteDB extends SQLiteOpenHelper {
                         coloursList.put("Removed", white);
                         coloursList.put("", black);
 
-                        Iterator<Map.Entry<String, String>> it = coloursList.entrySet().iterator();
-                        while (it.hasNext()) {
-                            Map.Entry<String, String> enter = it.next();
+                        for (Map.Entry<String, String> enter : coloursList.entrySet()) {
                             String tag = enter.getKey();
                             String tags = coloursList.get(tag);
 
@@ -1239,7 +1234,6 @@ public class sqliteDB extends SQLiteOpenHelper {
         });
 
         thread5.start();
-        return success[0];
     }
 
     public ArrayList<Integer> getZoom(String parentActivity)
@@ -1277,7 +1271,7 @@ public class sqliteDB extends SQLiteOpenHelper {
         return zoomList;
     }
 
-    public long setZoom(String parentActivity, int rows, int dimensions, int font)
+    public void setZoom(String parentActivity, int rows, int dimensions, int font)
     {
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -1298,16 +1292,16 @@ public class sqliteDB extends SQLiteOpenHelper {
         values.put("_size_", font);
 
         if (exists != 0) {
-            return db.update("zoom", values, "_activity_ = ?",
+            db.update("zoom", values, "_activity_ = ?",
                     new String[] {parentActivity});
         }
         else {
             values.put("_activity_", parentActivity);
-            return db.insert("zoom", null, values);
+            db.insert("zoom", null, values);
         }
     }
 
-    public long setMagnify(String parentActivity, int rows, int font)
+    public void setMagnify(String parentActivity, int rows, int font)
     {
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -1327,16 +1321,16 @@ public class sqliteDB extends SQLiteOpenHelper {
         values.put("_size_", font);
 
         if (exists != 0) {
-            return db.update("zoom", values, "_activity_ = ?",
+            db.update("zoom", values, "_activity_ = ?",
                     new String[]{parentActivity});
         }
         else {
             values.put("_activity_", parentActivity);
-            return db.insert("zoom", null, values);
+            db.insert("zoom", null, values);
         }
     }
 
-    public boolean insertLabel(int letters, String label, String orderBy)
+    public void insertLabel(int letters, String label, String orderBy)
     {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -1357,7 +1351,6 @@ public class sqliteDB extends SQLiteOpenHelper {
         contentValues.put("_sort_", orderBy);
 
         db.insert("scores", null, contentValues);
-        return true;
     }
 
     public int[] getCustomScore(String customQuery, int solvedStatus)
@@ -1795,7 +1788,7 @@ public class sqliteDB extends SQLiteOpenHelper {
         }
     }
 
-    public int resetLabel(String label, int lengthIndex, int letters, boolean timeIndex) {
+    public void resetLabel(String label, int lengthIndex, int letters, boolean timeIndex) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -1819,111 +1812,69 @@ public class sqliteDB extends SQLiteOpenHelper {
             whereClause.append("_length_ = ").append(letters);
         }
 
-        return db.update("words", values, new String(whereClause),
+        db.update("words", values, new String(whereClause),
                 new String[] {});
     }
 
-    public int updateCounter(int letters, String label, int counter, int solvedStatus, String orderBy) {
+    public void updateCounter(int letters, String label, int counter, int solvedStatus, String orderBy) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
         values.put(quizCondition(solvedStatus), counter);
 
-        return db.update("scores", values, "_length_ = ? AND _query_ = ? AND _blank_ = ? AND _sort_ = ?",
+        db.update("scores", values, "_length_ = ? AND _query_ = ? AND _blank_ = ? AND _sort_ = ?",
                 new String[] {Integer.toString(letters), label, "0", orderBy});
     }
 
-    public int updatePage(int letters, String label, int counter, int solvedStatus, String orderBy) {
+    public void updatePage(int letters, String label, int counter, int solvedStatus, String orderBy) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
         values.put(reportCondition(solvedStatus), counter);
 
-        return db.update("scores", values, "_length_ = ? AND _query_ = ? AND _blank_ = ? AND _sort_ = ?",
+        db.update("scores", values, "_length_ = ? AND _query_ = ? AND _blank_ = ? AND _sort_ = ?",
                 new String[] {Integer.toString(letters), label, "0", orderBy});
     }
 
-    public int updateTime(ArrayList<String> guesses, double time, int solved) {
+    public void updateTime(ArrayList<String> guesses, double time, boolean submitted, String cardbox) {
         SQLiteDatabase db = this.getWritableDatabase();
+        String guess = (((guesses.toString()).replace("[", "(\"")).replace("]", "\")")).replace(", ", "\", \"");
+        StringBuilder updates = new StringBuilder();
 
-        ContentValues values = new ContentValues();
-        values.put("_time_", time);
-        values.put("_solved_", solved);
-
-        if (solved == 1)
-        {
+        if (submitted) {
             long timestamp = System.currentTimeMillis();
             SimpleDateFormat iso8601Format = new SimpleDateFormat(
                     "yyyy-MM-dd HH:mm:ss");
             String simpleDateFormat = iso8601Format.format(timestamp);
-            values.put("_timestamp_", simpleDateFormat);
+            updates.append("_solved_ = 1, _timestamp_ = \"").append(simpleDateFormat).append("\", ");
         }
 
-        String guess = (((guesses.toString()).replace("[", "(\"")).replace("]", "\")")).replace(", ", "\", \"");
-        return db.update("words", values, "_word_ IN " + guess,
-                new String[] {});
+        if (cardbox != null) {
+            updates.append("_tag_ = \"").append(cardbox).append("\", ");
+        }
+
+        db.execSQL("UPDATE words SET " + new String(updates) + "_time_ = _time_ + " + time + " WHERE _word_ IN " + guess);
     }
 
-    public void updateCustomTime(ArrayList<String> guesses, double time) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        String guess = (((guesses.toString()).replace("[", "(\"")).replace("]", "\")")).replace(", ", "\", \"");
-        db.execSQL("UPDATE words SET _time_ = _time_ + " + time + " WHERE _word_ IN " + guess);
-    }
-
-    public int updateLabel(ArrayList<String> guesses, double time, int solved, String cardbox) {
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        ContentValues values = new ContentValues();
-        values.put("_time_", time);
-        values.put("_solved_", solved);
-        values.put("_tag_", cardbox);
-
-        long timestamp = System.currentTimeMillis();
-        SimpleDateFormat iso8601Format = new SimpleDateFormat(
-                "yyyy-MM-dd HH:mm:ss");
-        String simpleDateFormat = iso8601Format.format(timestamp);
-        values.put("_timestamp_", simpleDateFormat);
-
-        String guess = (((guesses.toString()).replace("[", "(\"")).replace("]", "\")")).replace(", ", "\", \"");
-        return db.update("words", values, "_word_ IN " + guess,
-                new String[] {});
-    }
-
-    public int updateTag(String guess, String tag)
+    public void updateTag(String guess, String tag)
     {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
         values.put("_tag_", tag);
 
-        return db.update("words", values, "_word_ = ?",
+        db.update("words", values, "_word_ = ?",
                 new String[] {guess});
     }
 
-    public int updateWord(String line, String category) {
+    public void updateWord(String line, String category) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
         values.put("_tag_", category);
 
-        return db.update("words", values, "_word_ = ?",
+        db.update("words", values, "_word_ = ?",
                 new String[] {line});
-    }
-
-    public double getTime(String guess)
-    {
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT _time_ FROM words WHERE _word_ = \"" + guess + "\"", null);
-
-        String data = null;
-
-        if (cursor.moveToFirst()) {
-            do {
-                data = cursor.getString(0);
-            } while (cursor.moveToNext());
-        }
-        cursor.close();
-        return Double.parseDouble(data);
     }
 
     public boolean existLabel(int letters, String label, String orderBy)
@@ -2203,7 +2154,7 @@ public class sqliteDB extends SQLiteOpenHelper {
 
         String thirdQuery = " " + argumentQuery + " ";
         String[] lastQuery = thirdQuery.split("'");
-        ArrayList<String> finalQuery = new ArrayList();
+        ArrayList<String> finalQuery = new ArrayList<>();
         for (int columnsArray = 0; columnsArray < lastQuery.length; columnsArray++)
         {
             finalQuery.add(columnsArray % 2 == 0 ? lastQuery[columnsArray] : secondQuery[columnsArray]);
@@ -2212,11 +2163,10 @@ public class sqliteDB extends SQLiteOpenHelper {
         ultimateQuery.append(finalQuery.get(0));
         for (int rowName = 1; rowName < finalQuery.size(); rowName++)
         {
-            ultimateQuery.append("'" + finalQuery.get(rowName));
+            ultimateQuery.append("'").append(finalQuery.get(rowName));
         }
-        String returnQuery = (new String(ultimateQuery)).trim();
 
-        return returnQuery;
+        return (new String(ultimateQuery)).trim();
     }
 
     public ArrayList<String> extract(String jumbleList, int start, String orderBy)
@@ -2306,7 +2256,7 @@ public class sqliteDB extends SQLiteOpenHelper {
         return wordList;
     }
 
-    public int trackWrongAnswers(String wrongAlphagram, String wrongWord)
+    public void trackWrongAnswers(String wrongAlphagram, String wrongWord)
     {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT _incorrect_, _wrong_ FROM words WHERE _alphagram_ = \"" + wrongAlphagram + "\"", null);
@@ -2328,7 +2278,7 @@ public class sqliteDB extends SQLiteOpenHelper {
             values.put("_wrong_", second.length() == 0 ? wrongWord : second + ", " + wrongWord);
         }
 
-        return db.update("words", values, "_alphagram_ = ?",
+        db.update("words", values, "_alphagram_ = ?",
                 new String[] {wrongAlphagram});
     }
 
@@ -2418,7 +2368,7 @@ public class sqliteDB extends SQLiteOpenHelper {
         lengthList.add(0, "Specific word length");
         lengthList.add(1, "All word lengths");
 
-        ArrayAdapter<String> lengthAdapter = new ArrayAdapter(theContext, android.R.layout.simple_spinner_item, lengthList);
+        ArrayAdapter<String> lengthAdapter = new ArrayAdapter<>(theContext, android.R.layout.simple_spinner_item, lengthList);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s2.setAdapter(lengthAdapter);
 
@@ -2448,7 +2398,7 @@ public class sqliteDB extends SQLiteOpenHelper {
         timeList.add(0, "Do not reset time");
         timeList.add(1, "Reset time");
 
-        ArrayAdapter<String> timeAdapter = new ArrayAdapter(theContext, android.R.layout.simple_spinner_item, timeList);
+        ArrayAdapter<String> timeAdapter = new ArrayAdapter<>(theContext, android.R.layout.simple_spinner_item, timeList);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s3.setAdapter(timeAdapter);
 
@@ -2756,7 +2706,7 @@ public class sqliteDB extends SQLiteOpenHelper {
 
     public List<Pair<String, String>> getAllPrefixes()
     {
-        ArrayList<Pair<String, String>> prefixesList = new ArrayList();
+        ArrayList<Pair<String, String>> prefixesList = new ArrayList<>();
 
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT _prefix_, _before_ FROM prefixes ORDER BY _prefix_", null);
@@ -2773,7 +2723,7 @@ public class sqliteDB extends SQLiteOpenHelper {
 
     public List<Pair<String, String>> getAllSuffixes()
     {
-        ArrayList<Pair<String, String>> suffixesList = new ArrayList();
+        ArrayList<Pair<String, String>> suffixesList = new ArrayList<>();
 
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT _suffix_, _after_ FROM suffixes ORDER BY _suffix_", null);
@@ -2861,7 +2811,7 @@ public class sqliteDB extends SQLiteOpenHelper {
             e9.setHint("(Before all first letters)");
         }
 
-        ArrayAdapter<String> beforeAdapter = new ArrayAdapter(theContext, android.R.layout.simple_spinner_item, beforeList);
+        ArrayAdapter<String> beforeAdapter = new ArrayAdapter<>(theContext, android.R.layout.simple_spinner_item, beforeList);
         beforeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s6.setAdapter(beforeAdapter);
 
@@ -2876,7 +2826,7 @@ public class sqliteDB extends SQLiteOpenHelper {
             }
         });
 
-        ArrayAdapter<String> afterAdapter = new ArrayAdapter(theContext, android.R.layout.simple_spinner_item, afterList);
+        ArrayAdapter<String> afterAdapter = new ArrayAdapter<>(theContext, android.R.layout.simple_spinner_item, afterList);
         afterAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s7.setAdapter(afterAdapter);
 
@@ -2908,11 +2858,11 @@ public class sqliteDB extends SQLiteOpenHelper {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         if (suffix)
                         {
-                            boolean transaction = addPrefix((variable[0] == 0 ? "" : (variable[0] == 1 ? "-" : "+")) + ((e8.getText()).toString()).toUpperCase(), variable[1] == 0 ? "" : ((e9.getText()).toString()).toUpperCase(), suffix);
+                            addPrefix((variable[0] == 0 ? "" : (variable[0] == 1 ? "-" : "+")) + ((e8.getText()).toString()).toUpperCase(), variable[1] == 0 ? "" : ((e9.getText()).toString()).toUpperCase(), suffix);
                         }
                         else
                         {
-                            boolean transaction = addPrefix(((e8.getText()).toString()).toUpperCase() + (variable[0] == 0 ? "" : (variable[0] == 1 ? "-" : "+")), variable[1] == 0 ? "" : ((e9.getText()).toString()).toUpperCase(), suffix);
+                            addPrefix(((e8.getText()).toString()).toUpperCase() + (variable[0] == 0 ? "" : (variable[0] == 1 ? "-" : "+")), variable[1] == 0 ? "" : ((e9.getText()).toString()).toUpperCase(), suffix);
                         }
 
                         if (parent && mode == 1) {
@@ -2984,7 +2934,7 @@ public class sqliteDB extends SQLiteOpenHelper {
             e11.setHint("(Before all first letters)");
         }
 
-        ArrayAdapter<String> queryAdapter = new ArrayAdapter(theContext, android.R.layout.simple_spinner_item, queryList);
+        ArrayAdapter<String> queryAdapter = new ArrayAdapter<>(theContext, android.R.layout.simple_spinner_item, queryList);
         queryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s8.setAdapter(queryAdapter);
 
@@ -3022,7 +2972,7 @@ public class sqliteDB extends SQLiteOpenHelper {
             }
         });
 
-        ArrayAdapter<String> beforeAdapter = new ArrayAdapter(theContext, android.R.layout.simple_spinner_item, beforeList);
+        ArrayAdapter<String> beforeAdapter = new ArrayAdapter<>(theContext, android.R.layout.simple_spinner_item, beforeList);
         beforeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s9.setAdapter(beforeAdapter);
 
@@ -3037,7 +2987,7 @@ public class sqliteDB extends SQLiteOpenHelper {
             }
         });
 
-        ArrayAdapter<String> afterAdapter = new ArrayAdapter(theContext, android.R.layout.simple_spinner_item, afterList);
+        ArrayAdapter<String> afterAdapter = new ArrayAdapter<>(theContext, android.R.layout.simple_spinner_item, afterList);
         afterAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s10.setAdapter(afterAdapter);
 
@@ -3069,11 +3019,11 @@ public class sqliteDB extends SQLiteOpenHelper {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         if (suffix)
                         {
-                            int result = changePrefix((insertList.get(variable[0])).first, (insertList.get(variable[0])).second, (variable[1] == 0 ? "" : (variable[1] == 1 ? "-" : "+")) + ((e10.getText()).toString()).toUpperCase(), variable[2] == 0 ? "" : ((e11.getText()).toString()).toUpperCase(), suffix);
+                            changePrefix((insertList.get(variable[0])).first, (insertList.get(variable[0])).second, (variable[1] == 0 ? "" : (variable[1] == 1 ? "-" : "+")) + ((e10.getText()).toString()).toUpperCase(), variable[2] == 0 ? "" : ((e11.getText()).toString()).toUpperCase(), suffix);
                         }
                         else
                         {
-                            int result = changePrefix((insertList.get(variable[0])).first, (insertList.get(variable[0])).second, ((e10.getText()).toString()).toUpperCase() + (variable[1] == 0 ? "" : (variable[1] == 1 ? "-" : "+")), variable[2] == 0 ? "" : ((e11.getText()).toString()).toUpperCase(), suffix);
+                            changePrefix((insertList.get(variable[0])).first, (insertList.get(variable[0])).second, ((e10.getText()).toString()).toUpperCase() + (variable[1] == 0 ? "" : (variable[1] == 1 ? "-" : "+")), variable[2] == 0 ? "" : ((e11.getText()).toString()).toUpperCase(), suffix);
                         }
 
                         if (parent && mode == 1) {
@@ -3121,7 +3071,7 @@ public class sqliteDB extends SQLiteOpenHelper {
             t32.setText("Before first letters:");
         }
 
-        ArrayAdapter<String> queryAdapter = new ArrayAdapter(theContext, android.R.layout.simple_spinner_item, queryList);
+        ArrayAdapter<String> queryAdapter = new ArrayAdapter<>(theContext, android.R.layout.simple_spinner_item, queryList);
         queryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s11.setAdapter(queryAdapter);
 
@@ -3157,11 +3107,11 @@ public class sqliteDB extends SQLiteOpenHelper {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         if (suffix)
                         {
-                            int result = deletePrefix((insertList.get(variable[0])).first, (insertList.get(variable[0])).second, suffix);
+                            deletePrefix((insertList.get(variable[0])).first, (insertList.get(variable[0])).second, suffix);
                         }
                         else
                         {
-                            int result = deletePrefix((insertList.get(variable[0])).first, (insertList.get(variable[0])).second, suffix);
+                            deletePrefix((insertList.get(variable[0])).first, (insertList.get(variable[0])).second, suffix);
                         }
 
                         if (parent && mode == 1) {
@@ -3173,7 +3123,7 @@ public class sqliteDB extends SQLiteOpenHelper {
         dialog.show();
     }
 
-    public boolean addPrefix(String prefix, String before, boolean suffix)
+    public void addPrefix(String prefix, String before, boolean suffix)
     {
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -3182,23 +3132,22 @@ public class sqliteDB extends SQLiteOpenHelper {
         contentValues.put(suffix ? "_after_" : "_before_", before);
 
         db.insert(suffix ? "suffixes" : "prefixes", null, contentValues);
-        return true;
     }
 
-    public int changePrefix(String myPrefix, String mySuffix, String prefix, String before, boolean suffix) {
+    public void changePrefix(String myPrefix, String mySuffix, String prefix, String before, boolean suffix) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
         values.put(suffix ? "_suffix_" : "_prefix_", prefix);
         values.put(suffix ? "_after_" : "_before_", before);
 
-        return db.update(suffix ? "suffixes" : "prefixes", values, suffix ? "_suffix_ = ? AND _after_ = ?" : "_prefix_ = ? AND _before_ = ?",
+        db.update(suffix ? "suffixes" : "prefixes", values, suffix ? "_suffix_ = ? AND _after_ = ?" : "_prefix_ = ? AND _before_ = ?",
                 new String[] {myPrefix, mySuffix});
     }
 
-    public int deletePrefix(String myPrefix, String mySuffix, boolean suffix) {
+    public void deletePrefix(String myPrefix, String mySuffix, boolean suffix) {
         SQLiteDatabase db = this.getWritableDatabase();
-        return db.delete(suffix ? "suffixes" : "prefixes", suffix ? "_suffix_ = ? AND _after_ = ?" : "_prefix_ = ? AND _before_ = ?",
+        db.delete(suffix ? "suffixes" : "prefixes", suffix ? "_suffix_ = ? AND _after_ = ?" : "_prefix_ = ? AND _before_ = ?",
                 new String[] {myPrefix, mySuffix});
     }
 
@@ -3215,7 +3164,7 @@ public class sqliteDB extends SQLiteOpenHelper {
                 .setView(yourCustomView)
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        int failure = deleteTable(theTable);
+                        deleteTable(theTable);
                         if (theTable.equals("colours")) {
                             refresh(theContext, parent);
                         } else {
@@ -3233,10 +3182,10 @@ public class sqliteDB extends SQLiteOpenHelper {
         dialog.show();
     }
 
-    public int deleteTable(String myTable)
+    public void deleteTable(String myTable)
     {
         SQLiteDatabase db = this.getWritableDatabase();
-        return db.delete(myTable, null, null);
+        db.delete(myTable, null, null);
     }
 
     public String getFullDetails(String myGuess)

@@ -88,18 +88,16 @@ public class Report extends AppCompatActivity {
 
     // Declare the DrawerLayout, NavigationView and Toolbar
     private DrawerLayout drawerLayout;
-    private NavigationView navigationView;
-    private Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.report);
 
-        // Initialize the DrawerLayout, Toolbar and NavigationView
+        // Initialize the DrawerLayout, NavigationView and Toolbar
         drawerLayout = findViewById(R.id.drawer_layout_report);
-        toolbar = findViewById(R.id.toolbar_report);
-        navigationView = findViewById(R.id.nav_view_report);
+        NavigationView navigationView = findViewById(R.id.nav_view_report);
+        Toolbar toolbar = findViewById(R.id.toolbar_report);
 
         pref = getApplicationContext().getSharedPreferences("AppData", 0);
         boolean prepared = pref.getBoolean("prepared", false);
@@ -470,12 +468,12 @@ public class Report extends AppCompatActivity {
                 s16.setVisibility(View.GONE);
 
                 Spinner s17 = yourCustomView.findViewById(R.id.spinner29);
-                ArrayAdapter<String> orderAdapter = new ArrayAdapter(Report.this, android.R.layout.simple_spinner_item, allColumns);
+                ArrayAdapter<String> orderAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, allColumns);
                 orderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 s17.setAdapter(orderAdapter);
 
                 Spinner s18 = yourCustomView.findViewById(R.id.spinner30);
-                ArrayAdapter<String> sortAdapter = new ArrayAdapter(Report.this, android.R.layout.simple_spinner_item, sort);
+                ArrayAdapter<String> sortAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, sort);
                 sortAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 s18.setAdapter(sortAdapter);
 
@@ -506,7 +504,7 @@ public class Report extends AppCompatActivity {
 
                 final int[] solved = {0};
                 Spinner s6 = yourCustomView.findViewById(R.id.spinner7);
-                ArrayAdapter<String> solvedAdapter = new ArrayAdapter(Report.this, android.R.layout.simple_spinner_item, solvedList);
+                ArrayAdapter<String> solvedAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, solvedList);
                 solvedAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 s6.setAdapter(solvedAdapter);
 
@@ -584,12 +582,12 @@ public class Report extends AppCompatActivity {
         s10.setVisibility(View.GONE);
 
         Spinner s11 = yourCustomView.findViewById(R.id.spinner23);
-        ArrayAdapter<String> orderAdapter = new ArrayAdapter(Report.this, android.R.layout.simple_spinner_item, allColumns);
+        ArrayAdapter<String> orderAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, allColumns);
         orderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s11.setAdapter(orderAdapter);
 
         Spinner s12 = yourCustomView.findViewById(R.id.spinner24);
-        ArrayAdapter<String> sortAdapter = new ArrayAdapter(Report.this, android.R.layout.simple_spinner_item, sort);
+        ArrayAdapter<String> sortAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, sort);
         sortAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s12.setAdapter(sortAdapter);
 
@@ -620,7 +618,7 @@ public class Report extends AppCompatActivity {
 
         final int[] solved = {0};
         Spinner s4 = yourCustomView.findViewById(R.id.spinner5);
-        ArrayAdapter<String> solvedAdapter = new ArrayAdapter(Report.this, android.R.layout.simple_spinner_item, solvedList);
+        ArrayAdapter<String> solvedAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, solvedList);
         solvedAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s4.setAdapter(solvedAdapter);
 
@@ -641,7 +639,7 @@ public class Report extends AppCompatActivity {
         lengthList.add(0, "Specific word length");
         lengthList.add(1, "All word lengths");
 
-        ArrayAdapter<String> lengthAdapter = new ArrayAdapter(Report.this, android.R.layout.simple_spinner_item, lengthList);
+        ArrayAdapter<String> lengthAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, lengthList);
         lengthAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s9.setAdapter(lengthAdapter);
 
@@ -706,12 +704,12 @@ public class Report extends AppCompatActivity {
         s13.setVisibility(View.GONE);
 
         Spinner s14 = yourCustomView.findViewById(R.id.spinner26);
-        ArrayAdapter<String> orderAdapter = new ArrayAdapter(Report.this, android.R.layout.simple_spinner_item, allColumns);
+        ArrayAdapter<String> orderAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, allColumns);
         orderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s14.setAdapter(orderAdapter);
 
         Spinner s15 = yourCustomView.findViewById(R.id.spinner27);
-        ArrayAdapter<String> sortAdapter = new ArrayAdapter(Report.this, android.R.layout.simple_spinner_item, sort);
+        ArrayAdapter<String> sortAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, sort);
         sortAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s15.setAdapter(sortAdapter);
 
@@ -742,7 +740,7 @@ public class Report extends AppCompatActivity {
 
         final int[] solved = {0};
         Spinner s5 = yourCustomView.findViewById(R.id.spinner6);
-        ArrayAdapter<String> solvedAdapter = new ArrayAdapter(Report.this, android.R.layout.simple_spinner_item, solvedList);
+        ArrayAdapter<String> solvedAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, solvedList);
         solvedAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s5.setAdapter(solvedAdapter);
 
@@ -786,7 +784,7 @@ public class Report extends AppCompatActivity {
         lengthList.add(0, "Specific word length");
         lengthList.add(1, "All word lengths");
 
-        ArrayAdapter<String> lengthAdapter = new ArrayAdapter(Report.this, android.R.layout.simple_spinner_item, lengthList);
+        ArrayAdapter<String> lengthAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, lengthList);
         lengthAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s7.setAdapter(lengthAdapter);
 
@@ -867,7 +865,6 @@ public class Report extends AppCompatActivity {
     public void nextWord()
     {
         started = true;
-
         b1.setEnabled(true);
         b2.setEnabled(true);
         b7.setEnabled(true);
@@ -1067,7 +1064,7 @@ public class Report extends AppCompatActivity {
                         }
                         else
                         {
-                            long magnify = db.setMagnify("Report", new_rows, new_font);
+                            db.setMagnify("Report", new_rows, new_font);
                             refresh();
                         }
                     }
@@ -1228,9 +1225,7 @@ public class Report extends AppCompatActivity {
 
                         for (int letterIndex = 0; letterIndex < t[0].length(); letterIndex++) {
                             char character = t[0].charAt(letterIndex);
-                            if (used.contains(character)) {
-                                continue;
-                            } else {
+                            if (!used.contains(character)) {
                                 used.add(character);
                                 String subword = t[0].substring(0, letterIndex) + t[0].substring(letterIndex + 1);
                                 char[] subcharacter = subword.toCharArray();
@@ -1330,12 +1325,12 @@ public class Report extends AppCompatActivity {
         s19.setVisibility(View.GONE);
 
         Spinner s20 = yourCustomView.findViewById(R.id.spinner32);
-        ArrayAdapter<String> orderAdapter = new ArrayAdapter(Report.this, android.R.layout.simple_spinner_item, allColumns);
+        ArrayAdapter<String> orderAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, allColumns);
         orderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s20.setAdapter(orderAdapter);
 
         Spinner s21 = yourCustomView.findViewById(R.id.spinner33);
-        ArrayAdapter<String> sortAdapter = new ArrayAdapter(Report.this, android.R.layout.simple_spinner_item, sort);
+        ArrayAdapter<String> sortAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, sort);
         sortAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s21.setAdapter(sortAdapter);
 
@@ -1366,7 +1361,7 @@ public class Report extends AppCompatActivity {
 
         final int[] solved = {0};
         Spinner s8 = yourCustomView.findViewById(R.id.spinner10);
-        ArrayAdapter<String> solvedAdapter = new ArrayAdapter(Report.this, android.R.layout.simple_spinner_item, solvedList);
+        ArrayAdapter<String> solvedAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, solvedList);
         solvedAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s8.setAdapter(solvedAdapter);
 
@@ -1386,96 +1381,110 @@ public class Report extends AppCompatActivity {
                 .setView(yourCustomView)
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        String letter = (((e10.getText()).toString()).trim()).toUpperCase();
-                        boolean flag = false;
-                        for (int digits = 0; digits < letter.length(); digits++) {
-                            int flags = (int) letter.charAt(digits);
-                            if (flags < 65 || flags > 90) {
-                                flag = true;
-                                break;
-                            }
-                        }
-
-                        String digit = (e11.getText()).toString();
-                        int blanks = (digit.length() == 0 ? 0 : Integer.parseInt(digit));
-
-                        if (flag) {
-                            Toast.makeText(Report.this, "Letters field can contain only letters", Toast.LENGTH_LONG).show();
-                            getAllSubanagrams(subanagram);
-                        }
-                        else {
-                            StringBuilder theQuery = new StringBuilder();
-
-                            if (subanagram) {
-                                int[] occurrence = new int[26];
-                                for (int myRadix = 0; myRadix < letter.length(); myRadix++) {
-                                    char theCharacter = letter.charAt(myRadix);
-                                    occurrence[theCharacter - 65]++;
-                                }
-
-                                for (int theRadix = 0; theRadix < 26; theRadix++) {
-                                    char occurrences = (char) (theRadix + 97);
-                                    theQuery.append("_no_").append(occurrences).append("_ <= ").append(occurrence[theRadix] + blanks).append(" AND ");
-                                }
-
-                                for (int myIndex = 0; myIndex < 26; myIndex++) {
-                                    char occurrences = (char) (myIndex + 97);
-                                    theQuery.append(myIndex == 0 ? "" : " + ").append("ABS(_no_").append(occurrences).append("_ - ").append(occurrence[myIndex]).append(")");
-                                }
-                                theQuery.append(" <= ").append((2 * blanks) + letter.length()).append(" - _length_");
-                            } else {
-                                char[] myCharacter = letter.toCharArray();
-                                Arrays.sort(myCharacter);
-                                StringBuilder empties = new StringBuilder();
-                                for (char myLetter : myCharacter) {
-                                    empties.append("%").append(myLetter);
-                                }
-                                empties.append("%");
-                                String empty = new String(empties);
-                                theQuery.append("_length_ = ").append(letter.length() + blanks).append(" AND _alphagram_ LIKE '").append(empty).append("'");
-                            }
-
-                            String extra = ((e12.getText()).toString()).replace("\"", "'");
-                            if (extra.length() > 0)
-                            {
-                                theQuery.append(" AND (").append(c4.isChecked() ? db.addUnderscores(extra) : extra).append(")");
-                            }
-
-                            String customQuery = new String(theQuery);
-                            String subanagramIndex = sortBy(sortIndex);
-                            Cursor resultSet = db.getSqlQuery(customQuery, Report.this, solved[0], subanagramIndex);
-
-                            if (resultSet != null) {
-                                label = customQuery;
-                                letters = 0;
-                                solvedStatus = solved[0];
-                                orderBy = subanagramIndex;
-
-                                closeCursor();
-                                anagrams = resultSet;
-                                words = anagrams.getCount();
-
-                                boolean exists = db.existLabel(letters, label, orderBy);
-
-                                if (!exists) {
-                                    counter = 0;
-                                    db.insertLabel(letters, label, orderBy);
-                                } else {
-                                    counter = db.getPage(letters, label, solvedStatus, orderBy);
-                                }
-
-                                int apex = (words - 1) / rows;
-                                if (counter > apex && words > 0) {
-                                    counter = apex;
-                                    db.updatePage(letters, label, counter, solvedStatus, orderBy);
-                                }
-
-                                nextWord();
-                            }
-                        }
+                        subanagrams((((e10.getText()).toString()).trim()).toUpperCase(), (e11.getText()).toString(), subanagram, ((e12.getText()).toString()).replace("\"", "'"), c4.isChecked(), sortIndex, solved, true);
                     }
                 }).create();
         dialog.show();
+    }
+
+    public void subanagrams(String letterSequence, String digit, boolean subanagram, String extra, boolean autoUnderscore, int[] sortIndex, int[] solved, boolean extraSql) {
+        boolean flag = false;
+        int blanks = 0;
+        for (int digits = 0; digits < letterSequence.length(); digits++) {
+            int flags = (int) letterSequence.charAt(digits);
+            if (flags == 46) {
+                blanks++;
+            }
+            else if (flags < 65 || flags > 90) {
+                flag = true;
+                break;
+            }
+        }
+
+        blanks += (digit.length() == 0 ? 0 : Integer.parseInt(digit));
+
+        if (flag && extraSql) {
+            Toast.makeText(Report.this, "Letters field can contain only letters and full stops for blanks", Toast.LENGTH_LONG).show();
+            getAllSubanagrams(subanagram);
+        }
+        else {
+            String letter;
+            StringBuilder theQuery = new StringBuilder();
+
+            if (flag) {
+                letter = "";
+                blanks = 0;
+            }
+            else {
+                letter = letterSequence.replace(".", "");
+            }
+
+            if (subanagram) {
+                int[] occurrence = new int[26];
+                for (int myRadix = 0; myRadix < letter.length(); myRadix++) {
+                    char theCharacter = letter.charAt(myRadix);
+                    occurrence[theCharacter - 65]++;
+                }
+
+                for (int theRadix = 0; theRadix < 26; theRadix++) {
+                    char occurrences = (char) (theRadix + 97);
+                    theQuery.append("_no_").append(occurrences).append("_ <= ").append(occurrence[theRadix] + blanks).append(" AND ");
+                }
+
+                for (int myIndex = 0; myIndex < 26; myIndex++) {
+                    char occurrences = (char) (myIndex + 97);
+                    theQuery.append(myIndex == 0 ? "" : " + ").append("ABS(_no_").append(occurrences).append("_ - ").append(occurrence[myIndex]).append(")");
+                }
+                theQuery.append(" <= ").append((2 * blanks) + letter.length()).append(" - _length_");
+            } else {
+                char[] myCharacter = letter.toCharArray();
+                Arrays.sort(myCharacter);
+                StringBuilder empties = new StringBuilder();
+                for (char myLetter : myCharacter) {
+                    empties.append("%").append(myLetter);
+                }
+                empties.append("%");
+                String empty = new String(empties);
+                theQuery.append("_length_ = ").append(letter.length() + blanks).append(" AND _alphagram_ LIKE '").append(empty).append("'");
+            }
+
+            if (extra.length() > 0)
+            {
+                theQuery.append(" AND (").append(autoUnderscore ? db.addUnderscores(extra) : extra).append(")");
+            }
+
+            String customQuery = new String(theQuery);
+            String subanagramIndex = sortBy(sortIndex);
+            Cursor resultSet = db.getSqlQuery(customQuery, Report.this, solved[0], subanagramIndex);
+
+            if (resultSet != null) {
+                label = customQuery;
+                letters = 0;
+                solvedStatus = solved[0];
+                orderBy = subanagramIndex;
+
+                closeCursor();
+                anagrams = resultSet;
+                words = anagrams.getCount();
+
+                boolean exists = db.existLabel(letters, label, orderBy);
+
+                if (!exists) {
+                    counter = 0;
+                    db.insertLabel(letters, label, orderBy);
+                } else {
+                    counter = db.getPage(letters, label, solvedStatus, orderBy);
+                }
+
+                int apex = (words - 1) / rows;
+                if (counter > apex && words > 0) {
+                    counter = apex;
+                    db.updatePage(letters, label, counter, solvedStatus, orderBy);
+                }
+
+                nextWord();
+            }
+        }
     }
 
     public String sortBy(int[] selection) {
