@@ -1119,9 +1119,7 @@ public class MainActivity extends AppCompatActivity {
         b6.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                cumulativeTime(null, false, null);
-                closeCursor();
-                finish();
+                terminate();
             }
         });
 
@@ -1920,6 +1918,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onBackPressed() {
+        terminate();
+    }
+
+    public void terminate() {
         cumulativeTime(null, false, null);
         closeCursor();
         finish();
