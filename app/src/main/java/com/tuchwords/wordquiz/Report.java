@@ -1224,16 +1224,22 @@ public class Report extends AppCompatActivity {
             char character = location.charAt(1);
             String word = ((character == 'f') ? location.substring(25, location.length() - 11) : location.substring(3, location.length() - 4));
 
-            int myBlank = (column * columns) + 5;
-            String myLocation = jumbles.get(myBlank);
-            char myAlphabet = myLocation.charAt(1);
-            String blankAnagram = ((myAlphabet == 'f') ? myLocation.substring(25, myLocation.length() - 11) : myLocation.substring(3, myLocation.length() - 4));
-
             int situation = column * columns;
             String index = jumbles.get(situation);
             char ch = index.charAt(0);
             int serial = ((ch == '<') ? Integer.parseInt(index.substring(22, index.length() - 7)) : Integer.parseInt(index));
-            db.updateTag(blank ? word + " " + blankAnagram : word, tag, blank);
+
+            if (blank) {
+                int myBlank = (column * columns) + 5;
+                String myLocation = jumbles.get(myBlank);
+                char myAlphabet = myLocation.charAt(1);
+                String blankAnagram = ((myAlphabet == 'f') ? myLocation.substring(25, myLocation.length() - 11) : myLocation.substring(3, myLocation.length() - 4));
+                db.updateTag(word + " " + blankAnagram, tag, true);
+            }
+            else {
+                db.updateTag(word, tag, false);
+            }
+
             ArrayList<String> wordsList = db.extract("(\"" + word + "\")", serial, orderBy, blank);
             for (int cell = 0; cell < columns; cell++)
             {
@@ -1251,13 +1257,19 @@ public class Report extends AppCompatActivity {
         String location = jumbles.get(myColour);
         char character = location.charAt(1);
         String word = ((character == 'f') ? location.substring(25, location.length() - 11) : location.substring(3, location.length() - 4));
+        ArrayList<String> hook;
 
-        int myBlank = (column * columns) + 5;
-        String myLocation = jumbles.get(myBlank);
-        char myAlphabet = myLocation.charAt(1);
-        String blankAnagram = ((myAlphabet == 'f') ? myLocation.substring(25, myLocation.length() - 11) : myLocation.substring(3, myLocation.length() - 4));
+        if (blank) {
+            int myBlank = (column * columns) + 5;
+            String myLocation = jumbles.get(myBlank);
+            char myAlphabet = myLocation.charAt(1);
+            String blankAnagram = ((myAlphabet == 'f') ? myLocation.substring(25, myLocation.length() - 11) : myLocation.substring(3, myLocation.length() - 4));
+            hook = db.getDefinition(word + " " + blankAnagram, true);
+        }
+        else {
+            hook = db.getDefinition(word, false);
+        }
 
-        ArrayList<String> hook = db.getDefinition(blank ? word + " " + blankAnagram : word, blank);
         String meaning = hook.get(0);
         String back = hook.get(1);
         String front = hook.get(2);
