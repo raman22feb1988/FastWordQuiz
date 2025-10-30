@@ -17,7 +17,9 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.Html;
+import android.text.TextWatcher;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -62,12 +64,17 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<String> aggregate;
     ArrayList<String> sort;
     ArrayList<String> allColumns;
+    ArrayList<String> blankColumns;
+    ArrayList<String> blankList;
+    ArrayList<String> jokerList;
+    HashMap<String, ArrayList<Integer>> grid;
     CustomAdapter cusadapter;
     SharedPreferences pref;
 
     int mode = 0;
     long begin = 0;
-    ArrayList<String> replies = new ArrayList<>();
+    HashSet<String> replies = new HashSet<>();
+    ArrayList<String> identities = new ArrayList<>();
     String ultimate;
 
     TextView t1;
@@ -93,11 +100,13 @@ public class MainActivity extends AppCompatActivity {
     int score;
     int counter;
     int number;
+    boolean blank;
 
     int rows;
     int columns;
     int font;
     int maximumWordLength;
+    int maximumBlankLength;
 
     // Declare the DrawerLayout, NavigationView and Toolbar
     private DrawerLayout drawerLayout;
@@ -203,6 +212,11 @@ public class MainActivity extends AppCompatActivity {
                             }
                         });
 
+                        Spinner s24 = yourCustomView2.findViewById(R.id.spinner36);
+                        ArrayAdapter<String> emptyAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, blankList);
+                        emptyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                        s24.setAdapter(emptyAdapter);
+
                         final int[] sortIndex = new int[3];
                         Spinner s16 = yourCustomView2.findViewById(R.id.spinner28);
                         ArrayAdapter<String> aggregateAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, aggregate);
@@ -212,6 +226,8 @@ public class MainActivity extends AppCompatActivity {
                         Spinner s17 = yourCustomView2.findViewById(R.id.spinner29);
                         ArrayAdapter<String> orderAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, allColumns);
                         orderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                        ArrayAdapter<String> ordersAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, blankColumns);
+                        ordersAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                         s17.setAdapter(orderAdapter);
 
                         Spinner s18 = yourCustomView2.findViewById(R.id.spinner30);
@@ -287,9 +303,10 @@ public class MainActivity extends AppCompatActivity {
                                     public void onClick(DialogInterface dialog, int whichButton) {
                                         String temporaryQuery = ((e7.getText()).toString()).replace("\"", "'");
                                         String customQuery = (temporaryQuery.length() == 0 ? "1" : temporaryQuery);
-                                        String orderIndex = sortBy(sortIndex);
+                                        boolean wildIndex = (s24.getSelectedItemPosition() > 0);
+                                        String orderIndex = sortBy(sortIndex, wildIndex);
                                         String processingQuery = (c2.isChecked() ? db.addUnderscores(customQuery) : customQuery);
-                                        Cursor resultSet = db.getCustomQuiz(processingQuery, MainActivity.this, solved[0], orderIndex);
+                                        Cursor resultSet = db.getCustomQuiz(processingQuery, MainActivity.this, solved[0], orderIndex, blank);
 
                                         if (resultSet != null) {
                                             label = processingQuery;
@@ -298,27 +315,28 @@ public class MainActivity extends AppCompatActivity {
                                             mode = 0;
                                             solvedStatus = solved[0];
                                             orderBy = orderIndex;
+                                            blank = wildIndex;
 
                                             closeCursor();
                                             anagrams = resultSet;
                                             words = anagrams.getCount();
-                                            int[] pair1 = db.getCustomScore(label, solved[0]);
+                                            int[] pair1 = db.getCustomScore(label, solved[0], blank);
                                             score = pair1[0];
                                             number = pair1[1];
 
-                                            boolean exists = db.existLabel(letters, label, orderBy);
+                                            boolean exists = db.existLabel(letters, label, orderBy, blank);
 
                                             if (!exists) {
                                                 counter = 0;
-                                                db.insertLabel(letters, label, orderBy);
+                                                db.insertLabel(letters, label, orderBy, blank);
                                             } else {
-                                                counter = db.getCounter(letters, label, solvedStatus, orderBy);
+                                                counter = db.getCounter(letters, label, solvedStatus, orderBy, blank);
                                             }
 
                                             int highest = (words - 1) / (rows * columns);
                                             if (counter > highest && words > 0) {
                                                 counter = highest;
-                                                db.updateCounter(letters, label, counter, solvedStatus, orderBy);
+                                                db.updateCounter(letters, label, counter, solvedStatus, orderBy, blank);
                                             }
 
                                             nextWord();
@@ -326,6 +344,26 @@ public class MainActivity extends AppCompatActivity {
                                     }
                                 }).create();
                         dialog2.show();
+
+                        s24.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                            @Override
+                            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                                dialog2.setTitle((i == 0) ? "SELECT DISTINCT(alphagram) FROM words WHERE" : "SELECT DISTINCT(anagram) FROM blanks WHERE");
+
+                                if (i == 0) {
+                                    s17.setAdapter(orderAdapter);
+                                    s17.setSelection(6);
+                                }
+                                else {
+                                    s17.setAdapter(ordersAdapter);
+                                    s17.setSelection(8);
+                                }
+                            }
+
+                            @Override
+                            public void onNothingSelected(AdapterView<?> adapterView) {
+                            }
+                        });
                         break;
                     case R.id.button26:
                         // Show a Toast message for the View all tag colours item
@@ -382,7 +420,7 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     case R.id.button39:
                         // Show a Toast message for the Reset words by tag item
-                        db.resetByLabel(MainActivity.this, true);
+                        db.resetByLabel(MainActivity.this, true, blankList, maximumWordLength, maximumBlankLength);
                         break;
                     case R.id.button41:
                         // Show a Toast message for the Add new tag item
@@ -530,7 +568,8 @@ public class MainActivity extends AppCompatActivity {
         rows = dimensions.get(0);
         columns = dimensions.get(1);
         font = dimensions.get(2);
-        maximumWordLength = db.getMaximumWordLength();
+        maximumWordLength = db.getMaximumWordLength(false);
+        maximumBlankLength = db.getMaximumWordLength(true);
 
         solvedList = new ArrayList<>();
         solvedList.add("Fully solved anagrams only");
@@ -557,8 +596,25 @@ public class MainActivity extends AppCompatActivity {
         allColumns.add("(default)");
         allColumns.add("(random)");
 
+        blankColumns = new ArrayList<>();
+        blankColumns.add("(default)");
+        blankColumns.add("(random)");
+
+        blankList = new ArrayList<>();
+        blankList.add("Regular anagrams");
+        blankList.add("Blank anagrams");
+
+        jokerList = new ArrayList<>();
+        jokerList.add("Regular anagrams");
+        jokerList.add("Blank anagrams counting blank");
+        jokerList.add("Blank anagrams without counting blank");
+
         for (String oneColumn : db.getAllColumns("words")) {
             allColumns.add(oneColumn.substring(1, oneColumn.length() - 1));
+        }
+
+        for (String blankColumn : db.getAllColumns("blanks")) {
+            blankColumns.add(blankColumn.substring(1, blankColumn.length() - 1));
         }
 
         b3.setOnClickListener(new View.OnClickListener() {
@@ -751,7 +807,12 @@ public class MainActivity extends AppCompatActivity {
 
         EditText e1 = yourCustomView.findViewById(R.id.edittext17);
         TextView t10 = yourCustomView.findViewById(R.id.textview80);
-        e1.setHint("Enter a value between 2 and " + db.getMaximumWordLength());
+        e1.setHint("Enter a value between 2 and " + maximumWordLength);
+
+        Spinner s22 = yourCustomView.findViewById(R.id.spinner34);
+        ArrayAdapter<String> blankAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, blankList);
+        blankAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        s22.setAdapter(blankAdapter);
 
         final int[] sortIndex = new int[3];
         Spinner s10 = yourCustomView.findViewById(R.id.spinner22);
@@ -762,12 +823,34 @@ public class MainActivity extends AppCompatActivity {
         Spinner s11 = yourCustomView.findViewById(R.id.spinner23);
         ArrayAdapter<String> orderAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, allColumns);
         orderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter<String> ordersAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, blankColumns);
+        ordersAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s11.setAdapter(orderAdapter);
 
         Spinner s12 = yourCustomView.findViewById(R.id.spinner24);
         ArrayAdapter<String> sortAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, sort);
         sortAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s12.setAdapter(sortAdapter);
+
+        s22.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                e1.setHint("Enter a value between 2 and " + ((i == 0) ? maximumWordLength : maximumBlankLength));
+
+                if (i == 0) {
+                    s11.setAdapter(orderAdapter);
+                    s11.setSelection(6);
+                }
+                else {
+                    s11.setAdapter(ordersAdapter);
+                    s11.setSelection(8);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
 
         s10.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -867,10 +950,11 @@ public class MainActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         String alphabet = (lengthIndex[0] == 0 ? (e1.getText()).toString() : "-1");
                         int precursor = (alphabet.length() == 0 ? 0 : Integer.parseInt(alphabet));
+                        boolean wild = (s22.getSelectedItemPosition() > 0);
 
                         if (lengthIndex[0] == 0 && precursor < 2)
                         {
-                            Toast.makeText(MainActivity.this, "Enter a value between 2 and " + db.getMaximumWordLength() + " for word length", Toast.LENGTH_LONG).show();
+                            Toast.makeText(MainActivity.this, "Enter a value between 2 and " + (wild ? maximumBlankLength : maximumWordLength) + " for word length", Toast.LENGTH_LONG).show();
                             getWordLength();
                         }
                         else
@@ -880,7 +964,8 @@ public class MainActivity extends AppCompatActivity {
                             letters = precursor;
                             label = "*";
                             solvedStatus = solved[0];
-                            orderBy = sortBy(sortIndex);
+                            orderBy = sortBy(sortIndex, wild);
+                            blank = wild;
                             start();
                         }
                     }
@@ -892,25 +977,25 @@ public class MainActivity extends AppCompatActivity {
     {
         closeCursor();
 
-        boolean exist = db.existLabel(letters, label, orderBy);
+        boolean exist = db.existLabel(letters, label, orderBy, blank);
 
         if (!exist)
         {
-            db.insertLabel(letters, label, orderBy);
+            db.insertLabel(letters, label, orderBy, blank);
         }
 
-        anagrams = db.getAllAnagrams(letters, label, solvedStatus, orderBy, false);
+        anagrams = db.getAllAnagrams(letters, label, solvedStatus, orderBy, blank);
         words = anagrams.getCount();
-        int[] pair2 = db.getScore(letters, label, solvedStatus);
+        int[] pair2 = db.getScore(letters, label, solvedStatus, blank);
         score = pair2[0];
-        counter = db.getCounter(letters, label, solvedStatus, orderBy);
+        counter = db.getCounter(letters, label, solvedStatus, orderBy, blank);
         number = pair2[1];
 
         int high = (words - 1) / (rows * columns);
         if (counter > high && words > 0)
         {
             counter = high;
-            db.updateCounter(letters, label, counter, solvedStatus, orderBy);
+            db.updateCounter(letters, label, counter, solvedStatus, orderBy, blank);
         }
 
         nextWord();
@@ -925,10 +1010,11 @@ public class MainActivity extends AppCompatActivity {
         started = true;
         begin = System.currentTimeMillis();
         jumbles = new ArrayList<>();
-        replies = new ArrayList<>();
+        replies = new HashSet<>();
+        identities = new ArrayList<>();
         ArrayList<Integer> totals = new ArrayList<>();
         ArrayList<Integer> amounts = new ArrayList<>();
-        HashMap<String, Integer> grid = new HashMap<>();
+        grid = new HashMap<>();
 
         int open = rows * columns * counter;
         int close = (Math.min((rows * columns * counter) + (rows * columns), words));
@@ -952,17 +1038,27 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        HashMap<String, ArrayList<String>> answers = db.getUnsolvedAnswers(jumbles);
-        HashMap<String, Integer> allList = db.getAllAnswers(jumbles);
+        HashMap<String, ArrayList<String>> answers = db.getUnsolvedAnswers(jumbles, blank);
+        HashMap<String, Integer> allList = db.getAllAnswers(jumbles, blank);
         for (int total = 0; total < jumbles.size(); total++)
         {
             String answer = jumbles.get(total);
             if (answers.containsKey(answer)) {
                 ArrayList<String> answersList = answers.get(answer);
                 replies.addAll(answersList);
+                for (String answersItem : answersList) {
+                    identities.add(answersItem + " " + answer);
+                }
                 totals.add(answersList.size());
                 for (String answerList : answersList) {
-                    grid.put(answerList, total);
+                    if (grid.containsKey(answerList)) {
+                        (grid.get(answerList)).add(total);
+                    }
+                    else {
+                        ArrayList<Integer> emptyList = new ArrayList<>();
+                        emptyList.add(total);
+                        grid.put(answerList, emptyList);
+                    }
                 }
             }
             else {
@@ -1009,15 +1105,25 @@ public class MainActivity extends AppCompatActivity {
                     ultimate = guess;
 
                     ArrayList<String> guesses = new ArrayList<>();
-                    guesses.add(guess);
+                    ArrayList<Integer> anagramMap = grid.get(guess);
+
+                    for (int index : anagramMap) {
+                        String blankMap = (blank ? guess + " " + jumbles.get(index) : guess);
+                        guesses.add(blankMap);
+                        identities.remove(blankMap);
+                        totals.set(index, totals.get(index) - 1);
+                        cusadapter.notifyItemChanged(index);
+                    }
+
                     cumulativeTime(guesses, true, null);
-                    ArrayList<String> hook = db.getDefinition(guess);
+                    String blankMaps = (blank ? guess + " " + jumbles.get(anagramMap.get(anagramMap.size() - 1)) : guess);
+                    ArrayList<String> hook = db.getDefinition(blankMaps, blank);
                     String meaning = hook.get(0);
                     String back = hook.get(1);
                     String front = hook.get(2);
                     String lexicons = hook.get(3);
                     HashMap<String, String> colourList = db.getColours();
-                    String coloursList = db.getLabel(guess);
+                    String coloursList = db.getLabel(blankMaps, blank);
                     String amount;
 
                     if (colourList.containsKey(coloursList) || colourList.containsKey("")) {
@@ -1029,23 +1135,37 @@ public class MainActivity extends AppCompatActivity {
 
                     t5.setText(Html.fromHtml(amount));
                     replies.remove(guess);
-                    score++;
-                    int index = grid.get(guess);
-                    totals.set(index, totals.get(index) - 1);
-                    cusadapter.notifyItemChanged(index);
+                    score += anagramMap.size();
                     t2.setText("Score: " + score + "/" + number);
                 }
                 else
                 {
-                    boolean exist = db.containsWord(guess);
-                    char[] character = guess.toCharArray();
-                    Arrays.sort(character);
-                    String wrongAnswer = new String(character);
+                    boolean exist = db.containsWord(guess, blank);
+                    ArrayList<String> wrongAnswers = new ArrayList<>();
+
+                    if (blank) {
+                        ArrayList<String> blankAnagrams = db.getJokerAnagrams(guess);
+                        for (String blankAnagram : blankAnagrams) {
+                            if (allList.containsKey(blankAnagram)) {
+                                wrongAnswers.add(guess + " " + blankAnagram);
+                            }
+                        }
+                    }
+                    else {
+                        char[] character = guess.toCharArray();
+                        Arrays.sort(character);
+                        String wrongAnswer = new String(character);
+
+                        if (allList.containsKey(wrongAnswer)) {
+                            wrongAnswers.add(wrongAnswer);
+                        }
+                    }
+
                     if (!exist) {
                         t6.setTextColor(Color.RED);
-                        if (allList.containsKey(wrongAnswer)) {
+                        if (wrongAnswers.size() > 0) {
                             t6.setText("Wrong answer");
-                            db.trackWrongAnswers(wrongAnswer, guess);
+                            db.trackWrongAnswers(wrongAnswers, guess, blank);
                         }
                         else {
                             t6.setText("Anagram not here");
@@ -1053,7 +1173,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     else {
                         t6.setTextColor(Color.rgb(0, 128, 0));
-                        if (allList.containsKey(wrongAnswer)) {
+                        if (wrongAnswers.size() > 0) {
                             t6.setText("Already solved");
                         }
                         else {
@@ -1076,7 +1196,7 @@ public class MainActivity extends AppCompatActivity {
                 else {
                     counter++;
                 }
-                db.updateCounter(letters, label, counter, solvedStatus, orderBy);
+                db.updateCounter(letters, label, counter, solvedStatus, orderBy, blank);
                 nextWord();
             }
         });
@@ -1100,7 +1220,7 @@ public class MainActivity extends AppCompatActivity {
                 else {
                     counter--;
                 }
-                db.updateCounter(letters, label, counter, solvedStatus, orderBy);
+                db.updateCounter(letters, label, counter, solvedStatus, orderBy, blank);
                 nextWord();
             }
         });
@@ -1137,6 +1257,7 @@ public class MainActivity extends AppCompatActivity {
 
                     EditText e5 = yourCustomView.findViewById(R.id.edittext5);
                     final int[] selection = {0};
+                    ArrayList<Integer> anagramMap = grid.get(guess);
 
                     Spinner s2 = yourCustomView.findViewById(R.id.spinner3);
                     List<Pair<String, String>> labelsList = db.getAllLabels();
@@ -1150,7 +1271,7 @@ public class MainActivity extends AppCompatActivity {
                             selection[0]++;
 
                             if (selection[0] <= 1) {
-                                String newTag = db.getLabel(guess);
+                                String newTag = db.getLabel(blank ? guess + " " + jumbles.get(anagramMap.get(anagramMap.size() - 1)) : guess, blank);
                                 e5.setText(newTag);
 
                                 if (labelsList.contains(newTag)) {
@@ -1180,16 +1301,20 @@ public class MainActivity extends AppCompatActivity {
                                     t6.setTextColor(Color.rgb(0, 128, 0));
 
                                     String cardbox = (e5.getText()).toString();
-
                                     ArrayList<String> guesses = new ArrayList<>();
-                                    guesses.add(guess);
+
+                                    for(int index : anagramMap) {
+                                        String blankMap = (blank ? guess + " " + jumbles.get(index) : guess);
+                                        guesses.add(blankMap);
+                                        identities.remove(blankMap);
+                                        totals.set(index, totals.get(index) - 1);
+                                        cusadapter.notifyItemChanged(index);
+                                    }
+
                                     cumulativeTime(guesses, true, cardbox);
                                     displayDefinition(cardbox);
                                     replies.remove(guess);
-                                    score++;
-                                    int index = grid.get(guess);
-                                    totals.set(index, totals.get(index) - 1);
-                                    cusadapter.notifyItemChanged(index);
+                                    score += anagramMap.size();
                                     t2.setText("Score: " + score + "/" + number);
                                 }
                             }).create();
@@ -1197,15 +1322,32 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else
                 {
-                    boolean exist = db.containsWord(guess);
-                    char[] character = guess.toCharArray();
-                    Arrays.sort(character);
-                    String wrongAnswer = new String(character);
+                    boolean exist = db.containsWord(guess, blank);
+                    ArrayList<String> wrongAnswers = new ArrayList<>();
+
+                    if (blank) {
+                        ArrayList<String> blankAnagrams = db.getJokerAnagrams(guess);
+                        for (String blankAnagram : blankAnagrams) {
+                            if (allList.containsKey(blankAnagram)) {
+                                wrongAnswers.add(guess + " " + blankAnagram);
+                            }
+                        }
+                    }
+                    else {
+                        char[] character = guess.toCharArray();
+                        Arrays.sort(character);
+                        String wrongAnswer = new String(character);
+
+                        if (allList.containsKey(wrongAnswer)) {
+                            wrongAnswers.add(wrongAnswer);
+                        }
+                    }
+
                     if (!exist) {
                         t6.setTextColor(Color.RED);
-                        if (allList.containsKey(wrongAnswer)) {
+                        if (wrongAnswers.size() > 0) {
                             t6.setText("Wrong answer");
-                            db.trackWrongAnswers(wrongAnswer, guess);
+                            db.trackWrongAnswers(wrongAnswers, guess, blank);
                         }
                         else {
                             t6.setText("Anagram not here");
@@ -1213,7 +1355,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     else {
                         t6.setTextColor(Color.rgb(0, 128, 0));
-                        if (allList.containsKey(wrongAnswer)) {
+                        if (wrongAnswers.size() > 0) {
                             t6.setText("Already solved");
                         }
                         else {
@@ -1232,6 +1374,28 @@ public class MainActivity extends AppCompatActivity {
 
                 EditText e3 = yourCustomView.findViewById(R.id.edittext3);
                 EditText e4 = yourCustomView.findViewById(R.id.edittext4);
+                Spinner s26 = yourCustomView.findViewById(R.id.spinner39);
+
+                final ArrayList<String>[] anagramItem = new ArrayList[] {new ArrayList<>()};
+                ArrayAdapter<String> anagramAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, anagramItem[0]);
+                anagramAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                s26.setAdapter(anagramAdapter);
+
+                e3.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+                        anagramItem[0] = db.getBlankAnagrams(s.toString());
+                        anagramAdapter.notifyDataSetChanged();
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable s) {
+                    }
+                });
 
                 Spinner s1 = yourCustomView.findViewById(R.id.spinner2);
                 List<Pair<String, String>> labelList = db.getAllLabels();
@@ -1257,7 +1421,13 @@ public class MainActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 String line = (((e3.getText()).toString()).trim()).toUpperCase();
                                 String category = (e4.getText()).toString();
-                                db.updateWord(line, category);
+                                int anagramIndex = s26.getSelectedItemPosition();
+
+                                if (anagramIndex == 0) {
+                                    db.updateTag(line, category, false);
+                                } else {
+                                    db.updateTag(line + " " + anagramItem[0].get(anagramIndex), category, true);
+                                }
 
                                 if (mode == 1) {
                                     if (line.equals(ultimate)) {
@@ -1269,14 +1439,14 @@ public class MainActivity extends AppCompatActivity {
                                     String order = new String(last);
 
                                     if (order.equals(ultimate)) {
-                                        String solved = db.getSolvedAnswers(order);
+                                        String solved = db.getSolvedAnswers(order, blank);
                                         t5.setText(Html.fromHtml(solved));
                                     }
                                 }
 
                                 if (mode == 3)
                                 {
-                                    String revision = db.getSummary(jumbles);
+                                    String revision = db.getSummary(jumbles, blank);
                                     t5.setText(Html.fromHtml(revision));
                                 }
                             }
@@ -1312,7 +1482,7 @@ public class MainActivity extends AppCompatActivity {
                                     ultimate = null;
 
                                     counter = page - 1;
-                                    db.updateCounter(letters, label, counter, solvedStatus, orderBy);
+                                    db.updateCounter(letters, label, counter, solvedStatus, orderBy, blank);
                                     nextWord();
                                 }
                             }
@@ -1333,7 +1503,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void revise()
     {
-        String revision = db.getSummary(jumbles);
+        String revision = db.getSummary(jumbles, blank);
         t5.setText(Html.fromHtml(revision));
         db.messageBox("Page Summary", revision, MainActivity.this);
     }
@@ -1343,20 +1513,20 @@ public class MainActivity extends AppCompatActivity {
         long stop = System.currentTimeMillis();
         double time = stop - begin;
         time /= 1000;
-        db.updateTime(guesses == null ? replies : guesses, time, submitted, cardbox);
+        db.updateTime(guesses == null ? identities : guesses, time, submitted, cardbox, blank);
     }
 
     public void onItemClick(int i) {
         mode = 2;
         ultimate = jumbles.get(i);
 
-        String solved = db.getSolvedAnswers(ultimate);
+        String solved = db.getSolvedAnswers(ultimate, blank);
         t5.setText(Html.fromHtml(solved));
     }
 
     public void onItemLongClick(int i) {
         String unsolved = jumbles.get(i);
-        String unsolvedAnswers = db.getUnsolvedWords(unsolved);
+        String unsolvedAnswers = db.getUnsolvedWords(unsolved, blank);
 
         db.messageBox("Unsolved answers", unsolvedAnswers, MainActivity.this);
     }
@@ -1367,25 +1537,27 @@ public class MainActivity extends AppCompatActivity {
         rows = dimensions.get(0);
         columns = dimensions.get(1);
         font = dimensions.get(2);
+        maximumWordLength = db.getMaximumWordLength(false);
+        maximumBlankLength = db.getMaximumWordLength(true);
 
         try
         {
             if (started) {
                 t6.setText("");
-                int[] pair3 = (letters == 1 ? db.getCustomScore(label, solvedStatus) : db.getScore(letters, label, solvedStatus));
+                int[] pair3 = (letters == 1 ? db.getCustomScore(label, solvedStatus, blank) : db.getScore(letters, label, solvedStatus, blank));
                 score = pair3[0];
 
                 closeCursor();
-                anagrams = (letters == 1 ? db.getCustomQuiz(label, MainActivity.this, solvedStatus, orderBy) : db.getAllAnagrams(letters, label, solvedStatus, orderBy, false));
+                anagrams = (letters == 1 ? db.getCustomQuiz(label, MainActivity.this, solvedStatus, orderBy, blank) : db.getAllAnagrams(letters, label, solvedStatus, orderBy, blank));
                 words = anagrams.getCount();
 
-                counter = db.getCounter(letters, label, solvedStatus, orderBy);
+                counter = db.getCounter(letters, label, solvedStatus, orderBy, blank);
                 number = pair3[1];
 
                 int peak = (words - 1) / (rows * columns);
                 if (counter > peak && words > 0) {
                     counter = peak;
-                    db.updateCounter(letters, label, counter, solvedStatus, orderBy);
+                    db.updateCounter(letters, label, counter, solvedStatus, orderBy, blank);
                 }
 
                 nextWord();
@@ -1404,15 +1576,16 @@ public class MainActivity extends AppCompatActivity {
             switch(mode)
             {
                 case 1:
-                    String tag = db.getLabel(ultimate);
+                    ArrayList<Integer> anagramMap = grid.get(ultimate);
+                    String tag = db.getLabel(blank ? ultimate + " " + jumbles.get(anagramMap.get(anagramMap.size() - 1)) : ultimate, blank);
                     displayDefinition(tag);
                     break;
                 case 2:
-                    String solved = db.getSolvedAnswers(ultimate);
+                    String solved = db.getSolvedAnswers(ultimate, blank);
                     t5.setText(Html.fromHtml(solved));
                     break;
                 case 3:
-                    String revision = db.getSummary(jumbles);
+                    String revision = db.getSummary(jumbles, blank);
                     t5.setText(Html.fromHtml(revision));
                     break;
             }
@@ -1421,7 +1594,8 @@ public class MainActivity extends AppCompatActivity {
 
     public void displayDefinition(String listbox)
     {
-        ArrayList<String> hook = db.getDefinition(ultimate);
+        ArrayList<Integer> anagramMap = grid.get(ultimate);
+        ArrayList<String> hook = db.getDefinition(blank ? ultimate + " " + jumbles.get(anagramMap.get(anagramMap.size() - 1)) : ultimate, blank);
         String meaning = hook.get(0);
         String back = hook.get(1);
         String front = hook.get(2);
@@ -1521,7 +1695,12 @@ public class MainActivity extends AppCompatActivity {
         EditText e11 = yourCustomView.findViewById(R.id.edittext6);
         EditText e12 = yourCustomView.findViewById(R.id.edittext7);
         TextView t7 = yourCustomView.findViewById(R.id.textview12);
-        e12.setHint("Enter a value between 2 and " + db.getMaximumWordLength());
+        e12.setHint("Enter a value between 2 and " + maximumWordLength);
+
+        Spinner s23 = yourCustomView.findViewById(R.id.spinner35);
+        ArrayAdapter<String> jokerAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, blankList);
+        jokerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        s23.setAdapter(jokerAdapter);
 
         final int[] sortIndex = new int[3];
         Spinner s13 = yourCustomView.findViewById(R.id.spinner25);
@@ -1532,12 +1711,34 @@ public class MainActivity extends AppCompatActivity {
         Spinner s14 = yourCustomView.findViewById(R.id.spinner26);
         ArrayAdapter<String> orderAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, allColumns);
         orderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter<String> ordersAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, blankColumns);
+        ordersAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s14.setAdapter(orderAdapter);
 
         Spinner s15 = yourCustomView.findViewById(R.id.spinner27);
         ArrayAdapter<String> sortAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, sort);
         sortAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s15.setAdapter(sortAdapter);
+
+        s23.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                e12.setHint("Enter a value between 2 and " + ((i == 0) ? maximumWordLength : maximumBlankLength));
+
+                if (i == 0) {
+                    s14.setAdapter(orderAdapter);
+                    s14.setSelection(6);
+                }
+                else {
+                    s14.setAdapter(ordersAdapter);
+                    s14.setSelection(8);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
 
         s13.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -1661,20 +1862,22 @@ public class MainActivity extends AppCompatActivity {
                         String intermediate = (e11.getText()).toString();
                         String alphabets = (lengthIndex[0] == 0 ? (e12.getText()).toString() : "-1");
                         int temporary = (alphabets.length() == 0 ? 0 : Integer.parseInt(alphabets));
+                        boolean wilds = (s23.getSelectedItemPosition() > 0);
 
                         if (lengthIndex[0] == 0 && temporary < 2)
                         {
-                            Toast.makeText(MainActivity.this, "Enter a value between 2 and " + db.getMaximumWordLength() + " for word length", Toast.LENGTH_LONG).show();
+                            Toast.makeText(MainActivity.this, "Enter a value between 2 and " + (wilds ? maximumBlankLength : maximumWordLength) + " for word length", Toast.LENGTH_LONG).show();
                             filterByLabel();
                         }
                         else
                         {
                             letters = temporary;
                             label = intermediate;
-                            orderBy = sortBy(sortIndex);
+                            orderBy = sortBy(sortIndex, wilds);
                             ultimate = null;
                             mode = 0;
                             solvedStatus = solved[0];
+                            blank = wilds;
                             start();
                         }
                     }
@@ -1704,6 +1907,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        Spinner s25 = yourCustomView.findViewById(R.id.spinner37);
+        ArrayAdapter<String> subanagramAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, jokerList);
+        subanagramAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        s25.setAdapter(subanagramAdapter);
+
         final int[] sortIndex = new int[3];
         Spinner s19 = yourCustomView.findViewById(R.id.spinner31);
         ArrayAdapter<String> aggregateAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, aggregate);
@@ -1713,6 +1921,8 @@ public class MainActivity extends AppCompatActivity {
         Spinner s20 = yourCustomView.findViewById(R.id.spinner32);
         ArrayAdapter<String> orderAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, allColumns);
         orderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter<String> ordersAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, blankColumns);
+        ordersAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s20.setAdapter(orderAdapter);
 
         Spinner s21 = yourCustomView.findViewById(R.id.spinner33);
@@ -1760,6 +1970,24 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        s25.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                if (i == 0) {
+                    s20.setAdapter(orderAdapter);
+                    s20.setSelection(subanagram ? 3 : 6);
+                }
+                else {
+                    s20.setAdapter(ordersAdapter);
+                    s20.setSelection(subanagram ? 3 : 8);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
+
         s20.setSelection(subanagram ? 3 : 6);
         s21.setSelection(1);
 
@@ -1786,13 +2014,13 @@ public class MainActivity extends AppCompatActivity {
                 .setView(yourCustomView)
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        subanagrams((((e13.getText()).toString()).trim()).toUpperCase(), (e14.getText()).toString(), subanagram, ((e15.getText()).toString()).replace("\"", "'"), c4.isChecked(), sortIndex, solved, true);
+                        subanagrams((((e13.getText()).toString()).trim()).toUpperCase(), (e14.getText()).toString(), subanagram, ((e15.getText()).toString()).replace("\"", "'"), c4.isChecked(), sortIndex, solved, true, s25.getSelectedItemPosition());
                     }
                 }).create();
         dialog.show();
     }
 
-    public void subanagrams(String letterSequence, String digit, boolean subanagram, String extra, boolean autoUnderscore, int[] sortIndex, int[] solved, boolean extraSql) {
+    public void subanagrams(String letterSequence, String digit, boolean subanagram, String extra, boolean autoUnderscore, int[] sortIndex, int[] solved, boolean extraSql, int blankIndex) {
         boolean flag = false;
         int blanks = 0;
         for (int digits = 0; digits < letterSequence.length(); digits++) {
@@ -1833,12 +2061,12 @@ public class MainActivity extends AppCompatActivity {
 
                 for (int theRadix = 0; theRadix < 26; theRadix++) {
                     char occurrences = (char) (theRadix + 97);
-                    theQuery.append("_no_").append(occurrences).append("_ <= ").append(occurrence[theRadix] + blanks).append(" AND ");
+                    theQuery.append(blankIndex == 1 ? "_total_" : "_no_").append(occurrences).append("_ <= ").append(occurrence[theRadix] + blanks).append(" AND ");
                 }
 
                 for (int myIndex = 0; myIndex < 26; myIndex++) {
                     char occurrences = (char) (myIndex + 97);
-                    theQuery.append(myIndex == 0 ? "" : " + ").append("ABS(_no_").append(occurrences).append("_ - ").append(occurrence[myIndex]).append(")");
+                    theQuery.append(myIndex == 0 ? "" : " + ").append(blankIndex == 1 ? "ABS(_total_" : "ABS(_no_").append(occurrences).append("_ - ").append(occurrence[myIndex]).append(")");
                 }
                 theQuery.append(" <= ").append((2 * blanks) + letter.length()).append(" - _length_");
             } else {
@@ -1850,7 +2078,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 empties.append("%");
                 String empty = new String(empties);
-                theQuery.append("_length_ = ").append(letter.length() + blanks).append(" AND _alphagram_ LIKE '").append(empty).append("'");
+                theQuery.append("_length_ = ").append(letter.length() + blanks).append(blankIndex == 2 ? " AND _anagram_ LIKE '" : " AND _alphagram_ LIKE '").append(empty).append("'");
             }
 
             if (extra.length() > 0) {
@@ -1858,8 +2086,9 @@ public class MainActivity extends AppCompatActivity {
             }
 
             String customQuery = new String(theQuery);
-            String subanagramIndex = sortBy(sortIndex);
-            Cursor resultSet = db.getCustomQuiz(customQuery, MainActivity.this, solved[0], subanagramIndex);
+            boolean wildsIndex = (blankIndex > 0);
+            String subanagramIndex = sortBy(sortIndex, wildsIndex);
+            Cursor resultSet = db.getCustomQuiz(customQuery, MainActivity.this, solved[0], subanagramIndex, blank);
 
             if (resultSet != null) {
                 label = customQuery;
@@ -1868,27 +2097,28 @@ public class MainActivity extends AppCompatActivity {
                 mode = 0;
                 solvedStatus = solved[0];
                 orderBy = subanagramIndex;
+                blank = wildsIndex;
 
                 closeCursor();
                 anagrams = resultSet;
                 words = anagrams.getCount();
-                int[] pair4 = db.getCustomScore(label, solved[0]);
+                int[] pair4 = db.getCustomScore(label, solved[0], blank);
                 score = pair4[0];
                 number = pair4[1];
 
-                boolean exists = db.existLabel(letters, label, orderBy);
+                boolean exists = db.existLabel(letters, label, orderBy, blank);
 
                 if (!exists) {
                     counter = 0;
-                    db.insertLabel(letters, label, orderBy);
+                    db.insertLabel(letters, label, orderBy, blank);
                 } else {
-                    counter = db.getCounter(letters, label, solvedStatus, orderBy);
+                    counter = db.getCounter(letters, label, solvedStatus, orderBy, blank);
                 }
 
                 int apex = (words - 1) / (rows * columns);
                 if (counter > apex && words > 0) {
                     counter = apex;
-                    db.updateCounter(letters, label, counter, solvedStatus, orderBy);
+                    db.updateCounter(letters, label, counter, solvedStatus, orderBy, blank);
                 }
 
                 nextWord();
@@ -1896,23 +2126,23 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public String sortBy(int[] selection) {
+    public String sortBy(int[] selection, boolean isBlank) {
         switch (selection[1]) {
             case 0: return (selection[2] == 1 ? "DESC" : "ASC");
             case 1: return " ORDER BY RANDOM()" + (selection[2] == 1 ? " DESC" : "");
             default: switch (selection[0]) {
                 case 1:
-                    return " ORDER BY MAX(_" + allColumns.get(selection[1]) + "_)" + (selection[2] == 1 ? " DESC" : "");
+                    return " ORDER BY MAX(_" + (isBlank ? blankColumns.get(selection[1]) : allColumns.get(selection[1])) + "_)" + (selection[2] == 1 ? " DESC" : "");
                 case 2:
-                    return " ORDER BY MIN(_" + allColumns.get(selection[1]) + "_)" + (selection[2] == 1 ? " DESC" : "");
+                    return " ORDER BY MIN(_" + (isBlank ? blankColumns.get(selection[1]) : allColumns.get(selection[1])) + "_)" + (selection[2] == 1 ? " DESC" : "");
                 case 3:
-                    return " ORDER BY AVG(_" + allColumns.get(selection[1]) + "_)" + (selection[2] == 1 ? " DESC" : "");
+                    return " ORDER BY AVG(_" + (isBlank ? blankColumns.get(selection[1]) : allColumns.get(selection[1])) + "_)" + (selection[2] == 1 ? " DESC" : "");
                 case 4:
-                    return " ORDER BY SUM(_" + allColumns.get(selection[1]) + "_)" + (selection[2] == 1 ? " DESC" : "");
+                    return " ORDER BY SUM(_" + (isBlank ? blankColumns.get(selection[1]) : allColumns.get(selection[1])) + "_)" + (selection[2] == 1 ? " DESC" : "");
                 case 5:
-                    return " ORDER BY COUNT(_" + allColumns.get(selection[1]) + "_)" + (selection[2] == 1 ? " DESC" : "");
+                    return " ORDER BY COUNT(_" + (isBlank ? blankColumns.get(selection[1]) : allColumns.get(selection[1])) + "_)" + (selection[2] == 1 ? " DESC" : "");
                 default:
-                    return " ORDER BY _" + allColumns.get(selection[1]) + "_" + (selection[2] == 1 ? " DESC" : "");
+                    return " ORDER BY _" + (isBlank ? blankColumns.get(selection[1]) : allColumns.get(selection[1])) + "_" + (selection[2] == 1 ? " DESC" : "");
             }
         }
     }

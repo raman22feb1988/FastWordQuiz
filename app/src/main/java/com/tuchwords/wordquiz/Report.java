@@ -16,6 +16,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -63,6 +65,9 @@ public class Report extends AppCompatActivity {
     ArrayList<String> solvedList;
     ArrayList<String> sort;
     ArrayList<String> allColumns;
+    ArrayList<String> blankColumns;
+    ArrayList<String> blankList;
+    ArrayList<String> jokerList;
     ReportAdapter reportAdapter;
     SharedPreferences pref;
 
@@ -81,10 +86,12 @@ public class Report extends AppCompatActivity {
     Cursor anagrams;
     int words;
     int counter;
+    boolean blank;
 
     int rows;
     int font;
     int maximumWordLength;
+    int maximumBlankLength;
 
     // Declare the DrawerLayout, NavigationView and Toolbar
     private DrawerLayout drawerLayout;
@@ -198,6 +205,28 @@ public class Report extends AppCompatActivity {
 
                         EditText e3 = yourCustomView2.findViewById(R.id.edittext3);
                         EditText e4 = yourCustomView2.findViewById(R.id.edittext4);
+                        Spinner s26 = yourCustomView2.findViewById(R.id.spinner39);
+
+                        final ArrayList<String>[] anagramItem = new ArrayList[] {new ArrayList<>()};
+                        ArrayAdapter<String> anagramAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, anagramItem[0]);
+                        anagramAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                        s26.setAdapter(anagramAdapter);
+
+                        e3.addTextChangedListener(new TextWatcher() {
+                            @Override
+                            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                            }
+
+                            @Override
+                            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                anagramItem[0] = db.getBlankAnagrams(s.toString());
+                                anagramAdapter.notifyDataSetChanged();
+                            }
+
+                            @Override
+                            public void afterTextChanged(Editable s) {
+                            }
+                        });
 
                         Spinner s2 = yourCustomView2.findViewById(R.id.spinner2);
                         List<Pair<String, String>> tagList = new ArrayList<>(labelsList.subList(1, labelsList.size()));
@@ -223,7 +252,13 @@ public class Report extends AppCompatActivity {
                                     public void onClick(DialogInterface dialog, int whichButton) {
                                         String line = (((e3.getText()).toString()).trim()).toUpperCase();
                                         String category = (e4.getText()).toString();
-                                        db.updateWord(line, category);
+                                        int anagramIndex = s26.getSelectedItemPosition();
+
+                                        if (anagramIndex == 0) {
+                                            db.updateTag(line, category, false);
+                                        } else {
+                                            db.updateTag(line + " " + anagramItem[0].get(anagramIndex), category, true);
+                                        }
 
                                         refresh();
                                     }
@@ -252,7 +287,7 @@ public class Report extends AppCompatActivity {
                         break;
                     case R.id.button40:
                         // Show a Toast message for the Reset words by tag item
-                        db.resetByLabel(Report.this, false);
+                        db.resetByLabel(Report.this, false, blankList, maximumWordLength, maximumBlankLength);
                         break;
                     case R.id.button46:
                         // Show a Toast message for the Add new tag item
@@ -389,7 +424,8 @@ public class Report extends AppCompatActivity {
         ArrayList<Integer> dimensions = db.getZoom("Report");
         rows = dimensions.get(0);
         font = dimensions.get(2);
-        maximumWordLength = db.getMaximumWordLength();
+        maximumWordLength = db.getMaximumWordLength(false);
+        maximumBlankLength = db.getMaximumWordLength(true);
 
         refreshSpinner();
 
@@ -406,8 +442,25 @@ public class Report extends AppCompatActivity {
         allColumns.add("(default)");
         allColumns.add("(random)");
 
+        blankColumns = new ArrayList<>();
+        blankColumns.add("(default)");
+        blankColumns.add("(random)");
+
+        blankList = new ArrayList<>();
+        blankList.add("Regular anagrams");
+        blankList.add("Blank anagrams");
+
+        jokerList = new ArrayList<>();
+        jokerList.add("Regular anagrams");
+        jokerList.add("Blank anagrams counting blank");
+        jokerList.add("Blank anagrams without counting blank");
+
         for (String oneColumn : db.getAllColumns("words")) {
             allColumns.add(oneColumn.substring(1, oneColumn.length() - 1));
+        }
+
+        for (String blankColumn : db.getAllColumns("blanks")) {
+            blankColumns.add(blankColumn.substring(1, blankColumn.length() - 1));
         }
 
         b3.setOnClickListener(new View.OnClickListener() {
@@ -463,6 +516,11 @@ public class Report extends AppCompatActivity {
                     }
                 });
 
+                Spinner s24 = yourCustomView.findViewById(R.id.spinner36);
+                ArrayAdapter<String> emptyAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, blankList);
+                emptyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                s24.setAdapter(emptyAdapter);
+
                 final int[] sortIndex = new int[2];
                 Spinner s16 = yourCustomView.findViewById(R.id.spinner28);
                 s16.setVisibility(View.GONE);
@@ -470,6 +528,8 @@ public class Report extends AppCompatActivity {
                 Spinner s17 = yourCustomView.findViewById(R.id.spinner29);
                 ArrayAdapter<String> orderAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, allColumns);
                 orderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                ArrayAdapter<String> ordersAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, blankColumns);
+                ordersAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 s17.setAdapter(orderAdapter);
 
                 Spinner s18 = yourCustomView.findViewById(R.id.spinner30);
@@ -526,33 +586,35 @@ public class Report extends AppCompatActivity {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 String temporaryQuery = ((e2.getText()).toString()).replace("\"", "'");
                                 String customQuery = (temporaryQuery.length() == 0 ? "1" : temporaryQuery);
-                                String orderIndex = sortBy(sortIndex);
+                                boolean wildIndex = (s24.getSelectedItemPosition() > 0);
+                                String orderIndex = sortBy(sortIndex, wildIndex);
                                 String processingQuery = (c2.isChecked() ? db.addUnderscores(customQuery) : customQuery);
-                                Cursor resultSet = db.getSqlQuery(processingQuery, Report.this, solved[0], orderIndex);
+                                Cursor resultSet = db.getSqlQuery(processingQuery, Report.this, solved[0], orderIndex, blank);
 
                                 if (resultSet != null) {
                                     label = processingQuery;
                                     letters = 0;
                                     solvedStatus = solved[0];
                                     orderBy = orderIndex;
+                                    blank = wildIndex;
 
                                     closeCursor();
                                     anagrams = resultSet;
                                     words = anagrams.getCount();
 
-                                    boolean exists = db.existLabel(letters, label, orderBy);
+                                    boolean exists = db.existLabel(letters, label, orderBy, blank);
 
                                     if (!exists) {
                                         counter = 0;
-                                        db.insertLabel(letters, label, orderBy);
+                                        db.insertLabel(letters, label, orderBy, blank);
                                     } else {
-                                        counter = db.getPage(letters, label, solvedStatus, orderBy);
+                                        counter = db.getPage(letters, label, solvedStatus, orderBy, blank);
                                     }
 
                                     int highest = (words - 1) / rows;
                                     if (counter > highest && words > 0) {
                                         counter = highest;
-                                        db.updatePage(letters, label, counter, solvedStatus, orderBy);
+                                        db.updatePage(letters, label, counter, solvedStatus, orderBy, blank);
                                     }
 
                                     nextWord();
@@ -560,6 +622,26 @@ public class Report extends AppCompatActivity {
                             }
                         }).create();
                 dialog.show();
+
+                s24.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                        dialog.setTitle("SELECT front, word, back, definition, time, tag FROM " + ((i == 0) ? "words" : "blanks") + " WHERE");
+
+                        if (i == 0) {
+                            s17.setAdapter(orderAdapter);
+                            s17.setSelection(7);
+                        }
+                        else {
+                            s17.setAdapter(ordersAdapter);
+                            s17.setSelection(10);
+                        }
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> adapterView) {
+                    }
+                });
             }
         });
 
@@ -575,7 +657,12 @@ public class Report extends AppCompatActivity {
 
         EditText e1 = yourCustomView.findViewById(R.id.edittext17);
         TextView t8 = yourCustomView.findViewById(R.id.textview80);
-        e1.setHint("Enter a value between 2 and " + db.getMaximumWordLength());
+        e1.setHint("Enter a value between 2 and " + maximumWordLength);
+
+        Spinner s22 = yourCustomView.findViewById(R.id.spinner34);
+        ArrayAdapter<String> blankAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, blankList);
+        blankAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        s22.setAdapter(blankAdapter);
 
         final int[] sortIndex = new int[2];
         Spinner s10 = yourCustomView.findViewById(R.id.spinner22);
@@ -584,12 +671,34 @@ public class Report extends AppCompatActivity {
         Spinner s11 = yourCustomView.findViewById(R.id.spinner23);
         ArrayAdapter<String> orderAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, allColumns);
         orderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter<String> ordersAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, blankColumns);
+        ordersAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s11.setAdapter(orderAdapter);
 
         Spinner s12 = yourCustomView.findViewById(R.id.spinner24);
         ArrayAdapter<String> sortAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, sort);
         sortAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s12.setAdapter(sortAdapter);
+
+        s22.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                e1.setHint("Enter a value between 2 and " + ((i == 0) ? maximumWordLength : maximumBlankLength));
+
+                if (i == 0) {
+                    s11.setAdapter(orderAdapter);
+                    s11.setSelection(7);
+                }
+                else {
+                    s11.setAdapter(ordersAdapter);
+                    s11.setSelection(10);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
 
         s11.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -670,18 +779,20 @@ public class Report extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         String alphabet = (lengthIndex[0] == 0 ? (e1.getText()).toString() : "-1");
                         int precursor = (alphabet.length() == 0 ? 0 : Integer.parseInt(alphabet));
+                        boolean wild = (s22.getSelectedItemPosition() > 0);
 
                         if (lengthIndex[0] == 0 && precursor < 2)
                         {
-                            Toast.makeText(Report.this, "Enter a value between 2 and " + db.getMaximumWordLength() + " for word length", Toast.LENGTH_LONG).show();
+                            Toast.makeText(Report.this, "Enter a value between 2 and " + (wild ? maximumBlankLength : maximumWordLength) + " for word length", Toast.LENGTH_LONG).show();
                             getWordLength();
                         }
                         else
                         {
                             letters = precursor;
                             solvedStatus = solved[0];
-                            orderBy = sortBy(sortIndex);
+                            orderBy = sortBy(sortIndex, wild);
                             label = "*";
+                            blank = wild;
                             start(true);
                         }
                     }
@@ -697,7 +808,12 @@ public class Report extends AppCompatActivity {
         EditText e6 = yourCustomView.findViewById(R.id.edittext6);
         EditText e7 = yourCustomView.findViewById(R.id.edittext7);
         TextView t4 = yourCustomView.findViewById(R.id.textview12);
-        e7.setHint("Enter a value between 2 and " + db.getMaximumWordLength());
+        e7.setHint("Enter a value between 2 and " + maximumWordLength);
+
+        Spinner s23 = yourCustomView.findViewById(R.id.spinner35);
+        ArrayAdapter<String> jokerAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, blankList);
+        jokerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        s23.setAdapter(jokerAdapter);
 
         final int[] sortIndex = new int[2];
         Spinner s13 = yourCustomView.findViewById(R.id.spinner25);
@@ -706,12 +822,34 @@ public class Report extends AppCompatActivity {
         Spinner s14 = yourCustomView.findViewById(R.id.spinner26);
         ArrayAdapter<String> orderAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, allColumns);
         orderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter<String> ordersAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, blankColumns);
+        ordersAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s14.setAdapter(orderAdapter);
 
         Spinner s15 = yourCustomView.findViewById(R.id.spinner27);
         ArrayAdapter<String> sortAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, sort);
         sortAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s15.setAdapter(sortAdapter);
+
+        s23.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                e7.setHint("Enter a value between 2 and " + ((i == 0) ? maximumWordLength : maximumBlankLength));
+
+                if (i == 0) {
+                    s14.setAdapter(orderAdapter);
+                    s14.setSelection(7);
+                }
+                else {
+                    s14.setAdapter(ordersAdapter);
+                    s14.setSelection(10);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
 
         s14.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -816,10 +954,11 @@ public class Report extends AppCompatActivity {
                         String intermediate = (e6.getText()).toString();
                         String alphabets = (lengthIndex[0] == 0 ? (e7.getText()).toString() : "-1");
                         int temporary = (alphabets.length() == 0 ? 0 : Integer.parseInt(alphabets));
+                        boolean wilds = (s23.getSelectedItemPosition() > 0);
 
                         if (lengthIndex[0] == 0 && temporary < 2)
                         {
-                            Toast.makeText(Report.this, "Enter a value between 2 and " + db.getMaximumWordLength() + " for word length", Toast.LENGTH_LONG).show();
+                            Toast.makeText(Report.this, "Enter a value between 2 and " + (wilds ? maximumBlankLength : maximumWordLength) + " for word length", Toast.LENGTH_LONG).show();
                             filterByLabel();
                         }
                         else
@@ -827,7 +966,8 @@ public class Report extends AppCompatActivity {
                             letters = temporary;
                             label = intermediate;
                             solvedStatus = solved[0];
-                            orderBy = sortBy(sortIndex);
+                            orderBy = sortBy(sortIndex, wilds);
+                            blank = wilds;
                             start(true);
                         }
                     }
@@ -841,22 +981,22 @@ public class Report extends AppCompatActivity {
 
         if (checkExist)
         {
-            boolean exist = db.existLabel(letters, label, orderBy);
+            boolean exist = db.existLabel(letters, label, orderBy, blank);
 
             if (!exist)
             {
-                db.insertLabel(letters, label, orderBy);
+                db.insertLabel(letters, label, orderBy, blank);
             }
         }
 
-        anagrams = (label.equals("*") ? db.getSolvedWords(letters, solvedStatus, orderBy) : db.getLabelledWords(letters, label, solvedStatus, orderBy));
+        anagrams = (label.equals("*") ? db.getSolvedWords(letters, solvedStatus, orderBy, blank) : db.getLabelledWords(letters, label, solvedStatus, orderBy, blank));
         words = anagrams.getCount();
-        counter = db.getPage(letters, label, solvedStatus, orderBy);
+        counter = db.getPage(letters, label, solvedStatus, orderBy, blank);
 
         int high = (words - 1) / rows;
         if (counter > high && words > 0) {
             counter = high;
-            db.updatePage(letters, label, counter, solvedStatus, orderBy);
+            db.updatePage(letters, label, counter, solvedStatus, orderBy, blank);
         }
 
         nextWord();
@@ -897,7 +1037,7 @@ public class Report extends AppCompatActivity {
         }
 
         String jumbleList = (((jumble.toString()).replace("[", "(\"")).replace("]", "\")")).replace(", ", "\", \"");
-        jumbles = db.extract(jumbleList, commence + 1, orderBy);
+        jumbles = db.extract(jumbleList, commence + 1, orderBy, blank);
 
         int open = counter * columns * rows;
         int close = Math.min((counter + 1) * columns * rows, words * columns);
@@ -916,7 +1056,7 @@ public class Report extends AppCompatActivity {
                     if (counter < 0) {
                         counter = (words - 1) / rows;
                     }
-                    db.updatePage(letters, label, counter, solvedStatus, orderBy);
+                    db.updatePage(letters, label, counter, solvedStatus, orderBy, blank);
                     nextWord();
                 }
             }
@@ -930,7 +1070,7 @@ public class Report extends AppCompatActivity {
                     if (counter == ((words - 1) / rows) + 1) {
                         counter = 0;
                     }
-                    db.updatePage(letters, label, counter, solvedStatus, orderBy);
+                    db.updatePage(letters, label, counter, solvedStatus, orderBy, blank);
                     nextWord();
                 }
             }
@@ -960,7 +1100,7 @@ public class Report extends AppCompatActivity {
                                 else
                                 {
                                     counter = page - 1;
-                                    db.updatePage(letters, label, counter, solvedStatus, orderBy);
+                                    db.updatePage(letters, label, counter, solvedStatus, orderBy, blank);
                                     nextWord();
                                 }
                             }
@@ -975,31 +1115,33 @@ public class Report extends AppCompatActivity {
         ArrayList<Integer> dimensions = db.getZoom("Report");
         rows = dimensions.get(0);
         font = dimensions.get(2);
+        maximumWordLength = db.getMaximumWordLength(false);
+        maximumBlankLength = db.getMaximumWordLength(true);
 
         refreshSpinner();
 
         if (started) {
             if (letters == 0) {
-                Cursor resultSet = db.getSqlQuery(label, Report.this, solvedStatus, orderBy);
+                Cursor resultSet = db.getSqlQuery(label, Report.this, solvedStatus, orderBy, blank);
 
                 if (resultSet != null) {
                     closeCursor();
                     anagrams = resultSet;
                     words = anagrams.getCount();
 
-                    boolean exists = db.existLabel(letters, label, orderBy);
+                    boolean exists = db.existLabel(letters, label, orderBy, blank);
 
                     if (!exists) {
                         counter = 0;
-                        db.insertLabel(letters, label, orderBy);
+                        db.insertLabel(letters, label, orderBy, blank);
                     } else {
-                        counter = db.getPage(letters, label, solvedStatus, orderBy);
+                        counter = db.getPage(letters, label, solvedStatus, orderBy, blank);
                     }
 
                     int peak = (words - 1) / rows;
                     if (counter > peak && words > 0) {
                         counter = peak;
-                        db.updatePage(letters, label, counter, solvedStatus, orderBy);
+                        db.updatePage(letters, label, counter, solvedStatus, orderBy, blank);
                     }
 
                     nextWord();
@@ -1081,12 +1223,18 @@ public class Report extends AppCompatActivity {
             String location = jumbles.get(colour);
             char character = location.charAt(1);
             String word = ((character == 'f') ? location.substring(25, location.length() - 11) : location.substring(3, location.length() - 4));
+
+            int myBlank = (column * columns) + 5;
+            String myLocation = jumbles.get(myBlank);
+            char myAlphabet = myLocation.charAt(1);
+            String blankAnagram = ((myAlphabet == 'f') ? myLocation.substring(25, myLocation.length() - 11) : myLocation.substring(3, myLocation.length() - 4));
+
             int situation = column * columns;
             String index = jumbles.get(situation);
             char ch = index.charAt(0);
             int serial = ((ch == '<') ? Integer.parseInt(index.substring(22, index.length() - 7)) : Integer.parseInt(index));
-            db.updateTag(word, tag);
-            ArrayList<String> wordsList = db.extract("(\"" + word + "\")", serial, orderBy);
+            db.updateTag(blank ? word + " " + blankAnagram : word, tag, blank);
+            ArrayList<String> wordsList = db.extract("(\"" + word + "\")", serial, orderBy, blank);
             for (int cell = 0; cell < columns; cell++)
             {
                 jumbles.set((column * columns) + cell, wordsList.get(cell));
@@ -1104,7 +1252,12 @@ public class Report extends AppCompatActivity {
         char character = location.charAt(1);
         String word = ((character == 'f') ? location.substring(25, location.length() - 11) : location.substring(3, location.length() - 4));
 
-        ArrayList<String> hook = db.getDefinition(word);
+        int myBlank = (column * columns) + 5;
+        String myLocation = jumbles.get(myBlank);
+        char myAlphabet = myLocation.charAt(1);
+        String blankAnagram = ((myAlphabet == 'f') ? myLocation.substring(25, myLocation.length() - 11) : myLocation.substring(3, myLocation.length() - 4));
+
+        ArrayList<String> hook = db.getDefinition(blank ? word + " " + blankAnagram : word, blank);
         String meaning = hook.get(0);
         String back = hook.get(1);
         String front = hook.get(2);
@@ -1320,6 +1473,11 @@ public class Report extends AppCompatActivity {
             }
         });
 
+        Spinner s25 = yourCustomView.findViewById(R.id.spinner37);
+        ArrayAdapter<String> subanagramAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, jokerList);
+        subanagramAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        s25.setAdapter(subanagramAdapter);
+
         final int[] sortIndex = new int[2];
         Spinner s19 = yourCustomView.findViewById(R.id.spinner31);
         s19.setVisibility(View.GONE);
@@ -1327,6 +1485,8 @@ public class Report extends AppCompatActivity {
         Spinner s20 = yourCustomView.findViewById(R.id.spinner32);
         ArrayAdapter<String> orderAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, allColumns);
         orderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter<String> ordersAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, blankColumns);
+        ordersAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s20.setAdapter(orderAdapter);
 
         Spinner s21 = yourCustomView.findViewById(R.id.spinner33);
@@ -1349,6 +1509,24 @@ public class Report extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 sortIndex[1] = i;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
+
+        s25.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                if (i == 0) {
+                    s20.setAdapter(orderAdapter);
+                    s20.setSelection(7);
+                }
+                else {
+                    s20.setAdapter(ordersAdapter);
+                    s20.setSelection(10);
+                }
             }
 
             @Override
@@ -1381,13 +1559,13 @@ public class Report extends AppCompatActivity {
                 .setView(yourCustomView)
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        subanagrams((((e10.getText()).toString()).trim()).toUpperCase(), (e11.getText()).toString(), subanagram, ((e12.getText()).toString()).replace("\"", "'"), c4.isChecked(), sortIndex, solved, true);
+                        subanagrams((((e10.getText()).toString()).trim()).toUpperCase(), (e11.getText()).toString(), subanagram, ((e12.getText()).toString()).replace("\"", "'"), c4.isChecked(), sortIndex, solved, true, s25.getSelectedItemPosition());
                     }
                 }).create();
         dialog.show();
     }
 
-    public void subanagrams(String letterSequence, String digit, boolean subanagram, String extra, boolean autoUnderscore, int[] sortIndex, int[] solved, boolean extraSql) {
+    public void subanagrams(String letterSequence, String digit, boolean subanagram, String extra, boolean autoUnderscore, int[] sortIndex, int[] solved, boolean extraSql, int blankIndex) {
         boolean flag = false;
         int blanks = 0;
         for (int digits = 0; digits < letterSequence.length(); digits++) {
@@ -1428,12 +1606,12 @@ public class Report extends AppCompatActivity {
 
                 for (int theRadix = 0; theRadix < 26; theRadix++) {
                     char occurrences = (char) (theRadix + 97);
-                    theQuery.append("_no_").append(occurrences).append("_ <= ").append(occurrence[theRadix] + blanks).append(" AND ");
+                    theQuery.append(blankIndex == 1 ? "_total_" : "_no_").append(occurrences).append("_ <= ").append(occurrence[theRadix] + blanks).append(" AND ");
                 }
 
                 for (int myIndex = 0; myIndex < 26; myIndex++) {
                     char occurrences = (char) (myIndex + 97);
-                    theQuery.append(myIndex == 0 ? "" : " + ").append("ABS(_no_").append(occurrences).append("_ - ").append(occurrence[myIndex]).append(")");
+                    theQuery.append(myIndex == 0 ? "" : " + ").append(blankIndex == 1 ? "ABS(_total_" : "ABS(_no_").append(occurrences).append("_ - ").append(occurrence[myIndex]).append(")");
                 }
                 theQuery.append(" <= ").append((2 * blanks) + letter.length()).append(" - _length_");
             } else {
@@ -1445,7 +1623,7 @@ public class Report extends AppCompatActivity {
                 }
                 empties.append("%");
                 String empty = new String(empties);
-                theQuery.append("_length_ = ").append(letter.length() + blanks).append(" AND _alphagram_ LIKE '").append(empty).append("'");
+                theQuery.append("_length_ = ").append(letter.length() + blanks).append(blankIndex == 2 ? " AND _anagram_ LIKE '" : " AND _alphagram_ LIKE '").append(empty).append("'");
             }
 
             if (extra.length() > 0)
@@ -1454,32 +1632,34 @@ public class Report extends AppCompatActivity {
             }
 
             String customQuery = new String(theQuery);
-            String subanagramIndex = sortBy(sortIndex);
-            Cursor resultSet = db.getSqlQuery(customQuery, Report.this, solved[0], subanagramIndex);
+            boolean wildsIndex = (blankIndex > 0);
+            String subanagramIndex = sortBy(sortIndex, wildsIndex);
+            Cursor resultSet = db.getSqlQuery(customQuery, Report.this, solved[0], subanagramIndex, blank);
 
             if (resultSet != null) {
                 label = customQuery;
                 letters = 0;
                 solvedStatus = solved[0];
                 orderBy = subanagramIndex;
+                blank = wildsIndex;
 
                 closeCursor();
                 anagrams = resultSet;
                 words = anagrams.getCount();
 
-                boolean exists = db.existLabel(letters, label, orderBy);
+                boolean exists = db.existLabel(letters, label, orderBy, blank);
 
                 if (!exists) {
                     counter = 0;
-                    db.insertLabel(letters, label, orderBy);
+                    db.insertLabel(letters, label, orderBy, blank);
                 } else {
-                    counter = db.getPage(letters, label, solvedStatus, orderBy);
+                    counter = db.getPage(letters, label, solvedStatus, orderBy, blank);
                 }
 
                 int apex = (words - 1) / rows;
                 if (counter > apex && words > 0) {
                     counter = apex;
-                    db.updatePage(letters, label, counter, solvedStatus, orderBy);
+                    db.updatePage(letters, label, counter, solvedStatus, orderBy, blank);
                 }
 
                 nextWord();
@@ -1487,11 +1667,11 @@ public class Report extends AppCompatActivity {
         }
     }
 
-    public String sortBy(int[] selection) {
+    public String sortBy(int[] selection, boolean isBlank) {
         switch (selection[0]) {
             case 0: return (selection[1] == 1 ? "DESC" : "ASC");
             case 1: return " ORDER BY RANDOM()" + (selection[1] == 1 ? " DESC" : "");
-            default: return " ORDER BY _" + allColumns.get(selection[0]) + "_" + (selection[1] == 1 ? " DESC" : "");
+            default: return " ORDER BY _" + (isBlank ? blankColumns.get(selection[0]) : allColumns.get(selection[0])) + "_" + (selection[1] == 1 ? " DESC" : "");
         }
     }
 }

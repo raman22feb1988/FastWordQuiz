@@ -160,10 +160,10 @@ public class sqliteDB extends SQLiteOpenHelper {
         }
     }
 
-    public boolean containsWord(String myWord)
+    public boolean containsWord(String myWord, boolean blank)
     {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT EXISTS(SELECT 1 FROM words WHERE _word_ = \"" + myWord + "\")", null);
+        Cursor cursor = db.rawQuery("SELECT EXISTS(SELECT 1 FROM " + (blank ? "blanks" : "words") + " WHERE _word_ = \"" + myWord + "\")", null);
 
         int exist = 0;
 
@@ -176,10 +176,10 @@ public class sqliteDB extends SQLiteOpenHelper {
         return (exist != 0);
     }
 
-    public String getLabel(String guess)
+    public String getLabel(String guess, boolean blank)
     {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT _tag_ FROM words WHERE _word_ = \"" + guess + "\"", null);
+        Cursor cursor = db.rawQuery("SELECT _tag_ FROM " + (blank ? "blanks WHERE _identity_ = \"" : "words WHERE _word_ = \"") + guess + "\"", null);
 
         String label = null;
 
@@ -514,28 +514,33 @@ public class sqliteDB extends SQLiteOpenHelper {
                 try {
                     file.createNewFile();
                     CSVWriter csvWrite = new CSVWriter(new FileWriter(file));
-                    Cursor curCSV = db.rawQuery("SELECT _word_, _tag_, _solved_, _time_ FROM words WHERE _time_ > 0 OR _tag_ != \"\"", null);
-                    String[] columnsList = curCSV.getColumnNames();
-                    for (int number = 0; number < columnsList.length; number++) {
-                        columnsList[number] = columnsList[number].substring(1, columnsList[number].length() - 1);
-                    }
-                    csvWrite.writeNext(columnsList);
-                    double myLine = 0.0;
-                    double myStep = curCSV.getCount() / 100.0;
-                    while (curCSV.moveToNext()) {
-                        String[] arrStr = new String[columnsList.length];
-                        for (int index = 0; index < columnsList.length; index++) {
-                            arrStr[index] = curCSV.getString(index);
+                    for (int turn = 0; turn < 2; turn++) {
+                        Cursor curCSV = db.rawQuery("SELECT _word_, " + ((turn == 0) ? "_alphagram_" : "_anagram_") + ", _tag_, _solved_, _time_ FROM " + ((turn == 0) ? "words" : "blanks") + " WHERE _time_ > 0 OR _tag_ != \"\"", null);
+                        String[] columnsList = curCSV.getColumnNames();
+
+                        if (turn == 0) {
+                            for (int number = 0; number < columnsList.length; number++) {
+                                columnsList[number] = columnsList[number].substring(1, columnsList[number].length() - 1);
+                            }
+                            csvWrite.writeNext(columnsList);
                         }
-                        csvWrite.writeNext(arrStr);
-                        myLine++;
-                        if (myLine % myStep < 1 || myLine == 1.0)
-                        {
-                            updateProgressBar(situation, parent, p3, t39, t40, myDialog, myLine / myStep, ((int) myLine) + "/" + curCSV.getCount(), false);
+
+                        double myLine = 0.0;
+                        double myStep = curCSV.getCount() / 100.0;
+                        while (curCSV.moveToNext()) {
+                            String[] arrStr = new String[columnsList.length];
+                            for (int index = 0; index < columnsList.length; index++) {
+                                arrStr[index] = curCSV.getString(index);
+                            }
+                            csvWrite.writeNext(arrStr);
+                            myLine++;
+                            if (myLine % myStep < 1 || myLine == 1.0) {
+                                updateProgressBar(situation, parent, p3, t39, t40, myDialog, myLine / myStep, ((int) myLine) + "/" + curCSV.getCount(), false);
+                            }
                         }
+                        curCSV.close();
                     }
                     csvWrite.close();
-                    curCSV.close();
                     uiThreadBox("Export tags", "Export tags complete.\nSaved tags to " + file.getAbsolutePath() + ".", situation, parent);
                 } catch (Exception sqlEx) {
                     myDialog.dismiss();
@@ -604,20 +609,32 @@ public class sqliteDB extends SQLiteOpenHelper {
                                         }
                                         reader.close();
 
+                                        int wordIndex = 0;
+                                        int anagramIndex = 0;
+                                        ArrayList<Integer> otherIndex = new ArrayList<>();
+
+                                        for (int column = 0; column < columns.length; column++) {
+                                            if (columns[column].equals("word")) {
+                                                wordIndex = column;
+                                            } else if (columns[column].equals("alphagram")) {
+                                                anagramIndex = column;
+                                            } else {
+                                                otherIndex.add(column);
+                                            }
+                                        }
+
                                         double myLine = 0.0;
                                         double myStep = lines / 100.0;
                                         do {
+                                            boolean isBlank = (nextLine[anagramIndex].charAt(nextLine[anagramIndex].length() - 1) == '?');
                                             ContentValues contentValues = new ContentValues();
-                                            int wordIndex = 0;
-                                            for (int column = 0; column < columns.length; column++) {
-                                                if (columns[column].equals("word")) {
-                                                    wordIndex = column;
-                                                } else {
-                                                    contentValues.put("_" + columns[column] + "_", nextLine[column]);
-                                                }
+
+                                            for (int columnNumber : otherIndex) {
+                                                contentValues.put("_" + columns[columnNumber] + "_", nextLine[columnNumber]);
                                             }
-                                            db.update("words", contentValues, "_word_ = ?",
-                                                    new String[]{nextLine[wordIndex]});
+
+                                            db.update(isBlank ? "blanks" : "words", contentValues, isBlank ? "_identity_ = ?" : "_word_ = ?",
+                                                    new String[] {isBlank ? nextLine[wordIndex] + " " + nextLine[anagramIndex] : nextLine[wordIndex]});
                                             nextLine = csvRead.readNext();
                                             myLine++;
                                             if (myLine % myStep < 1 || myLine == 1.0) {
@@ -645,10 +662,10 @@ public class sqliteDB extends SQLiteOpenHelper {
         dialog.show();
     }
 
-    public int getMaximumWordLength()
+    public int getMaximumWordLength(boolean blank)
     {
         SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.rawQuery("SELECT MAX(_length_) FROM words", null);
+        Cursor cursor = db.rawQuery("SELECT MAX(_length_) FROM " + (blank ? "blanks" : "words"), null);
         int maximumWordLength = 0;
 
         if (cursor.moveToFirst()) {
@@ -903,7 +920,7 @@ public class sqliteDB extends SQLiteOpenHelper {
                         }
                     }
 
-                    Cursor[] anagramList = new Cursor[getMaximumWordLength() - 1];
+                    Cursor[] anagramList = new Cursor[getMaximumWordLength(joker) - 1];
                     int[] wordLength = new int[anagramList.length];
                     int[] pages = new int[anagramList.length];
                     int maximumPages = 0;
@@ -940,7 +957,7 @@ public class sqliteDB extends SQLiteOpenHelper {
                         ContentValues values = new ContentValues();
                         values.put("_page_", positionNumber);
 
-                        db.update(joker ? "blanks" : "words", values, (joker ? "_anagram_ IN" : "_alphagram_ IN ") + pageString,
+                        db.update(joker ? "blanks" : "words", values, (joker ? "_anagram_ IN " : "_alphagram_ IN ") + pageString,
                                 new String[] {});
 
                         if (positionNumber % myStep2 < 1 || positionNumber == 1)
@@ -968,7 +985,7 @@ public class sqliteDB extends SQLiteOpenHelper {
                         ContentValues values = new ContentValues();
                         values.put("_position_", cellNumber);
 
-                        db.update(joker ? "blanks" : "words", values, (joker ? "_anagram_ IN" : "_alphagram_ IN ") + cellString,
+                        db.update(joker ? "blanks" : "words", values, (joker ? "_anagram_ IN " : "_alphagram_ IN ") + cellString,
                                 new String[] {});
 
                         if (cellNumber % myStep3 < 1 || cellNumber == 1)
@@ -1322,7 +1339,7 @@ public class sqliteDB extends SQLiteOpenHelper {
 
         if (exists != 0) {
             db.update("zoom", values, "_activity_ = ?",
-                    new String[]{parentActivity});
+                    new String[] {parentActivity});
         }
         else {
             values.put("_activity_", parentActivity);
@@ -1330,7 +1347,7 @@ public class sqliteDB extends SQLiteOpenHelper {
         }
     }
 
-    public void insertLabel(int letters, String label, String orderBy)
+    public void insertLabel(int letters, String label, String orderBy, boolean blank)
     {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -1347,16 +1364,16 @@ public class sqliteDB extends SQLiteOpenHelper {
         contentValues.put("_nothing_", 0);
         contentValues.put("_partial_", 0);
         contentValues.put("_total_", 0);
-        contentValues.put("_blank_", 0);
+        contentValues.put("_blank_", blank ? 1 : 0);
         contentValues.put("_sort_", orderBy);
 
         db.insert("scores", null, contentValues);
     }
 
-    public int[] getCustomScore(String customQuery, int solvedStatus)
+    public int[] getCustomScore(String customQuery, int solvedStatus, boolean blank)
     {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT SUM(_solved_), COUNT(_word_) FROM words WHERE _alphagram_ IN (SELECT _alphagram_ FROM words WHERE " + customQuery + " GROUP BY _alphagram_" + solvedCondition(solvedStatus) + ")", null);
+        Cursor cursor = db.rawQuery("SELECT SUM(_solved_), COUNT(_word_) FROM " + (blank ? "blanks" : "words") + " WHERE " + (blank ? "_anagram_" : "_alphagram_") + " IN (SELECT " + (blank ? "_anagram_" : "_alphagram_") + " FROM " + (blank ? "blanks" : "words") + " WHERE " + customQuery + " GROUP BY " + (blank ? "_anagram_" : "_alphagram_") + solvedCondition(solvedStatus) + ")", null);
 
         int[] answer = new int[2];
 
@@ -1370,10 +1387,10 @@ public class sqliteDB extends SQLiteOpenHelper {
         return answer;
     }
 
-    public int[] getScore(int letters, String label, int solvedStatus)
+    public int[] getScore(int letters, String label, int solvedStatus, boolean blank)
     {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT SUM(_solved_), COUNT(_word_) FROM words WHERE _alphagram_ IN (SELECT _alphagram_ FROM words" + ((letters > 1 || !label.equals("*")) ? " WHERE " : "") + (letters > 1 ? "_length_ = " + letters : "") + ((letters > 1 && !label.equals("*")) ? " AND " : "") + (!label.equals("*") ? "_tag_ = \"" + label + "\"" : "") + " GROUP BY _alphagram_" + solvedCondition(solvedStatus) + ")", null);
+        Cursor cursor = db.rawQuery("SELECT SUM(_solved_), COUNT(_word_) FROM " + (blank ? "blanks" : "words") + " WHERE " + (blank ? "_anagram_" : "_alphagram_") + " IN (SELECT " + (blank ? "_anagram_" : "_alphagram_") + " FROM " + (blank ? "blanks" : "words") + ((letters > 1 || !label.equals("*")) ? " WHERE " : "") + (letters > 1 ? "_length_ = " + letters : "") + ((letters > 1 && !label.equals("*")) ? " AND " : "") + (!label.equals("*") ? "_tag_ = \"" + label + "\"" : "") + " GROUP BY " + (blank ? "_anagram_" : "_alphagram_") + solvedCondition(solvedStatus) + ")", null);
 
         int[] answer = new int[2];
 
@@ -1387,10 +1404,10 @@ public class sqliteDB extends SQLiteOpenHelper {
         return answer;
     }
 
-    public int getCounter(int letters, String label, int solvedStatus, String orderBy)
+    public int getCounter(int letters, String label, int solvedStatus, String orderBy, boolean blank)
     {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT " + quizCondition(solvedStatus) + " FROM scores WHERE _blank_ = 0 AND _length_ = " + letters + " AND _query_ = \"" + label + "\" AND _sort_ = \"" + orderBy + "\"", null);
+        Cursor cursor = db.rawQuery("SELECT " + quizCondition(solvedStatus) + " FROM scores WHERE _blank_ = " + (blank ? "1" : "0") + " AND _length_ = " + letters + " AND _query_ = \"" + label + "\" AND _sort_ = \"" + orderBy + "\"", null);
 
         String data = null;
 
@@ -1476,18 +1493,18 @@ public class sqliteDB extends SQLiteOpenHelper {
         return db.rawQuery("SELECT DISTINCT(_alphagram_) FROM words WHERE _length_ = " + letters + " ORDER BY _probability_ DESC", null);
     }
 
-    public Cursor getCustomQuiz(String customQuery, Context activity, int solvedStatus, String orderBy)
+    public Cursor getCustomQuiz(String customQuery, Context activity, int solvedStatus, String orderBy, boolean blank)
     {
         try {
             SQLiteDatabase db = this.getReadableDatabase();
 
             if (orderBy.charAt(0) == ' ')
             {
-                return db.rawQuery("SELECT _alphagram_ FROM words WHERE " + customQuery + " GROUP BY _alphagram_" + solvedCondition(solvedStatus) + orderBy, null);
+                return db.rawQuery("SELECT " + (blank ? "_anagram_" : "_alphagram_") + " FROM " + (blank ? "words" : "blanks") + " WHERE " + customQuery + " GROUP BY " + (blank ? "_anagram_" : "_alphagram_") + solvedCondition(solvedStatus) + orderBy, null);
             }
             else
             {
-                return db.rawQuery("SELECT DISTINCT(_alphagram_) FROM words WHERE " + customQuery + solvedCondition(solvedStatus), null);
+                return db.rawQuery("SELECT DISTINCT(" + (blank ? "_anagram_" : "_alphagram_") + ") FROM " + (blank ? "words" : "blanks") + " WHERE " + customQuery + solvedCondition(solvedStatus), null);
             }
         }
         catch (SQLiteException e) {
@@ -1496,7 +1513,7 @@ public class sqliteDB extends SQLiteOpenHelper {
         }
     }
 
-    public Cursor getSolvedWords(int letters, int solvedStatus, String orderBy)
+    public Cursor getSolvedWords(int letters, int solvedStatus, String orderBy, boolean blank)
     {
         String status = "";
         if (solvedStatus == 0)
@@ -1509,10 +1526,10 @@ public class sqliteDB extends SQLiteOpenHelper {
         }
 
         SQLiteDatabase db = this.getReadableDatabase();
-        return db.rawQuery("SELECT _word_ FROM words" + (letters >= 0 || solvedStatus < 2 ? " WHERE " : "") + (letters >= 0 ? "_length_ = " + letters : "") + status + (orderBy.charAt(0) == ' ' ? orderBy : ""), null);
+        return db.rawQuery((blank ? "SELECT _identity_ FROM blanks" : "SELECT _word_ FROM words") + (letters >= 0 || solvedStatus < 2 ? " WHERE " : "") + (letters >= 0 ? "_length_ = " + letters : "") + status + (orderBy.charAt(0) == ' ' ? orderBy : ""), null);
     }
 
-    public Cursor getLabelledWords(int letters, String label, int solvedStatus, String orderBy)
+    public Cursor getLabelledWords(int letters, String label, int solvedStatus, String orderBy, boolean blank)
     {
         String status = "";
         if (solvedStatus == 0)
@@ -1525,10 +1542,10 @@ public class sqliteDB extends SQLiteOpenHelper {
         }
 
         SQLiteDatabase db = this.getReadableDatabase();
-        return db.rawQuery("SELECT _word_ FROM words WHERE " + (letters >= 0 ? "_length_ = " + letters + " AND " : "") + status + "_tag_ = \"" + label + "\"" + (orderBy.charAt(0) == ' ' ? orderBy : ""), null);
+        return db.rawQuery((blank ? "SELECT _identity_ FROM blanks WHERE" : "SELECT _word_ FROM words WHERE") + (letters >= 0 ? "_length_ = " + letters + " AND " : "") + status + "_tag_ = \"" + label + "\"" + (orderBy.charAt(0) == ' ' ? orderBy : ""), null);
     }
 
-    public Cursor getSqlQuery(String query, Context activity, int solvedStatus, String orderBy)
+    public Cursor getSqlQuery(String query, Context activity, int solvedStatus, String orderBy, boolean blank)
     {
         String status = "";
         if (solvedStatus == 0)
@@ -1542,7 +1559,7 @@ public class sqliteDB extends SQLiteOpenHelper {
 
         try {
             SQLiteDatabase db = this.getReadableDatabase();
-            return db.rawQuery("SELECT _word_ FROM words WHERE " + status + query + (orderBy.charAt(0) == ' ' ? orderBy : ""), null);
+            return db.rawQuery((blank ? "SELECT _identity_ FROM blanks WHERE" : "SELECT _word_ FROM words WHERE") + status + query + (orderBy.charAt(0) == ' ' ? orderBy : ""), null);
         }
         catch (SQLiteException e) {
             alertBox("Error", e.toString(), activity);
@@ -1550,13 +1567,13 @@ public class sqliteDB extends SQLiteOpenHelper {
         }
     }
 
-    public HashMap<String, ArrayList<String>> getUnsolvedAnswers(ArrayList<String> jumbles)
+    public HashMap<String, ArrayList<String>> getUnsolvedAnswers(ArrayList<String> jumbles, boolean blank)
     {
         HashMap<String, ArrayList<String>> answerList = new HashMap<>();
         String jumble = (((jumbles.toString()).replace("[", "(\"")).replace("]", "\")")).replace(", ", "\", \"");
 
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT _alphagram_, _word_ FROM words WHERE _alphagram_ IN " + jumble + " AND _solved_ = 0", null);
+        Cursor cursor = db.rawQuery((blank ? "SELECT _anagram_, _word_ FROM blanks WHERE _anagram_ IN " : "SELECT _alphagram_, _word_ FROM words WHERE _alphagram_ IN ") + jumble + " AND _solved_ = 0", null);
 
         if (cursor.moveToFirst()) {
             do {
@@ -1579,14 +1596,14 @@ public class sqliteDB extends SQLiteOpenHelper {
         return answerList;
     }
 
-    public HashMap<String, Integer> getAllAnswers(ArrayList<String> jumbles)
+    public HashMap<String, Integer> getAllAnswers(ArrayList<String> jumbles, boolean blank)
     {
         HashMap<String, Integer> allList = new HashMap<>();
 
         String jumble = (((jumbles.toString()).replace("[", "(\"")).replace("]", "\")")).replace(", ", "\", \"");
 
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT _alphagram_, COUNT(_word_) FROM words WHERE _alphagram_ IN " + jumble + " GROUP BY _alphagram_", null);
+        Cursor cursor = db.rawQuery((blank ? "SELECT _anagram_, COUNT(_word_) FROM blanks WHERE _anagram_ IN " : "SELECT _alphagram_, COUNT(_word_) FROM words WHERE _alphagram_ IN ") + jumble + " GROUP BY " + (blank ? "_anagram_" : "_alphagram_"), null);
 
         if (cursor.moveToFirst()) {
             do {
@@ -1619,13 +1636,13 @@ public class sqliteDB extends SQLiteOpenHelper {
         return colourList;
     }
 
-    public String getSolvedAnswers(String jumble)
+    public String getSolvedAnswers(String jumble, boolean blank)
     {
         StringBuilder solved = new StringBuilder();
         int total = 1;
 
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT _word_, _definition_, _back_, _front_, _tag_, _length_, _csw24_, _csw19_, _csw15_, _csw12_, _csw07_, _nwl23_, _nwl18_, _twl06_, _nswl23_, _wims_, _cel21_ FROM words WHERE _alphagram_ = \"" + jumble + "\" AND _solved_ = 1 ORDER BY _time_", null);
+        Cursor cursor = db.rawQuery("SELECT _word_, _definition_, _back_, _front_, _tag_, _length_, _csw24_, _csw19_, _csw15_, _csw12_, _csw07_, _nwl23_, _nwl18_, _twl06_, _nswl23_, _wims_, _cel21_ FROM " + (blank ? "blanks WHERE _anagram_ = \"" : "words WHERE _alphagram_ = \"") + jumble + "\" AND _solved_ = 1 ORDER BY _time_", null);
 
         if (cursor.moveToFirst()) {
             do {
@@ -1673,13 +1690,13 @@ public class sqliteDB extends SQLiteOpenHelper {
         return new String(solved);
     }
 
-    public String getUnsolvedWords(String unsolved)
+    public String getUnsolvedWords(String unsolved, boolean blank)
     {
         StringBuilder unsolvedAnswers = new StringBuilder();
         int total = 1;
 
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT _word_, _definition_, _back_, _front_, _length_, _csw24_, _csw19_, _csw15_, _csw12_, _csw07_, _nwl23_, _nwl18_, _twl06_, _nswl23_, _wims_, _cel21_ FROM words WHERE _alphagram_ = \"" + unsolved + "\" AND _solved_ = 0", null);
+        Cursor cursor = db.rawQuery("SELECT _word_, _definition_, _back_, _front_, _length_, _csw24_, _csw19_, _csw15_, _csw12_, _csw07_, _nwl23_, _nwl18_, _twl06_, _nswl23_, _wims_, _cel21_ FROM " + (blank ? "blanks WHERE _anagram_ = \"" : "words WHERE _alphagram_ = \"") + unsolved + "\" AND _solved_ = 0", null);
 
         if (cursor.moveToFirst()) {
             do {
@@ -1716,12 +1733,12 @@ public class sqliteDB extends SQLiteOpenHelper {
         return new String(unsolvedAnswers);
     }
 
-    public ArrayList<String> getDefinition(String guess)
+    public ArrayList<String> getDefinition(String guess, boolean blank)
     {
         ArrayList<String> hookList = new ArrayList<>();
 
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT _definition_, _back_, _front_, _length_, _csw24_, _csw19_, _csw15_, _csw12_, _csw07_, _nwl23_, _nwl18_, _twl06_, _nswl23_, _wims_, _cel21_, _tag_ FROM words WHERE _word_ = \"" + guess + "\"", null);
+        Cursor cursor = db.rawQuery("SELECT _definition_, _back_, _front_, _length_, _csw24_, _csw19_, _csw15_, _csw12_, _csw07_, _nwl23_, _nwl18_, _twl06_, _nswl23_, _wims_, _cel21_, _tag_ FROM " + (blank ? "blanks WHERE _identity_ = \"" : "words WHERE _word_ = \"") + guess + "\"", null);
 
         String meaning = null;
         String back = null;
@@ -1764,10 +1781,10 @@ public class sqliteDB extends SQLiteOpenHelper {
         return hookList;
     }
 
-    public int getPage(int letters, String label, int solvedStatus, String orderBy)
+    public int getPage(int letters, String label, int solvedStatus, String orderBy, boolean blank)
     {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT " + reportCondition(solvedStatus) + " FROM scores WHERE _blank_ = 0 AND _length_ = " + letters + " AND _query_ = \"" + label + "\" AND _sort_ = \"" + orderBy + "\"", null);
+        Cursor cursor = db.rawQuery("SELECT " + reportCondition(solvedStatus) + " FROM scores WHERE _blank_ = " + (blank ? "1" : "0") + " AND _length_ = " + letters + " AND _query_ = \"" + label + "\" AND _sort_ = \"" + orderBy + "\"", null);
 
         String data = null;
 
@@ -1788,7 +1805,7 @@ public class sqliteDB extends SQLiteOpenHelper {
         }
     }
 
-    public void resetLabel(String label, int lengthIndex, int letters, boolean timeIndex) {
+    public void resetLabel(String label, int lengthIndex, int letters, boolean timeIndex, boolean blank) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -1799,6 +1816,11 @@ public class sqliteDB extends SQLiteOpenHelper {
         }
 
         StringBuilder whereClause = new StringBuilder();
+        whereClause.append("_blank_ = ").append(blank ? "1" : "0");
+        if (!label.equals("*") || lengthIndex == 0)
+        {
+            whereClause.append(" AND ");
+        }
         if (!label.equals("*"))
         {
             whereClause.append("_tag_ = \"").append(label).append("\"");
@@ -1812,31 +1834,31 @@ public class sqliteDB extends SQLiteOpenHelper {
             whereClause.append("_length_ = ").append(letters);
         }
 
-        db.update("words", values, new String(whereClause),
+        db.update(blank ? "blanks" : "words", values, new String(whereClause),
                 new String[] {});
     }
 
-    public void updateCounter(int letters, String label, int counter, int solvedStatus, String orderBy) {
+    public void updateCounter(int letters, String label, int counter, int solvedStatus, String orderBy, boolean blank) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
         values.put(quizCondition(solvedStatus), counter);
 
         db.update("scores", values, "_length_ = ? AND _query_ = ? AND _blank_ = ? AND _sort_ = ?",
-                new String[] {Integer.toString(letters), label, "0", orderBy});
+                new String[] {Integer.toString(letters), label, blank ? "1" : "0", orderBy});
     }
 
-    public void updatePage(int letters, String label, int counter, int solvedStatus, String orderBy) {
+    public void updatePage(int letters, String label, int counter, int solvedStatus, String orderBy, boolean blank) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
         values.put(reportCondition(solvedStatus), counter);
 
         db.update("scores", values, "_length_ = ? AND _query_ = ? AND _blank_ = ? AND _sort_ = ?",
-                new String[] {Integer.toString(letters), label, "0", orderBy});
+                new String[] {Integer.toString(letters), label, blank ? "1" : "0", orderBy});
     }
 
-    public void updateTime(ArrayList<String> guesses, double time, boolean submitted, String cardbox) {
+    public void updateTime(ArrayList<String> guesses, double time, boolean submitted, String cardbox, boolean blank) {
         SQLiteDatabase db = this.getWritableDatabase();
         String guess = (((guesses.toString()).replace("[", "(\"")).replace("]", "\")")).replace(", ", "\", \"");
         StringBuilder updates = new StringBuilder();
@@ -1853,34 +1875,24 @@ public class sqliteDB extends SQLiteOpenHelper {
             updates.append("_tag_ = \"").append(cardbox).append("\", ");
         }
 
-        db.execSQL("UPDATE words SET " + new String(updates) + "_time_ = _time_ + " + time + " WHERE _word_ IN " + guess);
+        db.execSQL("UPDATE " + (blank ? "blanks" : "words") + " SET " + new String(updates) + "_time_ = _time_ + " + time + (blank ? " WHERE _identity_ IN " : " WHERE _word_ IN ") + guess);
     }
 
-    public void updateTag(String guess, String tag)
+    public void updateTag(String guess, String tag, boolean blank)
     {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
         values.put("_tag_", tag);
 
-        db.update("words", values, "_word_ = ?",
+        db.update(blank ? "blanks" : "words", values, blank ? "_identity_ = ?" : "_word_ = ?",
                 new String[] {guess});
     }
 
-    public void updateWord(String line, String category) {
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        ContentValues values = new ContentValues();
-        values.put("_tag_", category);
-
-        db.update("words", values, "_word_ = ?",
-                new String[] {line});
-    }
-
-    public boolean existLabel(int letters, String label, String orderBy)
+    public boolean existLabel(int letters, String label, String orderBy, boolean blank)
     {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT EXISTS(SELECT 1 FROM scores WHERE _blank_ = 0 AND _length_ = " + letters + " AND _query_ = \"" + label + "\" AND _sort_ = \"" + orderBy + "\")", null);
+        Cursor cursor = db.rawQuery("SELECT EXISTS(SELECT 1 FROM scores WHERE _blank_ = " + (blank ? "1" : "0") + " AND _length_ = " + letters + " AND _query_ = \"" + label + "\" AND _sort_ = \"" + orderBy + "\")", null);
 
         int exists = 0;
 
@@ -1893,12 +1905,12 @@ public class sqliteDB extends SQLiteOpenHelper {
         return (exists != 0);
     }
 
-    public String getSummary(ArrayList<String> guesses)
+    public String getSummary(ArrayList<String> guesses, boolean blank)
     {
         String guess = (((guesses.toString()).replace("[", "(\"")).replace("]", "\")")).replace(", ", "\", \"");
 
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT _front_, _word_, _back_, _tag_ FROM words WHERE _alphagram_ IN " + guess + " AND _solved_ = 1", null);
+        Cursor cursor = db.rawQuery("SELECT _front_, _word_, _back_, _tag_ FROM " + (blank ? "blanks WHERE _anagram_ IN " : "words WHERE _alphagram_ IN ") + guess + " AND _solved_ = 1", null);
 
         HashMap<String, ArrayList<String>> h = new HashMap<>();
 
@@ -2169,7 +2181,7 @@ public class sqliteDB extends SQLiteOpenHelper {
         return (new String(ultimateQuery)).trim();
     }
 
-    public ArrayList<String> extract(String jumbleList, int start, String orderBy)
+    public ArrayList<String> extract(String jumbleList, int start, String orderBy, boolean blank)
     {
         ArrayList<String> wordList = new ArrayList<>();
 
@@ -2177,7 +2189,7 @@ public class sqliteDB extends SQLiteOpenHelper {
         HashMap<String, String> coloursMap = getColours();
 
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT _word_, _definition_, _time_, _back_, _front_, _answers_, _page_, _alphagram_, _timestamp_, _csw24_, _csw19_, _csw15_, _csw12_, _csw07_, _nwl23_, _nwl18_, _twl06_, _nswl23_, _wims_, _cel21_, _incorrect_, _wrong_, _tag_ FROM words WHERE _word_ IN " + jumbleList + (orderBy.charAt(0) == ' ' ? orderBy : ""), null);
+        Cursor cursor = db.rawQuery("SELECT _word_, _definition_, _time_, _back_, _front_, _answers_, _page_, " + (blank ? "_anagram_" : "_alphagram_") + ", _timestamp_, _csw24_, _csw19_, _csw15_, _csw12_, _csw07_, _nwl23_, _nwl18_, _twl06_, _nswl23_, _wims_, _cel21_, _incorrect_, _wrong_, _tag_ FROM " + (blank ? "blanks WHERE _identity_ IN " : "words WHERE _word_ IN ") + jumbleList + (orderBy.charAt(0) == ' ' ? orderBy : ""), null);
 
         if (orderBy.equals("DESC") ? cursor.moveToLast() : cursor.moveToFirst()) {
             do {
@@ -2256,30 +2268,31 @@ public class sqliteDB extends SQLiteOpenHelper {
         return wordList;
     }
 
-    public void trackWrongAnswers(String wrongAlphagram, String wrongWord)
+    public void trackWrongAnswers(ArrayList<String> wrongAlphagram, String wrongWord, boolean blank)
     {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT _incorrect_, _wrong_ FROM words WHERE _alphagram_ = \"" + wrongAlphagram + "\"", null);
-
-        int first = 0;
-        String second = null;
+        String incorrectAlphagram = (((wrongAlphagram.toString()).replace("[", "(\"")).replace("]", "\")")).replace(", ", "\", \"");
+        Cursor cursor = db.rawQuery("SELECT _incorrect_, _wrong_, " + (blank ? "_identity_ FROM blanks WHERE _identity_ IN " : "_alphagram_ FROM words WHERE _alphagram_ IN ") + incorrectAlphagram, null);
 
         if (cursor.moveToFirst()) {
-            first = cursor.getInt(0);
-            second = cursor.getString(1);
+            do {
+                int first = cursor.getInt(0);
+                String second = cursor.getString(1);
+                String identity = cursor.getString(2);
+
+                List<String> third = Arrays.asList(second.split(", "));
+                ContentValues values = new ContentValues();
+                values.put("_incorrect_", first + 1);
+                if (!third.contains(wrongWord)) {
+                    values.put("_wrong_", second.length() == 0 ? wrongWord : second + ", " + wrongWord);
+                }
+
+                db.update(blank ? "blanks" : "words", values, blank ? "_identity_ = ?" : "_alphagram_ = ?",
+                        new String[] {identity});
+            } while (cursor.moveToLast());
         }
 
         cursor.close();
-
-        List<String> third = Arrays.asList(second.split(", "));
-        ContentValues values = new ContentValues();
-        values.put("_incorrect_", first + 1);
-        if (!third.contains(wrongWord)) {
-            values.put("_wrong_", second.length() == 0 ? wrongWord : second + ", " + wrongWord);
-        }
-
-        db.update("words", values, "_alphagram_ = ?",
-                new String[] {wrongAlphagram});
     }
 
     public void refresh(Context theContext, boolean parent)
@@ -2328,7 +2341,7 @@ public class sqliteDB extends SQLiteOpenHelper {
         }
     }
 
-    public void resetByLabel(Context theContext, boolean parent)
+    public void resetByLabel(Context theContext, boolean parent, ArrayList<String> blankList, int maximumWordLength, int maximumBlankLength)
     {
         LayoutInflater inflater = LayoutInflater.from(theContext);
         final View yourCustomView = inflater.inflate(R.layout.reset, null);
@@ -2337,11 +2350,27 @@ public class sqliteDB extends SQLiteOpenHelper {
         EditText e5 = yourCustomView.findViewById(R.id.edittext22);
         TextView t5 = yourCustomView.findViewById(R.id.textview36);
 
-        e5.setHint("Enter a value between 2 and " + getMaximumWordLength());
+        e5.setHint("Enter a value between 2 and " + maximumWordLength);
+
+        Spinner s12 = yourCustomView.findViewById(R.id.spinner38);
+        ArrayAdapter<String> blankAdapter = new ArrayAdapter<>(theContext, android.R.layout.simple_spinner_item, blankList);
+        blankAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        s12.setAdapter(blankAdapter);
 
         Spinner s1 = yourCustomView.findViewById(R.id.spinner11);
         List<Pair<String, String>> tagsList = getAllLabels();
         tagsList.add(0, new Pair<>("(All Tags)", null));
+
+        s12.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                e5.setHint("Enter a value between 2 and " + ((i == 0) ? maximumWordLength : maximumBlankLength));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
 
         ColourAdapter spinnerAdapter = new ColourAdapter(theContext, R.layout.colour, R.id.textview62, tagsList, parent ? (MainActivity) theContext : (Report) theContext, true);
         s1.setAdapter(spinnerAdapter);
@@ -2426,7 +2455,7 @@ public class sqliteDB extends SQLiteOpenHelper {
                         String myLabel = (e4.getText()).toString();
                         String alphabets = (e5.getText()).toString();
                         int temporary = (alphabets.length() == 0 ? 0 : Integer.parseInt(alphabets));
-                        resetLabel(myLabel, lengthIndex[0], temporary, timeIndex[0]);
+                        resetLabel(myLabel, lengthIndex[0], temporary, timeIndex[0], s12.getSelectedItemPosition() > 0);
                         refresh(theContext, parent);
                     }
                 }).create();
@@ -3475,6 +3504,45 @@ public class sqliteDB extends SQLiteOpenHelper {
         String[] allColumns = myCursor.getColumnNames();
         myCursor.close();
         return allColumns;
+    }
+
+    public ArrayList<String> getBlankAnagrams(String inputWord) {
+        ArrayList<String> blankAnagrams = new ArrayList<>();
+        char[] sortedAnagram = inputWord.toCharArray();
+        Arrays.sort(sortedAnagram);
+        blankAnagrams.add(new String(sortedAnagram));
+        HashSet<Character> over = new HashSet<>();
+
+        for (int alphabetIndex = 0; alphabetIndex < inputWord.length(); alphabetIndex++) {
+            char anagramsItem = inputWord.charAt(alphabetIndex);
+            if (!over.contains(anagramsItem)) {
+                over.add(anagramsItem);
+                String anagramItem = inputWord.substring(0, alphabetIndex) + inputWord.substring(alphabetIndex + 1);
+                char[] blankAnagram = anagramItem.toCharArray();
+                Arrays.sort(blankAnagram);
+                blankAnagrams.add(new String(blankAnagram) + "?");
+            }
+        }
+
+        return blankAnagrams;
+    }
+
+    public ArrayList<String> getJokerAnagrams(String inputWord) {
+        ArrayList<String> blankAnagrams = new ArrayList<>();
+        HashSet<Character> over = new HashSet<>();
+
+        for (int alphabetIndex = 0; alphabetIndex < inputWord.length(); alphabetIndex++) {
+            char anagramsItem = inputWord.charAt(alphabetIndex);
+            if (!over.contains(anagramsItem)) {
+                over.add(anagramsItem);
+                String anagramItem = inputWord.substring(0, alphabetIndex) + inputWord.substring(alphabetIndex + 1);
+                char[] blankAnagram = anagramItem.toCharArray();
+                Arrays.sort(blankAnagram);
+                blankAnagrams.add(new String(blankAnagram) + "?");
+            }
+        }
+
+        return blankAnagrams;
     }
 
     public static void main(String[] args) {

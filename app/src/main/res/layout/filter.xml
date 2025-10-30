@@ -8,6 +8,15 @@
         android:layout_height="wrap_content"
         android:background="@drawable/rectangle">
         <Spinner
+            android:id="@+id/spinner35"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </FrameLayout>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/rectangle">
+        <Spinner
             android:id="@+id/spinner6"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
