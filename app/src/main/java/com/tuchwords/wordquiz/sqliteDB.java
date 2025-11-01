@@ -706,7 +706,7 @@ public class sqliteDB extends SQLiteOpenHelper {
         TextView t44 = myCustomView.findViewById(R.id.textview79);
 
         AlertDialog myDialog = new AlertDialog.Builder(myContext)
-                .setTitle(joker ? "Preparing blank database" : "Preparing regular database")
+                .setTitle("Inserting words")
                 .setView(myCustomView)
                 .create();
         myDialog.show();
@@ -1484,13 +1484,13 @@ public class sqliteDB extends SQLiteOpenHelper {
     public Cursor getAllBlankAnagrams(int letters)
     {
         SQLiteDatabase db = this.getReadableDatabase();
-        return db.rawQuery("SELECT DISTINCT(_anagram_) FROM blanks WHERE _length_ = " + letters + " ORDER BY _probability_ DESC", null);
+        return db.rawQuery("SELECT _anagram_ FROM blanks WHERE _length_ = " + letters + " GROUP BY _anagram_ ORDER BY _probability_ DESC", null);
     }
 
     public Cursor getAllRegularAnagrams(int letters)
     {
         SQLiteDatabase db = this.getReadableDatabase();
-        return db.rawQuery("SELECT DISTINCT(_alphagram_) FROM words WHERE _length_ = " + letters + " ORDER BY _probability_ DESC", null);
+        return db.rawQuery("SELECT _alphagram_ FROM words WHERE _length_ = " + letters + " GROUP BY _alphagram_ ORDER BY _probability_ DESC", null);
     }
 
     public Cursor getCustomQuiz(String customQuery, Context activity, int solvedStatus, String orderBy, boolean blank)
@@ -1500,11 +1500,11 @@ public class sqliteDB extends SQLiteOpenHelper {
 
             if (orderBy.charAt(0) == ' ')
             {
-                return db.rawQuery("SELECT " + (blank ? "_anagram_" : "_alphagram_") + " FROM " + (blank ? "words" : "blanks") + " WHERE " + customQuery + " GROUP BY " + (blank ? "_anagram_" : "_alphagram_") + solvedCondition(solvedStatus) + orderBy, null);
+                return db.rawQuery("SELECT " + (blank ? "_anagram_" : "_alphagram_") + " FROM " + (blank ? "blanks" : "words") + " WHERE " + customQuery + " GROUP BY " + (blank ? "_anagram_" : "_alphagram_") + solvedCondition(solvedStatus) + orderBy, null);
             }
             else
             {
-                return db.rawQuery("SELECT DISTINCT(" + (blank ? "_anagram_" : "_alphagram_") + ") FROM " + (blank ? "words" : "blanks") + " WHERE " + customQuery + solvedCondition(solvedStatus), null);
+                return db.rawQuery("SELECT DISTINCT(" + (blank ? "_anagram_" : "_alphagram_") + ") FROM " + (blank ? "blanks" : "words") + " WHERE " + customQuery + solvedCondition(solvedStatus), null);
             }
         }
         catch (SQLiteException e) {
@@ -1542,7 +1542,7 @@ public class sqliteDB extends SQLiteOpenHelper {
         }
 
         SQLiteDatabase db = this.getReadableDatabase();
-        return db.rawQuery((blank ? "SELECT _identity_ FROM blanks WHERE" : "SELECT _word_ FROM words WHERE") + (letters >= 0 ? "_length_ = " + letters + " AND " : "") + status + "_tag_ = \"" + label + "\"" + (orderBy.charAt(0) == ' ' ? orderBy : ""), null);
+        return db.rawQuery((blank ? "SELECT _identity_ FROM blanks WHERE " : "SELECT _word_ FROM words WHERE ") + (letters >= 0 ? "_length_ = " + letters + " AND " : "") + status + "_tag_ = \"" + label + "\"" + (orderBy.charAt(0) == ' ' ? orderBy : ""), null);
     }
 
     public Cursor getSqlQuery(String query, Context activity, int solvedStatus, String orderBy, boolean blank)
@@ -1559,7 +1559,7 @@ public class sqliteDB extends SQLiteOpenHelper {
 
         try {
             SQLiteDatabase db = this.getReadableDatabase();
-            return db.rawQuery((blank ? "SELECT _identity_ FROM blanks WHERE" : "SELECT _word_ FROM words WHERE") + status + query + (orderBy.charAt(0) == ' ' ? orderBy : ""), null);
+            return db.rawQuery((blank ? "SELECT _identity_ FROM blanks WHERE " : "SELECT _word_ FROM words WHERE ") + status + query + (orderBy.charAt(0) == ' ' ? orderBy : ""), null);
         }
         catch (SQLiteException e) {
             alertBox("Error", e.toString(), activity);
@@ -2272,25 +2272,33 @@ public class sqliteDB extends SQLiteOpenHelper {
     {
         SQLiteDatabase db = this.getReadableDatabase();
         String incorrectAlphagram = (((wrongAlphagram.toString()).replace("[", "(\"")).replace("]", "\")")).replace(", ", "\", \"");
-        Cursor cursor = db.rawQuery("SELECT _incorrect_, _wrong_, " + (blank ? "_identity_ FROM blanks WHERE _identity_ IN " : "_alphagram_ FROM words WHERE _alphagram_ IN ") + incorrectAlphagram, null);
+        Cursor cursor = db.rawQuery("SELECT _wrong_, " + (blank ? "_identity_ FROM blanks WHERE _anagram_ IN " : "_alphagram_ FROM words WHERE _alphagram_ IN ") + incorrectAlphagram, null);
+
+        ArrayList<String> noWrongAnswers = new ArrayList<>();
+        ArrayList<String> someWrongAnswers = new ArrayList<>();
 
         if (cursor.moveToFirst()) {
             do {
-                int first = cursor.getInt(0);
+                String first = cursor.getString(0);
                 String second = cursor.getString(1);
-                String identity = cursor.getString(2);
 
-                List<String> third = Arrays.asList(second.split(", "));
-                ContentValues values = new ContentValues();
-                values.put("_incorrect_", first + 1);
-                if (!third.contains(wrongWord)) {
-                    values.put("_wrong_", second.length() == 0 ? wrongWord : second + ", " + wrongWord);
+                if (first.length() == 0) {
+                    noWrongAnswers.add(second);
                 }
-
-                db.update(blank ? "blanks" : "words", values, blank ? "_identity_ = ?" : "_alphagram_ = ?",
-                        new String[] {identity});
-            } while (cursor.moveToLast());
+                else {
+                    List<String> third = Arrays.asList(first.split(", "));
+                    if (!third.contains(wrongWord)) {
+                        someWrongAnswers.add(second);
+                    }
+                }
+            } while (cursor.moveToNext());
         }
+
+        String anagramMap = (((noWrongAnswers.toString()).replace("[", "(\"")).replace("]", "\")")).replace(", ", "\", \"");
+        String anagramsMap = (((someWrongAnswers.toString()).replace("[", "(\"")).replace("]", "\")")).replace(", ", "\", \"");
+
+        db.execSQL("UPDATE " + (blank ? "blanks" : "words") + " SET _incorrect_ = _incorrect_ + 1, _wrong_ = _wrong_ || \"" + wrongWord + "\" WHERE " + (blank ? "_identity_" : "_alphagram_") + " IN " + anagramMap);
+        db.execSQL("UPDATE " + (blank ? "blanks" : "words") + " SET _incorrect_ = _incorrect_ + 1, _wrong_ = _wrong_ || \", " + wrongWord + "\" WHERE " + (blank ? "_identity_" : "_alphagram_") + " IN " + anagramsMap);
 
         cursor.close();
     }
@@ -3527,7 +3535,7 @@ public class sqliteDB extends SQLiteOpenHelper {
         return blankAnagrams;
     }
 
-    public ArrayList<String> getJokerAnagrams(String inputWord) {
+    public ArrayList<String> getBlankAlphagrams(String inputWord) {
         ArrayList<String> blankAnagrams = new ArrayList<>();
         HashSet<Character> over = new HashSet<>();
 

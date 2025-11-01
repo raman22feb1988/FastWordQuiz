@@ -157,14 +157,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Change Tag"
-                    android:enabled="false"
                     android:id="@+id/button12">
                 </Button>
                 <Button
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Page Summary"
-                    android:enabled="false"
                     android:id="@+id/button17">
                 </Button>
             </LinearLayout>

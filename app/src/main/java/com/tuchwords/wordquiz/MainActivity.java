@@ -76,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
     HashSet<String> replies = new HashSet<>();
     ArrayList<String> identities = new ArrayList<>();
     String ultimate;
+    String selectedAnagram;
 
     TextView t1;
     RecyclerView g1;
@@ -306,12 +307,13 @@ public class MainActivity extends AppCompatActivity {
                                         boolean wildIndex = (s24.getSelectedItemPosition() > 0);
                                         String orderIndex = sortBy(sortIndex, wildIndex);
                                         String processingQuery = (c2.isChecked() ? db.addUnderscores(customQuery) : customQuery);
-                                        Cursor resultSet = db.getCustomQuiz(processingQuery, MainActivity.this, solved[0], orderIndex, blank);
+                                        Cursor resultSet = db.getCustomQuiz(processingQuery, MainActivity.this, solved[0], orderIndex, wildIndex);
 
                                         if (resultSet != null) {
                                             label = processingQuery;
                                             letters = 1;
                                             ultimate = null;
+                                            selectedAnagram = null;
                                             mode = 0;
                                             solvedStatus = solved[0];
                                             orderBy = orderIndex;
@@ -640,6 +642,106 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        b8.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                LayoutInflater inflater = LayoutInflater.from(MainActivity.this);
+                final View yourCustomView = inflater.inflate(R.layout.label, null);
+
+                EditText e3 = yourCustomView.findViewById(R.id.edittext3);
+                EditText e4 = yourCustomView.findViewById(R.id.edittext4);
+                Spinner s26 = yourCustomView.findViewById(R.id.spinner39);
+
+                final ArrayList<String>[] anagramItem = new ArrayList[]{new ArrayList<>()};
+                ArrayAdapter<String> anagramAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, anagramItem[0]);
+                anagramAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                s26.setAdapter(anagramAdapter);
+
+                e3.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+                        anagramItem[0] = db.getBlankAnagrams((s.toString()).toUpperCase());
+                        ArrayAdapter<String> alphagramAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, anagramItem[0]);
+                        alphagramAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                        s26.setAdapter(alphagramAdapter);
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable s) {
+                    }
+                });
+
+                Spinner s1 = yourCustomView.findViewById(R.id.spinner2);
+                List<Pair<String, String>> labelList = db.getAllLabels();
+
+                ColourAdapter spinnerAdapter = new ColourAdapter(MainActivity.this, R.layout.colour, R.id.textview62, labelList, MainActivity.this, true);
+                s1.setAdapter(spinnerAdapter);
+
+                s1.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                        e4.setText((labelList.get(i)).first);
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> adapterView) {
+                    }
+                });
+
+                AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
+                        .setTitle("Change tag")
+                        .setView(yourCustomView)
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                String line = (((e3.getText()).toString()).trim()).toUpperCase();
+                                String category = (e4.getText()).toString();
+                                int anagramIndex = s26.getSelectedItemPosition();
+                                String chosenAnagram = anagramItem[0].get(anagramIndex);
+
+                                if (anagramIndex == 0) {
+                                    db.updateTag(line, category, false);
+                                } else {
+                                    db.updateTag(line + " " + chosenAnagram, category, true);
+                                }
+
+                                if (mode == 1) {
+                                    if (grid.containsKey(line)) {
+                                        if (line.equals(ultimate) && chosenAnagram.equals(selectedAnagram)) {
+                                            displayDefinition(category);
+                                        }
+                                    }
+                                } else if (mode == 2) {
+                                    if (chosenAnagram.equals(ultimate)) {
+                                        String solved = db.getSolvedAnswers(chosenAnagram, blank);
+                                        t5.setText(Html.fromHtml(solved));
+                                    }
+                                }
+
+                                if (mode == 3)
+                                {
+                                    String revision = db.getSummary(jumbles, blank);
+                                    t5.setText(Html.fromHtml(revision));
+                                }
+                            }
+                        }).create();
+                dialog.show();
+            }
+        });
+
+        b10.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ultimate = "";
+                selectedAnagram = "";
+                mode = 3;
+                revise();
+            }
+        });
+
         b11.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -961,6 +1063,7 @@ public class MainActivity extends AppCompatActivity {
                         {
                             mode = 0;
                             ultimate = null;
+                            selectedAnagram = null;
                             letters = precursor;
                             label = "*";
                             solvedStatus = solved[0];
@@ -1071,14 +1174,13 @@ public class MainActivity extends AppCompatActivity {
         b2.setEnabled(true);
         b4.setEnabled(true);
         b7.setEnabled(true);
-        b8.setEnabled(true);
         b9.setEnabled(true);
-        b10.setEnabled(true);
 
         t1.setText("Page " + (counter + 1) + " out of " + (((words - 1) / (rows * columns)) + 1));
         t2.setText("Score: " + score + "/" + number);
         if (ultimate == null) {
             t5.setText("");
+            t6.setText("");
         }
         e2.setText("");
 
@@ -1116,7 +1218,8 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     cumulativeTime(guesses, true, null);
-                    String blankMaps = (blank ? guess + " " + jumbles.get(anagramMap.get(anagramMap.size() - 1)) : guess);
+                    selectedAnagram = jumbles.get(anagramMap.get(anagramMap.size() - 1));
+                    String blankMaps = (blank ? guess + " " + selectedAnagram : guess);
                     ArrayList<String> hook = db.getDefinition(blankMaps, blank);
                     String meaning = hook.get(0);
                     String back = hook.get(1);
@@ -1144,10 +1247,10 @@ public class MainActivity extends AppCompatActivity {
                     ArrayList<String> wrongAnswers = new ArrayList<>();
 
                     if (blank) {
-                        ArrayList<String> blankAnagrams = db.getJokerAnagrams(guess);
+                        ArrayList<String> blankAnagrams = db.getBlankAlphagrams(guess);
                         for (String blankAnagram : blankAnagrams) {
                             if (allList.containsKey(blankAnagram)) {
-                                wrongAnswers.add(guess + " " + blankAnagram);
+                                wrongAnswers.add(blankAnagram);
                             }
                         }
                     }
@@ -1189,6 +1292,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 mode = 0;
                 ultimate = null;
+                selectedAnagram = null;
 
                 if (counter == (words - 1) / (rows * columns)) {
                     counter = 0;
@@ -1213,6 +1317,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 mode = 0;
                 ultimate = null;
+                selectedAnagram = null;
 
                 if (counter == 0) {
                     counter = (words - 1) / (rows * columns);
@@ -1312,6 +1417,7 @@ public class MainActivity extends AppCompatActivity {
                                     }
 
                                     cumulativeTime(guesses, true, cardbox);
+                                    selectedAnagram = jumbles.get(anagramMap.get(anagramMap.size() - 1));
                                     displayDefinition(cardbox);
                                     replies.remove(guess);
                                     score += anagramMap.size();
@@ -1326,10 +1432,10 @@ public class MainActivity extends AppCompatActivity {
                     ArrayList<String> wrongAnswers = new ArrayList<>();
 
                     if (blank) {
-                        ArrayList<String> blankAnagrams = db.getJokerAnagrams(guess);
+                        ArrayList<String> blankAnagrams = db.getBlankAlphagrams(guess);
                         for (String blankAnagram : blankAnagrams) {
                             if (allList.containsKey(blankAnagram)) {
-                                wrongAnswers.add(guess + " " + blankAnagram);
+                                wrongAnswers.add(blankAnagram);
                             }
                         }
                     }
@@ -1366,95 +1472,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        b8.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                LayoutInflater inflater = LayoutInflater.from(MainActivity.this);
-                final View yourCustomView = inflater.inflate(R.layout.label, null);
-
-                EditText e3 = yourCustomView.findViewById(R.id.edittext3);
-                EditText e4 = yourCustomView.findViewById(R.id.edittext4);
-                Spinner s26 = yourCustomView.findViewById(R.id.spinner39);
-
-                final ArrayList<String>[] anagramItem = new ArrayList[] {new ArrayList<>()};
-                ArrayAdapter<String> anagramAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, anagramItem[0]);
-                anagramAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                s26.setAdapter(anagramAdapter);
-
-                e3.addTextChangedListener(new TextWatcher() {
-                    @Override
-                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                    }
-
-                    @Override
-                    public void onTextChanged(CharSequence s, int start, int before, int count) {
-                        anagramItem[0] = db.getBlankAnagrams(s.toString());
-                        anagramAdapter.notifyDataSetChanged();
-                    }
-
-                    @Override
-                    public void afterTextChanged(Editable s) {
-                    }
-                });
-
-                Spinner s1 = yourCustomView.findViewById(R.id.spinner2);
-                List<Pair<String, String>> labelList = db.getAllLabels();
-
-                ColourAdapter spinnerAdapter = new ColourAdapter(MainActivity.this, R.layout.colour, R.id.textview62, labelList, MainActivity.this, true);
-                s1.setAdapter(spinnerAdapter);
-
-                s1.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                        e4.setText((labelList.get(i)).first);
-                    }
-
-                    @Override
-                    public void onNothingSelected(AdapterView<?> adapterView) {
-                    }
-                });
-
-                AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
-                        .setTitle("Change tag")
-                        .setView(yourCustomView)
-                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                String line = (((e3.getText()).toString()).trim()).toUpperCase();
-                                String category = (e4.getText()).toString();
-                                int anagramIndex = s26.getSelectedItemPosition();
-
-                                if (anagramIndex == 0) {
-                                    db.updateTag(line, category, false);
-                                } else {
-                                    db.updateTag(line + " " + anagramItem[0].get(anagramIndex), category, true);
-                                }
-
-                                if (mode == 1) {
-                                    if (line.equals(ultimate)) {
-                                        displayDefinition(category);
-                                    }
-                                } else if (mode == 2) {
-                                    char[] last = line.toCharArray();
-                                    Arrays.sort(last);
-                                    String order = new String(last);
-
-                                    if (order.equals(ultimate)) {
-                                        String solved = db.getSolvedAnswers(order, blank);
-                                        t5.setText(Html.fromHtml(solved));
-                                    }
-                                }
-
-                                if (mode == 3)
-                                {
-                                    String revision = db.getSummary(jumbles, blank);
-                                    t5.setText(Html.fromHtml(revision));
-                                }
-                            }
-                        }).create();
-                dialog.show();
-            }
-        });
-
         b9.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -1480,6 +1497,7 @@ public class MainActivity extends AppCompatActivity {
                                 {
                                     mode = 0;
                                     ultimate = null;
+                                    selectedAnagram = null;
 
                                     counter = page - 1;
                                     db.updateCounter(letters, label, counter, solvedStatus, orderBy, blank);
@@ -1490,20 +1508,11 @@ public class MainActivity extends AppCompatActivity {
                 dialog.show();
             }
         });
-
-        b10.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ultimate = "";
-                mode = 3;
-                revise();
-            }
-        });
     }
 
     public void revise()
     {
-        String revision = db.getSummary(jumbles, blank);
+        String revision = ((jumbles == null) ? "" : db.getSummary(jumbles, blank));
         t5.setText(Html.fromHtml(revision));
         db.messageBox("Page Summary", revision, MainActivity.this);
     }
@@ -1519,6 +1528,7 @@ public class MainActivity extends AppCompatActivity {
     public void onItemClick(int i) {
         mode = 2;
         ultimate = jumbles.get(i);
+        selectedAnagram = ultimate;
 
         String solved = db.getSolvedAnswers(ultimate, blank);
         t5.setText(Html.fromHtml(solved));
@@ -1543,7 +1553,6 @@ public class MainActivity extends AppCompatActivity {
         try
         {
             if (started) {
-                t6.setText("");
                 int[] pair3 = (letters == 1 ? db.getCustomScore(label, solvedStatus, blank) : db.getScore(letters, label, solvedStatus, blank));
                 score = pair3[0];
 
@@ -1576,8 +1585,7 @@ public class MainActivity extends AppCompatActivity {
             switch(mode)
             {
                 case 1:
-                    ArrayList<Integer> anagramMap = grid.get(ultimate);
-                    String tag = db.getLabel(blank ? ultimate + " " + jumbles.get(anagramMap.get(anagramMap.size() - 1)) : ultimate, blank);
+                    String tag = db.getLabel(blank ? ultimate + " " + selectedAnagram : ultimate, blank);
                     displayDefinition(tag);
                     break;
                 case 2:
@@ -1594,8 +1602,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void displayDefinition(String listbox)
     {
-        ArrayList<Integer> anagramMap = grid.get(ultimate);
-        ArrayList<String> hook = db.getDefinition(blank ? ultimate + " " + jumbles.get(anagramMap.get(anagramMap.size() - 1)) : ultimate, blank);
+        ArrayList<String> hook = db.getDefinition(blank ? ultimate + " " + selectedAnagram : ultimate, blank);
         String meaning = hook.get(0);
         String back = hook.get(1);
         String front = hook.get(2);
@@ -1875,6 +1882,7 @@ public class MainActivity extends AppCompatActivity {
                             label = intermediate;
                             orderBy = sortBy(sortIndex, wilds);
                             ultimate = null;
+                            selectedAnagram = null;
                             mode = 0;
                             solvedStatus = solved[0];
                             blank = wilds;
@@ -2088,12 +2096,13 @@ public class MainActivity extends AppCompatActivity {
             String customQuery = new String(theQuery);
             boolean wildsIndex = (blankIndex > 0);
             String subanagramIndex = sortBy(sortIndex, wildsIndex);
-            Cursor resultSet = db.getCustomQuiz(customQuery, MainActivity.this, solved[0], subanagramIndex, blank);
+            Cursor resultSet = db.getCustomQuiz(customQuery, MainActivity.this, solved[0], subanagramIndex, wildsIndex);
 
             if (resultSet != null) {
                 label = customQuery;
                 letters = 1;
                 ultimate = null;
+                selectedAnagram = null;
                 mode = 0;
                 solvedStatus = solved[0];
                 orderBy = subanagramIndex;

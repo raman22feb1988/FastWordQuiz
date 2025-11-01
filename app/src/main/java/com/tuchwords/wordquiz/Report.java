@@ -207,7 +207,7 @@ public class Report extends AppCompatActivity {
                         EditText e4 = yourCustomView2.findViewById(R.id.edittext4);
                         Spinner s26 = yourCustomView2.findViewById(R.id.spinner39);
 
-                        final ArrayList<String>[] anagramItem = new ArrayList[] {new ArrayList<>()};
+                        final ArrayList<String>[] anagramItem = new ArrayList[]{new ArrayList<>()};
                         ArrayAdapter<String> anagramAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, anagramItem[0]);
                         anagramAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                         s26.setAdapter(anagramAdapter);
@@ -219,8 +219,10 @@ public class Report extends AppCompatActivity {
 
                             @Override
                             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                                anagramItem[0] = db.getBlankAnagrams(s.toString());
-                                anagramAdapter.notifyDataSetChanged();
+                                anagramItem[0] = db.getBlankAnagrams((s.toString()).toUpperCase());
+                                ArrayAdapter<String> alphagramAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, anagramItem[0]);
+                                alphagramAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                                s26.setAdapter(alphagramAdapter);
                             }
 
                             @Override
@@ -589,7 +591,7 @@ public class Report extends AppCompatActivity {
                                 boolean wildIndex = (s24.getSelectedItemPosition() > 0);
                                 String orderIndex = sortBy(sortIndex, wildIndex);
                                 String processingQuery = (c2.isChecked() ? db.addUnderscores(customQuery) : customQuery);
-                                Cursor resultSet = db.getSqlQuery(processingQuery, Report.this, solved[0], orderIndex, blank);
+                                Cursor resultSet = db.getSqlQuery(processingQuery, Report.this, solved[0], orderIndex, wildIndex);
 
                                 if (resultSet != null) {
                                     label = processingQuery;
@@ -1228,19 +1230,22 @@ public class Report extends AppCompatActivity {
             String index = jumbles.get(situation);
             char ch = index.charAt(0);
             int serial = ((ch == '<') ? Integer.parseInt(index.substring(22, index.length() - 7)) : Integer.parseInt(index));
+            ArrayList<String> wordsList;
 
             if (blank) {
                 int myBlank = (column * columns) + 5;
                 String myLocation = jumbles.get(myBlank);
                 char myAlphabet = myLocation.charAt(1);
                 String blankAnagram = ((myAlphabet == 'f') ? myLocation.substring(25, myLocation.length() - 11) : myLocation.substring(3, myLocation.length() - 4));
-                db.updateTag(word + " " + blankAnagram, tag, true);
+                String identity = word + " " + blankAnagram;
+                db.updateTag(identity, tag, true);
+                wordsList = db.extract("(\"" + identity + "\")", serial, orderBy, true);
             }
             else {
                 db.updateTag(word, tag, false);
+                wordsList = db.extract("(\"" + word + "\")", serial, orderBy, false);
             }
 
-            ArrayList<String> wordsList = db.extract("(\"" + word + "\")", serial, orderBy, blank);
             for (int cell = 0; cell < columns; cell++)
             {
                 jumbles.set((column * columns) + cell, wordsList.get(cell));
@@ -1646,7 +1651,7 @@ public class Report extends AppCompatActivity {
             String customQuery = new String(theQuery);
             boolean wildsIndex = (blankIndex > 0);
             String subanagramIndex = sortBy(sortIndex, wildsIndex);
-            Cursor resultSet = db.getSqlQuery(customQuery, Report.this, solved[0], subanagramIndex, blank);
+            Cursor resultSet = db.getSqlQuery(customQuery, Report.this, solved[0], subanagramIndex, wildsIndex);
 
             if (resultSet != null) {
                 label = customQuery;
