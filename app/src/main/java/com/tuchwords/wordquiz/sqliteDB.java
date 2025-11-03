@@ -1816,11 +1816,6 @@ public class sqliteDB extends SQLiteOpenHelper {
         }
 
         StringBuilder whereClause = new StringBuilder();
-        whereClause.append("_blank_ = ").append(blank ? "1" : "0");
-        if (!label.equals("*") || lengthIndex == 0)
-        {
-            whereClause.append(" AND ");
-        }
         if (!label.equals("*"))
         {
             whereClause.append("_tag_ = \"").append(label).append("\"");
