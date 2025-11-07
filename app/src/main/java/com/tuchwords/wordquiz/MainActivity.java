@@ -54,6 +54,8 @@ public class MainActivity extends AppCompatActivity {
     int solvedStatus = 0;
     boolean hidden;
     boolean detail;
+    int clear;
+    String lastWord;
     boolean started;
     String orderBy;
     ArrayList<String> jumbles;
@@ -83,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
     TextView t2;
     TextView t5;
     TextView t6;
+    TextView t11;
     EditText e2;
     Button b1;
     Button b2;
@@ -95,12 +98,15 @@ public class MainActivity extends AppCompatActivity {
     Button b9;
     Button b10;
     Button b11;
+    Button b15;
 
     Cursor anagrams;
     int words;
     int score;
     int counter;
     int number;
+    int numerator;
+    int denominator;
     boolean blank;
 
     int rows;
@@ -127,6 +133,8 @@ public class MainActivity extends AppCompatActivity {
         hidden = pref.getBoolean("hidden", false);
         detail = pref.getBoolean("detail", false);
         int version = pref.getInt("version", 1);
+        clear = pref.getInt("clear", 255);
+        lastWord = "";
         Menu menu = navigationView.getMenu();
 
         if (hidden)
@@ -138,7 +146,7 @@ public class MainActivity extends AppCompatActivity {
         if (detail)
         {
             MenuItem menuItem = menu.findItem(R.id.button51);
-            menuItem.setTitle("Hide full details");
+            menuItem.setTitle("Hide similar words (Faster)");
         }
 
         // Create an ActionBarDrawerToggle to handle
@@ -445,16 +453,16 @@ public class MainActivity extends AppCompatActivity {
                         db.deleteByLabel(MainActivity.this, true, false);
                         break;
                     case R.id.button51:
-                        // Show a Toast message for the Hide and show full details item
+                        // Show a Toast message for the Hide and show similar words item
                         if (detail) {
                             detail = false;
-                            item.setTitle("Show full details");
+                            item.setTitle("Show similar words (Slower)");
                             SharedPreferences.Editor editor = pref.edit();
                             editor.putBoolean("detail", false);
                             editor.apply();
                         } else {
                             detail = true;
-                            item.setTitle("Hide full details");
+                            item.setTitle("Hide similar words (Faster)");
                             SharedPreferences.Editor editor = pref.edit();
                             editor.putBoolean("detail", true);
                             editor.apply();
@@ -520,6 +528,48 @@ public class MainActivity extends AppCompatActivity {
                         // Show a Toast message for the Prepare blank database item
                         promptDictionary(false, true);
                         break;
+                    case R.id.button84:
+                        // Show a Toast message for the Clear answers on submit item
+                        LayoutInflater inflater3 = LayoutInflater.from(MainActivity.this);
+                        final View yourCustomView3 = inflater3.inflate(R.layout.clear, null);
+
+                        CheckBox[] checkBoxes = {yourCustomView3.findViewById(R.id.checkbox5),
+                                yourCustomView3.findViewById(R.id.checkbox6),
+                                yourCustomView3.findViewById(R.id.checkbox7),
+                                yourCustomView3.findViewById(R.id.checkbox8),
+                                yourCustomView3.findViewById(R.id.checkbox9),
+                                yourCustomView3.findViewById(R.id.checkbox10),
+                                yourCustomView3.findViewById(R.id.checkbox11),
+                                yourCustomView3.findViewById(R.id.checkbox12),
+                        };
+
+                        for (int clearIndex = 0; clearIndex < checkBoxes.length; clearIndex++) {
+                            if ((clear & (1 << clearIndex)) > 0) {
+                                checkBoxes[clearIndex].setChecked(true);
+                            }
+                        }
+
+                        AlertDialog dialog3 = new AlertDialog.Builder(MainActivity.this)
+                                .setTitle("Clear answers on submit")
+                                .setView(yourCustomView3)
+                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int whichButton) {
+                                        int clearValue = 0;
+                                        for (int clearVariable = 0; clearVariable < checkBoxes.length; clearVariable++) {
+                                            if (checkBoxes[clearVariable].isChecked()) {
+                                                clearValue += (1 << clearVariable);
+                                            }
+                                        }
+
+                                        clear = clearValue;
+                                        SharedPreferences.Editor editor = pref.edit();
+                                        editor.putInt("clear", clear);
+                                        editor.apply();
+                                    }
+                                }).create();
+
+                        dialog3.show();
+                        break;
                 }
 
                 // Close the drawer after selection
@@ -551,6 +601,7 @@ public class MainActivity extends AppCompatActivity {
         t2 = findViewById(R.id.textview4);
         t5 = findViewById(R.id.textview5);
         t6 = findViewById(R.id.textview28);
+        t11 = findViewById(R.id.textview87);
         e2 = findViewById(R.id.edittext2);
         b1 = findViewById(R.id.button1);
         b2 = findViewById(R.id.button2);
@@ -563,6 +614,7 @@ public class MainActivity extends AppCompatActivity {
         b9 = findViewById(R.id.button15);
         b10 = findViewById(R.id.button17);
         b11 = findViewById(R.id.button19);
+        b15 = findViewById(R.id.button86);
 
         db = new sqliteDB(MainActivity.this, version, null, false);
 
@@ -746,6 +798,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 e2.setText("");
+            }
+        });
+
+        b15.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                e2.setText(lastWord);
             }
         });
 
@@ -1117,6 +1176,7 @@ public class MainActivity extends AppCompatActivity {
         identities = new ArrayList<>();
         ArrayList<Integer> totals = new ArrayList<>();
         ArrayList<Integer> amounts = new ArrayList<>();
+        denominator = 0;
         grid = new HashMap<>();
 
         int open = rows * columns * counter;
@@ -1167,8 +1227,12 @@ public class MainActivity extends AppCompatActivity {
             else {
                 totals.add(0);
             }
-            amounts.add(allList.get(answer));
+            int pageScore = allList.get(answer);
+            amounts.add(pageScore);
+            denominator += pageScore;
         }
+
+        numerator = denominator - replies.size();
 
         b1.setEnabled(true);
         b2.setEnabled(true);
@@ -1178,9 +1242,11 @@ public class MainActivity extends AppCompatActivity {
 
         t1.setText("Page " + (counter + 1) + " out of " + (((words - 1) / (rows * columns)) + 1));
         t2.setText("Score: " + score + "/" + number);
+        t11.setText("This page: " + numerator + "/" + denominator);
         if (ultimate == null) {
             t5.setText("");
             t6.setText("");
+            lastWord = "";
         }
         e2.setText("");
 
@@ -1202,6 +1268,14 @@ public class MainActivity extends AppCompatActivity {
                 {
                     t6.setText("Correct answer");
                     t6.setTextColor(Color.rgb(0, 128, 0));
+
+                    if ((clear & 1) > 0) {
+                        e2.setText("");
+                    }
+
+                    if ((clear & 2) > 0) {
+                        lastWord = guess;
+                    }
 
                     mode = 1;
                     ultimate = guess;
@@ -1238,8 +1312,11 @@ public class MainActivity extends AppCompatActivity {
 
                     t5.setText(Html.fromHtml(amount));
                     replies.remove(guess);
-                    score += anagramMap.size();
+                    int thisPage = anagramMap.size();
+                    score += thisPage;
+                    numerator += thisPage;
                     t2.setText("Score: " + score + "/" + number);
+                    t11.setText("This page: " + numerator + "/" + denominator);
                 }
                 else
                 {
@@ -1269,18 +1346,50 @@ public class MainActivity extends AppCompatActivity {
                         if (!wrongAnswers.isEmpty()) {
                             t6.setText("Wrong answer");
                             db.trackWrongAnswers(wrongAnswers, guess, blank);
+
+                            if ((clear & 4) > 0) {
+                                e2.setText("");
+                            }
+
+                            if ((clear & 8) > 0) {
+                                lastWord = guess;
+                            }
                         }
                         else {
                             t6.setText("Anagram not here");
+
+                            if ((clear & 64) > 0) {
+                                e2.setText("");
+                            }
+
+                            if ((clear & 128) > 0) {
+                                lastWord = guess;
+                            }
                         }
                     }
                     else {
                         t6.setTextColor(Color.rgb(0, 128, 0));
                         if (!wrongAnswers.isEmpty()) {
                             t6.setText("Already solved");
+
+                            if ((clear & 16) > 0) {
+                                e2.setText("");
+                            }
+
+                            if ((clear & 32) > 0) {
+                                lastWord = guess;
+                            }
                         }
                         else {
                             t6.setText("Anagram not here");
+
+                            if ((clear & 64) > 0) {
+                                e2.setText("");
+                            }
+
+                            if ((clear & 128) > 0) {
+                                lastWord = guess;
+                            }
                         }
                     }
                 }
@@ -1405,6 +1514,14 @@ public class MainActivity extends AppCompatActivity {
                                     t6.setText("Correct answer");
                                     t6.setTextColor(Color.rgb(0, 128, 0));
 
+                                    if ((clear & 1) > 0) {
+                                        e2.setText("");
+                                    }
+
+                                    if ((clear & 2) > 0) {
+                                        lastWord = guess;
+                                    }
+
                                     String cardbox = (e5.getText()).toString();
                                     ArrayList<String> guesses = new ArrayList<>();
 
@@ -1420,8 +1537,11 @@ public class MainActivity extends AppCompatActivity {
                                     selectedAnagram = jumbles.get(anagramMap.get(anagramMap.size() - 1));
                                     displayDefinition(cardbox);
                                     replies.remove(guess);
-                                    score += anagramMap.size();
+                                    int thatPage = anagramMap.size();
+                                    score += thatPage;
+                                    numerator += thatPage;
                                     t2.setText("Score: " + score + "/" + number);
+                                    t11.setText("This page: " + numerator + "/" + denominator);
                                 }
                             }).create();
                     dialog.show();
@@ -1454,18 +1574,50 @@ public class MainActivity extends AppCompatActivity {
                         if (!wrongAnswers.isEmpty()) {
                             t6.setText("Wrong answer");
                             db.trackWrongAnswers(wrongAnswers, guess, blank);
+
+                            if ((clear & 4) > 0) {
+                                e2.setText("");
+                            }
+
+                            if ((clear & 8) > 0) {
+                                lastWord = guess;
+                            }
                         }
                         else {
                             t6.setText("Anagram not here");
+
+                            if ((clear & 64) > 0) {
+                                e2.setText("");
+                            }
+
+                            if ((clear & 128) > 0) {
+                                lastWord = guess;
+                            }
                         }
                     }
                     else {
                         t6.setTextColor(Color.rgb(0, 128, 0));
                         if (!wrongAnswers.isEmpty()) {
                             t6.setText("Already solved");
+
+                            if ((clear & 16) > 0) {
+                                e2.setText("");
+                            }
+
+                            if ((clear & 32) > 0) {
+                                lastWord = guess;
+                            }
                         }
                         else {
                             t6.setText("Anagram not here");
+
+                            if ((clear & 64) > 0) {
+                                e2.setText("");
+                            }
+
+                            if ((clear & 128) > 0) {
+                                lastWord = guess;
+                            }
                         }
                     }
                 }

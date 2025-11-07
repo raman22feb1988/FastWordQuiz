@@ -31,11 +31,14 @@
                 android:id="@+id/button35"
                 android:title="Change rows and font size" />
             <item
+                android:id="@+id/button85"
+                android:title="Clear answers on submit" />
+            <item
                 android:id="@+id/button37"
                 android:title="Hide number of answers" />
             <item
                 android:id="@+id/button52"
-                android:title="Show full details" />
+                android:title="Show similar words (Slower)" />
         </menu>
     </item>
     <item android:title="Tag manager">

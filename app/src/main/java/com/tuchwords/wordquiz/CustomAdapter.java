@@ -85,7 +85,7 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
         t1.setTextSize(size);
         t2.setTextSize(size);
 
-        if (li == 0)
+        if (li == 0 && !hide)
         {
             l1.setBackgroundColor(Color.GREEN);
         }

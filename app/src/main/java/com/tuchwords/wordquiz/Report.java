@@ -54,6 +54,7 @@ public class Report extends AppCompatActivity {
     int solvedStatus = 0;
     boolean hidden;
     boolean detail;
+    int clear;
     boolean started;
     String orderBy;
     HashMap<String, String> dictionary;
@@ -111,6 +112,7 @@ public class Report extends AppCompatActivity {
         hidden = pref.getBoolean("hidden", false);
         detail = pref.getBoolean("detail", false);
         int version = pref.getInt("version", 1);
+        clear = pref.getInt("clear", 255);
         Menu menu = navigationView.getMenu();
 
         if (hidden)
@@ -122,7 +124,7 @@ public class Report extends AppCompatActivity {
         if (detail)
         {
             MenuItem menuItem = menu.findItem(R.id.button52);
-            menuItem.setTitle("Hide full details");
+            menuItem.setTitle("Hide similar words (Faster)");
         }
 
         // Create an ActionBarDrawerToggle to handle
@@ -312,16 +314,16 @@ public class Report extends AppCompatActivity {
                         db.deleteByLabel(Report.this, false, false);
                         break;
                     case R.id.button52:
-                        // Show a Toast message for the Hide and show full details item
+                        // Show a Toast message for the Hide and show similar words item
                         if (detail) {
                             detail = false;
-                            item.setTitle("Show full details");
+                            item.setTitle("Show similar words (Slower)");
                             SharedPreferences.Editor editor = pref.edit();
                             editor.putBoolean("detail", false);
                             editor.apply();
                         } else {
                             detail = true;
-                            item.setTitle("Hide full details");
+                            item.setTitle("Hide similar words (Faster)");
                             SharedPreferences.Editor editor = pref.edit();
                             editor.putBoolean("detail", true);
                             editor.apply();
@@ -382,6 +384,48 @@ public class Report extends AppCompatActivity {
                     case R.id.button83:
                         // Show a Toast message for the Prepare blank database item
                         promptDictionary(false, true);
+                        break;
+                    case R.id.button85:
+                        // Show a Toast message for the Clear answers on submit item
+                        LayoutInflater inflater3 = LayoutInflater.from(Report.this);
+                        final View yourCustomView3 = inflater3.inflate(R.layout.clear, null);
+
+                        CheckBox[] checkBoxes = {yourCustomView3.findViewById(R.id.checkbox5),
+                                yourCustomView3.findViewById(R.id.checkbox6),
+                                yourCustomView3.findViewById(R.id.checkbox7),
+                                yourCustomView3.findViewById(R.id.checkbox8),
+                                yourCustomView3.findViewById(R.id.checkbox9),
+                                yourCustomView3.findViewById(R.id.checkbox10),
+                                yourCustomView3.findViewById(R.id.checkbox11),
+                                yourCustomView3.findViewById(R.id.checkbox12),
+                        };
+
+                        for (int clearIndex = 0; clearIndex < checkBoxes.length; clearIndex++) {
+                            if ((clear & (1 << clearIndex)) > 0) {
+                                checkBoxes[clearIndex].setChecked(true);
+                            }
+                        }
+
+                        AlertDialog dialog3 = new AlertDialog.Builder(Report.this)
+                                .setTitle("Clear answers on submit")
+                                .setView(yourCustomView3)
+                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int whichButton) {
+                                        int clearValue = 0;
+                                        for (int clearVariable = 0; clearVariable < checkBoxes.length; clearVariable++) {
+                                            if (checkBoxes[clearVariable].isChecked()) {
+                                                clearValue += (1 << clearVariable);
+                                            }
+                                        }
+
+                                        clear = clearValue;
+                                        SharedPreferences.Editor editor = pref.edit();
+                                        editor.putInt("clear", clear);
+                                        editor.apply();
+                                    }
+                                }).create();
+
+                        dialog3.show();
                         break;
                 }
 
@@ -1291,7 +1335,7 @@ public class Report extends AppCompatActivity {
             amount = "<b><small>" + front + "</small> " + word + " <small>" + back + "</small></b> " + meaning + " <b>" + (listbox.isEmpty() ? "(No Tag)" : listbox) + " " + lexicons + "</b>" + db.getFullDetails(word);
         }
 
-        db.messageBox("Full details for " + word, amount, Report.this);
+        db.messageBox("Similar words for " + word, amount, Report.this);
     }
 
     public void setPrepared()
