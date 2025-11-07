@@ -170,7 +170,7 @@ public class Report extends AppCompatActivity {
                                     public void onClick(DialogInterface dialog, int whichButton) {
                                         String sqlQuery = (e5.getText()).toString();
 
-                                        if (sqlQuery.length() > 0) {
+                                        if (!sqlQuery.isEmpty()) {
                                             db.myQuery(c3.isChecked() ? db.addUnderscores(sqlQuery) : sqlQuery, Report.this, false);
                                         }
                                     }
@@ -587,7 +587,7 @@ public class Report extends AppCompatActivity {
                         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 String temporaryQuery = ((e2.getText()).toString()).replace("\"", "'");
-                                String customQuery = (temporaryQuery.length() == 0 ? "1" : temporaryQuery);
+                                String customQuery = (temporaryQuery.isEmpty() ? "1" : temporaryQuery);
                                 boolean wildIndex = (s24.getSelectedItemPosition() > 0);
                                 String orderIndex = sortBy(sortIndex, wildIndex);
                                 String processingQuery = (c2.isChecked() ? db.addUnderscores(customQuery) : customQuery);
@@ -780,7 +780,7 @@ public class Report extends AppCompatActivity {
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         String alphabet = (lengthIndex[0] == 0 ? (e1.getText()).toString() : "-1");
-                        int precursor = (alphabet.length() == 0 ? 0 : Integer.parseInt(alphabet));
+                        int precursor = (alphabet.isEmpty() ? 0 : Integer.parseInt(alphabet));
                         boolean wild = (s22.getSelectedItemPosition() > 0);
 
                         if (lengthIndex[0] == 0 && precursor < 2)
@@ -955,7 +955,7 @@ public class Report extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         String intermediate = (e6.getText()).toString();
                         String alphabets = (lengthIndex[0] == 0 ? (e7.getText()).toString() : "-1");
-                        int temporary = (alphabets.length() == 0 ? 0 : Integer.parseInt(alphabets));
+                        int temporary = (alphabets.isEmpty() ? 0 : Integer.parseInt(alphabets));
                         boolean wilds = (s23.getSelectedItemPosition() > 0);
 
                         if (lengthIndex[0] == 0 && temporary < 2)
@@ -1094,7 +1094,7 @@ public class Report extends AppCompatActivity {
                         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 String pages = (e1.getText()).toString();
-                                int page = (pages.length() == 0 ? 0 : Integer.parseInt(pages));
+                                int page = (pages.isEmpty() ? 0 : Integer.parseInt(pages));
                                 if (page < 1 || page > maximum)
                                 {
                                     Toast.makeText(Report.this, "Enter a value between 1 and " + maximum, Toast.LENGTH_LONG).show();
@@ -1198,8 +1198,8 @@ public class Report extends AppCompatActivity {
                         String old_rows = (e8.getText()).toString();
                         String old_font = (e9.getText()).toString();
 
-                        int new_rows = (old_rows.length() == 0 ? 0 : Integer.parseInt(old_rows));
-                        int new_font = (old_font.length() == 0 ? 0 : Integer.parseInt(old_font));
+                        int new_rows = (old_rows.isEmpty() ? 0 : Integer.parseInt(old_rows));
+                        int new_font = (old_font.isEmpty() ? 0 : Integer.parseInt(old_font));
 
                         if (new_rows < 1 || new_font < 11)
                         {
@@ -1286,9 +1286,9 @@ public class Report extends AppCompatActivity {
 
         if (colours.containsKey(listbox) || colours.containsKey("")) {
             String colour = (colours.containsKey(listbox) ? colours.get(listbox) : colours.get(""));
-            amount = "<font color=\"" + colour + "\"><b><small>" + front + "</small> " + word + " <small>" + back + "</small></b> " + meaning + " <b>" + (listbox.length() == 0 ? "(No Tag)" : listbox) + " " + lexicons + "</b>" + db.getFullDetails(word) + "</font>";
+            amount = "<font color=\"" + colour + "\"><b><small>" + front + "</small> " + word + " <small>" + back + "</small></b> " + meaning + " <b>" + (listbox.isEmpty() ? "(No Tag)" : listbox) + " " + lexicons + "</b>" + db.getFullDetails(word) + "</font>";
         } else {
-            amount = "<b><small>" + front + "</small> " + word + " <small>" + back + "</small></b> " + meaning + " <b>" + (listbox.length() == 0 ? "(No Tag)" : listbox) + " " + lexicons + "</b>" + db.getFullDetails(word);
+            amount = "<b><small>" + front + "</small> " + word + " <small>" + back + "</small></b> " + meaning + " <b>" + (listbox.isEmpty() ? "(No Tag)" : listbox) + " " + lexicons + "</b>" + db.getFullDetails(word);
         }
 
         db.messageBox("Full details for " + word, amount, Report.this);
@@ -1586,7 +1586,7 @@ public class Report extends AppCompatActivity {
         boolean flag = false;
         int blanks = 0;
         for (int digits = 0; digits < letterSequence.length(); digits++) {
-            int flags = (int) letterSequence.charAt(digits);
+            int flags = letterSequence.charAt(digits);
             if (flags == 46) {
                 blanks++;
             }
@@ -1596,7 +1596,7 @@ public class Report extends AppCompatActivity {
             }
         }
 
-        blanks += (digit.length() == 0 ? 0 : Integer.parseInt(digit));
+        blanks += (digit.isEmpty() ? 0 : Integer.parseInt(digit));
 
         if (flag && extraSql) {
             Toast.makeText(Report.this, "Letters field can contain only letters and full stops for blanks", Toast.LENGTH_LONG).show();
@@ -1643,7 +1643,7 @@ public class Report extends AppCompatActivity {
                 theQuery.append("_length_ = ").append(letter.length() + blanks).append(blankIndex == 2 ? " AND _anagram_ LIKE '" : " AND _alphagram_ LIKE '").append(empty).append("'");
             }
 
-            if (extra.length() > 0)
+            if (!extra.isEmpty())
             {
                 theQuery.append(" AND (").append(autoUnderscore ? db.addUnderscores(extra) : extra).append(")");
             }

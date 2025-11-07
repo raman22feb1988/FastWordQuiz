@@ -186,7 +186,7 @@ public class MainActivity extends AppCompatActivity {
                                     public void onClick(DialogInterface dialog, int whichButton) {
                                         String sqlQuery = ((e6.getText()).toString()).replace("\"", "'");
 
-                                        if (sqlQuery.length() > 0) {
+                                        if (!sqlQuery.isEmpty()) {
                                             db.myQuery(c3.isChecked() ? db.addUnderscores(sqlQuery) : sqlQuery, MainActivity.this, true);
                                         }
                                     }
@@ -303,7 +303,7 @@ public class MainActivity extends AppCompatActivity {
                                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int whichButton) {
                                         String temporaryQuery = ((e7.getText()).toString()).replace("\"", "'");
-                                        String customQuery = (temporaryQuery.length() == 0 ? "1" : temporaryQuery);
+                                        String customQuery = (temporaryQuery.isEmpty() ? "1" : temporaryQuery);
                                         boolean wildIndex = (s24.getSelectedItemPosition() > 0);
                                         String orderIndex = sortBy(sortIndex, wildIndex);
                                         String processingQuery = (c2.isChecked() ? db.addUnderscores(customQuery) : customQuery);
@@ -1051,7 +1051,7 @@ public class MainActivity extends AppCompatActivity {
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         String alphabet = (lengthIndex[0] == 0 ? (e1.getText()).toString() : "-1");
-                        int precursor = (alphabet.length() == 0 ? 0 : Integer.parseInt(alphabet));
+                        int precursor = (alphabet.isEmpty() ? 0 : Integer.parseInt(alphabet));
                         boolean wild = (s22.getSelectedItemPosition() > 0);
 
                         if (lengthIndex[0] == 0 && precursor < 2)
@@ -1231,9 +1231,9 @@ public class MainActivity extends AppCompatActivity {
 
                     if (colourList.containsKey(coloursList) || colourList.containsKey("")) {
                         String coloured = (colourList.containsKey(coloursList) ? colourList.get(coloursList) : colourList.get(""));
-                        amount = "<font color=\"" + coloured + "\"><b><small>" + front + "</small> " + guess + " <small>" + back + "</small></b> " + meaning + " <b>" + (coloursList.length() == 0 ? "(No Tag)" : coloursList) + " " + lexicons + "</b>" + (detail ? db.getFullDetails(guess) : "") + "</font>";
+                        amount = "<font color=\"" + coloured + "\"><b><small>" + front + "</small> " + guess + " <small>" + back + "</small></b> " + meaning + " <b>" + (coloursList.isEmpty() ? "(No Tag)" : coloursList) + " " + lexicons + "</b>" + (detail ? db.getFullDetails(guess) : "") + "</font>";
                     } else {
-                        amount = "<b><small>" + front + "</small> " + guess + " <small>" + back + "</small></b> " + meaning + " <b>" + (coloursList.length() == 0 ? "(No Tag)" : coloursList) + " " + lexicons + "</b>" + (detail ? db.getFullDetails(guess) : "");
+                        amount = "<b><small>" + front + "</small> " + guess + " <small>" + back + "</small></b> " + meaning + " <b>" + (coloursList.isEmpty() ? "(No Tag)" : coloursList) + " " + lexicons + "</b>" + (detail ? db.getFullDetails(guess) : "");
                     }
 
                     t5.setText(Html.fromHtml(amount));
@@ -1266,7 +1266,7 @@ public class MainActivity extends AppCompatActivity {
 
                     if (!exist) {
                         t6.setTextColor(Color.RED);
-                        if (wrongAnswers.size() > 0) {
+                        if (!wrongAnswers.isEmpty()) {
                             t6.setText("Wrong answer");
                             db.trackWrongAnswers(wrongAnswers, guess, blank);
                         }
@@ -1276,7 +1276,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     else {
                         t6.setTextColor(Color.rgb(0, 128, 0));
-                        if (wrongAnswers.size() > 0) {
+                        if (!wrongAnswers.isEmpty()) {
                             t6.setText("Already solved");
                         }
                         else {
@@ -1451,7 +1451,7 @@ public class MainActivity extends AppCompatActivity {
 
                     if (!exist) {
                         t6.setTextColor(Color.RED);
-                        if (wrongAnswers.size() > 0) {
+                        if (!wrongAnswers.isEmpty()) {
                             t6.setText("Wrong answer");
                             db.trackWrongAnswers(wrongAnswers, guess, blank);
                         }
@@ -1461,7 +1461,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     else {
                         t6.setTextColor(Color.rgb(0, 128, 0));
-                        if (wrongAnswers.size() > 0) {
+                        if (!wrongAnswers.isEmpty()) {
                             t6.setText("Already solved");
                         }
                         else {
@@ -1488,7 +1488,7 @@ public class MainActivity extends AppCompatActivity {
                         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 String pages = (e1.getText()).toString();
-                                int page = (pages.length() == 0 ? 0 : Integer.parseInt(pages));
+                                int page = (pages.isEmpty() ? 0 : Integer.parseInt(pages));
                                 if (page < 1 || page > maximum)
                                 {
                                     Toast.makeText(MainActivity.this, "Enter a value between 1 and " + maximum, Toast.LENGTH_LONG).show();
@@ -1613,9 +1613,9 @@ public class MainActivity extends AppCompatActivity {
 
         if (colours.containsKey(listbox) || colours.containsKey("")) {
             String colour = (colours.containsKey(listbox) ? colours.get(listbox) : colours.get(""));
-            amount = "<font color=\"" + colour + "\"><b><small>" + front + "</small> " + ultimate + " <small>" + back + "</small></b> " + meaning + " <b>" + (listbox.length() == 0 ? "(No Tag)" : listbox) + " " + lexicons + "</b>" + (detail ? db.getFullDetails(ultimate) : "") + "</font>";
+            amount = "<font color=\"" + colour + "\"><b><small>" + front + "</small> " + ultimate + " <small>" + back + "</small></b> " + meaning + " <b>" + (listbox.isEmpty() ? "(No Tag)" : listbox) + " " + lexicons + "</b>" + (detail ? db.getFullDetails(ultimate) : "") + "</font>";
         } else {
-            amount = "<b><small>" + front + "</small> " + ultimate + " <small>" + back + "</small></b> " + meaning + " <b>" + (listbox.length() == 0 ? "(No Tag)" : listbox) + " " + lexicons + "</b>" + (detail ? db.getFullDetails(ultimate) : "");
+            amount = "<b><small>" + front + "</small> " + ultimate + " <small>" + back + "</small></b> " + meaning + " <b>" + (listbox.isEmpty() ? "(No Tag)" : listbox) + " " + lexicons + "</b>" + (detail ? db.getFullDetails(ultimate) : "");
         }
 
         t5.setText(Html.fromHtml(amount));
@@ -1647,9 +1647,9 @@ public class MainActivity extends AppCompatActivity {
                         String old_columns = (e9.getText()).toString();
                         String old_font = (e10.getText()).toString();
 
-                        int new_rows = (old_rows.length() == 0 ? 0 : Integer.parseInt(old_rows));
-                        int new_columns = (old_columns.length() == 0 ? 0 : Integer.parseInt(old_columns));
-                        int new_font = (old_font.length() == 0 ? 0 : Integer.parseInt(old_font));
+                        int new_rows = (old_rows.isEmpty() ? 0 : Integer.parseInt(old_rows));
+                        int new_columns = (old_columns.isEmpty() ? 0 : Integer.parseInt(old_columns));
+                        int new_font = (old_font.isEmpty() ? 0 : Integer.parseInt(old_font));
 
                         if (new_rows < 1 || new_columns < 1 || new_font < 11)
                         {
@@ -1868,7 +1868,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         String intermediate = (e11.getText()).toString();
                         String alphabets = (lengthIndex[0] == 0 ? (e12.getText()).toString() : "-1");
-                        int temporary = (alphabets.length() == 0 ? 0 : Integer.parseInt(alphabets));
+                        int temporary = (alphabets.isEmpty() ? 0 : Integer.parseInt(alphabets));
                         boolean wilds = (s23.getSelectedItemPosition() > 0);
 
                         if (lengthIndex[0] == 0 && temporary < 2)
@@ -2032,7 +2032,7 @@ public class MainActivity extends AppCompatActivity {
         boolean flag = false;
         int blanks = 0;
         for (int digits = 0; digits < letterSequence.length(); digits++) {
-            int flags = (int) letterSequence.charAt(digits);
+            int flags = letterSequence.charAt(digits);
             if (flags == 46) {
                 blanks++;
             }
@@ -2042,7 +2042,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        blanks += (digit.length() == 0 ? 0 : Integer.parseInt(digit));
+        blanks += (digit.isEmpty() ? 0 : Integer.parseInt(digit));
 
         if (flag && extraSql) {
             Toast.makeText(MainActivity.this, "Letters field can contain only letters and full stops for blanks", Toast.LENGTH_LONG).show();
@@ -2089,7 +2089,7 @@ public class MainActivity extends AppCompatActivity {
                 theQuery.append("_length_ = ").append(letter.length() + blanks).append(blankIndex == 2 ? " AND _anagram_ LIKE '" : " AND _alphagram_ LIKE '").append(empty).append("'");
             }
 
-            if (extra.length() > 0) {
+            if (!extra.isEmpty()) {
                 theQuery.append(" AND (").append(autoUnderscore ? db.addUnderscores(extra) : extra).append(")");
             }
 
@@ -2157,6 +2157,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onBackPressed() {
+        super.onBackPressed();
         terminate();
     }
 
