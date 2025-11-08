@@ -16,7 +16,7 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ViewHolder
     int _resource;
     List<String> lival1;
     int size;
-    int columns = 17;
+    int columns = 18;
 
     /**
      * Provide a reference to the type of views that you are using

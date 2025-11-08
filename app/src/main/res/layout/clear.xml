@@ -1,64 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
-<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:columnCount="2"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Clear answers on">
-    </TextView>
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Save last words on">
-    </TextView>
-    <CheckBox
-        android:id="@+id/checkbox5"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Correct answer">
-    </CheckBox>
-    <CheckBox
-        android:id="@+id/checkbox6"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Correct answer">
-    </CheckBox>
-    <CheckBox
-        android:id="@+id/checkbox7"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Wrong answer">
-    </CheckBox>
-    <CheckBox
-        android:id="@+id/checkbox8"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Wrong answer">
-    </CheckBox>
-    <CheckBox
-        android:id="@+id/checkbox9"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Already solved">
-    </CheckBox>
-    <CheckBox
-        android:id="@+id/checkbox10"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Already solved">
-    </CheckBox>
-    <CheckBox
-        android:id="@+id/checkbox11"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Anagram not here">
-    </CheckBox>
-    <CheckBox
-        android:id="@+id/checkbox12"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Anagram not here">
-    </CheckBox>
-</GridLayout>
+    <GridLayout
+        android:columnCount="2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Clear answers on">
+        </TextView>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Save last words on">
+        </TextView>
+        <CheckBox
+            android:id="@+id/checkbox5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Correct answer">
+        </CheckBox>
+        <CheckBox
+            android:id="@+id/checkbox6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Correct answer">
+        </CheckBox>
+        <CheckBox
+            android:id="@+id/checkbox7"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Wrong answer">
+        </CheckBox>
+        <CheckBox
+            android:id="@+id/checkbox8"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Wrong answer">
+        </CheckBox>
+        <CheckBox
+            android:id="@+id/checkbox9"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Already solved">
+        </CheckBox>
+        <CheckBox
+            android:id="@+id/checkbox10"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Already solved">
+        </CheckBox>
+        <CheckBox
+            android:id="@+id/checkbox11"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Anagram not here">
+        </CheckBox>
+        <CheckBox
+            android:id="@+id/checkbox12"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Anagram not here">
+        </CheckBox>
+    </GridLayout>
+</ScrollView>

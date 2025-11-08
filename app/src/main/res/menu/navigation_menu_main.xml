@@ -45,6 +45,9 @@
             <item
                 android:id="@+id/button51"
                 android:title="Show similar words (Slower)" />
+            <item
+                android:id="@+id/button87"
+                android:title="Shuffle anagrams by" />
         </menu>
     </item>
     <item android:title="Tag manager">

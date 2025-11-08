@@ -30,6 +30,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -55,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
     boolean hidden;
     boolean detail;
     int clear;
+    int shuffle;
     String lastWord;
     boolean started;
     String orderBy;
@@ -76,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
     int mode = 0;
     long begin = 0;
     HashSet<String> replies = new HashSet<>();
-    ArrayList<String> identities = new ArrayList<>();
+    HashSet<String> identities = new HashSet<>();
     String ultimate;
     String selectedAnagram;
 
@@ -134,6 +137,7 @@ public class MainActivity extends AppCompatActivity {
         detail = pref.getBoolean("detail", false);
         int version = pref.getInt("version", 1);
         clear = pref.getInt("clear", 255);
+        shuffle = pref.getInt("shuffle", 0);
         lastWord = "";
         Menu menu = navigationView.getMenu();
 
@@ -363,10 +367,12 @@ public class MainActivity extends AppCompatActivity {
                                 if (i == 0) {
                                     s17.setAdapter(orderAdapter);
                                     s17.setSelection(6);
+                                    s18.setSelection(1);
                                 }
                                 else {
                                     s17.setAdapter(ordersAdapter);
-                                    s17.setSelection(8);
+                                    s17.setSelection(1);
+                                    s18.setSelection(0);
                                 }
                             }
 
@@ -567,8 +573,30 @@ public class MainActivity extends AppCompatActivity {
                                         editor.apply();
                                     }
                                 }).create();
-
                         dialog3.show();
+                        break;
+                    case R.id.button87:
+                        // Show a Toast message for the Shuffle anagrams by item
+                        LayoutInflater inflater4 = LayoutInflater.from(MainActivity.this);
+                        final View yourCustomView4 = inflater4.inflate(R.layout.shuffle, null);
+
+                        RadioGroup r1 = yourCustomView4.findViewById(R.id.radioGroup1);
+                        ((RadioButton) r1.getChildAt(shuffle)).setChecked(true);
+
+                        AlertDialog dialog4 = new AlertDialog.Builder(MainActivity.this)
+                                .setTitle("Shuffle anagrams by")
+                                .setView(yourCustomView4)
+                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int whichButton) {
+                                        RadioButton r2 = yourCustomView4.findViewById(r1.getCheckedRadioButtonId());
+                                        shuffle = r1.indexOfChild(r2);
+                                        SharedPreferences.Editor editor = pref.edit();
+                                        editor.putInt("shuffle", shuffle);
+                                        editor.apply();
+                                        refresh();
+                                    }
+                                }).create();
+                        dialog4.show();
                         break;
                 }
 
@@ -808,6 +836,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // Add a callback to handle the back button press
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            // Called when the back button is pressed.
+            @Override
+            public void handleOnBackPressed() {
+                // Handle the back button event here
+                terminate();
+            }
+        });
+
         if (!prepared) {
             promptDictionary(false, false);
         }
@@ -1001,10 +1039,12 @@ public class MainActivity extends AppCompatActivity {
                 if (i == 0) {
                     s11.setAdapter(orderAdapter);
                     s11.setSelection(6);
+                    s12.setSelection(1);
                 }
                 else {
                     s11.setAdapter(ordersAdapter);
-                    s11.setSelection(8);
+                    s11.setSelection(1);
+                    s12.setSelection(0);
                 }
             }
 
@@ -1173,7 +1213,7 @@ public class MainActivity extends AppCompatActivity {
         begin = System.currentTimeMillis();
         jumbles = new ArrayList<>();
         replies = new HashSet<>();
-        identities = new ArrayList<>();
+        identities = new HashSet<>();
         ArrayList<Integer> totals = new ArrayList<>();
         ArrayList<Integer> amounts = new ArrayList<>();
         denominator = 0;
@@ -1253,7 +1293,7 @@ public class MainActivity extends AppCompatActivity {
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(this, Math.max(((jumbles.size() - 1) / columns) + 1, 1), GridLayoutManager.HORIZONTAL, false);
         g1.setLayoutManager(layoutManager);
 
-        cusadapter = new CustomAdapter(MainActivity.this, R.layout.cell, jumbles, totals, amounts, columns, font);
+        cusadapter = new CustomAdapter(MainActivity.this, R.layout.cell, jumbles, totals, amounts, columns, font, shuffle);
         if (hidden)
         {
             cusadapter.setHidden(true);
@@ -1280,7 +1320,7 @@ public class MainActivity extends AppCompatActivity {
                     mode = 1;
                     ultimate = guess;
 
-                    ArrayList<String> guesses = new ArrayList<>();
+                    HashSet<String> guesses = new HashSet<>();
                     ArrayList<Integer> anagramMap = grid.get(guess);
 
                     for (int index : anagramMap) {
@@ -1523,7 +1563,7 @@ public class MainActivity extends AppCompatActivity {
                                     }
 
                                     String cardbox = (e5.getText()).toString();
-                                    ArrayList<String> guesses = new ArrayList<>();
+                                    HashSet<String> guesses = new HashSet<>();
 
                                     for(int index : anagramMap) {
                                         String blankMap = (blank ? guess + " " + jumbles.get(index) : guess);
@@ -1669,12 +1709,12 @@ public class MainActivity extends AppCompatActivity {
         db.messageBox("Page Summary", revision, MainActivity.this);
     }
 
-    public void cumulativeTime(ArrayList<String> guesses, boolean submitted, String cardbox)
+    public void cumulativeTime(HashSet<String> guesses, boolean submitted, String cardbox)
     {
         long stop = System.currentTimeMillis();
         double time = stop - begin;
         time /= 1000;
-        db.updateTime(guesses == null ? identities : guesses, time, submitted, cardbox, blank);
+        db.updateTime((guesses == null) ? (blank ? identities : replies) : guesses, time, submitted, cardbox, blank);
     }
 
     public void onItemClick(int i) {
@@ -1887,10 +1927,12 @@ public class MainActivity extends AppCompatActivity {
                 if (i == 0) {
                     s14.setAdapter(orderAdapter);
                     s14.setSelection(6);
+                    s15.setSelection(1);
                 }
                 else {
                     s14.setAdapter(ordersAdapter);
-                    s14.setSelection(8);
+                    s14.setSelection(1);
+                    s15.setSelection(0);
                 }
             }
 
@@ -2136,10 +2178,18 @@ public class MainActivity extends AppCompatActivity {
                 if (i == 0) {
                     s20.setAdapter(orderAdapter);
                     s20.setSelection(subanagram ? 3 : 6);
+
+                    if (!subanagram) {
+                        s21.setSelection(1);
+                    }
                 }
                 else {
                     s20.setAdapter(ordersAdapter);
-                    s20.setSelection(subanagram ? 3 : 8);
+                    s20.setSelection(subanagram ? 3 : 1);
+
+                    if (!subanagram) {
+                        s21.setSelection(0);
+                    }
                 }
             }
 
@@ -2306,11 +2356,6 @@ public class MainActivity extends AppCompatActivity {
                     return " ORDER BY _" + (isBlank ? blankColumns.get(selection[1]) : allColumns.get(selection[1])) + "_" + (selection[2] == 1 ? " DESC" : "");
             }
         }
-    }
-
-    public void onBackPressed() {
-        super.onBackPressed();
-        terminate();
     }
 
     public void terminate() {

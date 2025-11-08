@@ -11,7 +11,11 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
 public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder> {
     Context con;
@@ -22,6 +26,7 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
     int dimensions;
     int size;
     boolean hide;
+    int jumble;
 
     /**
      * Provide a reference to the type of views that you are using
@@ -47,7 +52,7 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
      * param dataSet String[] containing the data to populate views to be used
      * by RecyclerView
      */
-    public CustomAdapter(Context context, int resource, List<String> li1, List<Integer> li2, List<Integer> li3, int columns, int font) {
+    public CustomAdapter(Context context, int resource, List<String> li1, List<Integer> li2, List<Integer> li3, int columns, int font, int shuffle) {
         con = context;
         _resource = resource;
         lival1 = li1;
@@ -55,6 +60,7 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
         lival3 = li3;
         dimensions = columns;
         size = font;
+        jumble = shuffle;
     }
 
     // Create new views (invoked by the layout manager)
@@ -80,7 +86,7 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
         TextView t1 = v.findViewById(R.id.textview2);
         TextView t2 = v.findViewById(R.id.textview3);
 
-        t1.setText(lival);
+        t1.setText(arrange(lival));
         t2.setText(hide ? "" : superscript(livalue - li) + "/" + subscript(livalue));
         t1.setTextSize(size);
         t2.setTextSize(size);
@@ -156,5 +162,57 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
     @Override
     public int getItemCount() {
         return lival1.size();
+    }
+
+    public String arrange(String anagram) {
+        switch (jumble) {
+            case 0: return anagram;
+            case 1: ArrayList<String> l = new ArrayList<>(Arrays.asList(anagram.split("")));
+                StringBuilder s = new StringBuilder();
+                while (!l.isEmpty()) {
+                    Random random = new Random();
+                    int r = random.nextInt(l.size());
+                    s.append(l.get(r));
+                    l.remove(r);
+                }
+                return new String(s);
+            case 2: return ((new StringBuilder(anagram)).reverse()).toString();
+            case 3: return organize(anagram, "AEIOUBCDFGHJKLMNPQRSTVWXYZ");
+            case 4: return organize(anagram, "UOIEAZYXWVTSRQPNMLKJHGFDCB");
+            case 5: return organize(anagram, "BCDFGHJKLMNPQRSTVWXYZAEIOU");
+            case 6: return organize(anagram, "ZYXWVTSRQPNMLKJHGFDCBUOIEA");
+            case 7: return organize(anagram, "AEILNORSTUDGBCMPFHVWYKJXQZ");
+            case 8: return organize(anagram, "UTSRONLIEAGDPMCBYWVHFKXJZQ");
+            case 9: return organize(anagram, "QZJXKFHVWYBCMPDGAEILNORSTU");
+            case 10: return organize(anagram, "ZQXJKYWVHFPMCBGDUTSRONLIEA");
+            default: return anagram;
+        }
+    }
+
+    public HashMap<Character, Integer> letters(String anagram) {
+        HashMap<Character, Integer> h = new HashMap<>();
+        for (int i = 0; i < anagram.length(); i++) {
+            char c = anagram.charAt(i);
+            if (h.containsKey(c)) {
+                h.put(c, h.get(c) + 1);
+            }
+            else {
+                h.put(c, 1);
+            }
+        }
+        return h;
+    }
+
+    public String organize(String anagram, String sequence) {
+        HashMap<Character, Integer> hashMap = letters(anagram);
+        StringBuilder st = new StringBuilder();
+        for (char ch : sequence.toCharArray()) {
+            if (hashMap.containsKey(ch)) {
+                for (int j = 0; j < hashMap.get(ch); j++) {
+                    st.append(ch);
+                }
+            }
+        }
+        return new String(st);
     }
 }

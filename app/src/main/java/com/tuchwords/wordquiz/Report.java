@@ -28,6 +28,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -48,13 +50,14 @@ import java.util.List;
 public class Report extends AppCompatActivity {
     sqliteDB db;
     int letters = 0;
-    int columns = 17;
+    int columns = 18;
     String label = "*";
     String tag = "(No Action)";
     int solvedStatus = 0;
     boolean hidden;
     boolean detail;
     int clear;
+    int shuffle;
     boolean started;
     String orderBy;
     HashMap<String, String> dictionary;
@@ -113,6 +116,7 @@ public class Report extends AppCompatActivity {
         detail = pref.getBoolean("detail", false);
         int version = pref.getInt("version", 1);
         clear = pref.getInt("clear", 255);
+        shuffle = pref.getInt("shuffle", 0);
         Menu menu = navigationView.getMenu();
 
         if (hidden)
@@ -424,8 +428,29 @@ public class Report extends AppCompatActivity {
                                         editor.apply();
                                     }
                                 }).create();
-
                         dialog3.show();
+                        break;
+                    case R.id.button88:
+                        // Show a Toast message for the Shuffle anagrams by item
+                        LayoutInflater inflater4 = LayoutInflater.from(Report.this);
+                        final View yourCustomView4 = inflater4.inflate(R.layout.shuffle, null);
+
+                        RadioGroup r1 = yourCustomView4.findViewById(R.id.radioGroup1);
+                        ((RadioButton) r1.getChildAt(shuffle)).setChecked(true);
+
+                        AlertDialog dialog4 = new AlertDialog.Builder(Report.this)
+                                .setTitle("Shuffle anagrams by")
+                                .setView(yourCustomView4)
+                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int whichButton) {
+                                        RadioButton r2 = yourCustomView4.findViewById(r1.getCheckedRadioButtonId());
+                                        shuffle = r1.indexOfChild(r2);
+                                        SharedPreferences.Editor editor = pref.edit();
+                                        editor.putInt("shuffle", shuffle);
+                                        editor.apply();
+                                    }
+                                }).create();
+                        dialog4.show();
                         break;
                 }
 

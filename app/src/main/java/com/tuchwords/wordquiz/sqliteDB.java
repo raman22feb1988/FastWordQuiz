@@ -1853,7 +1853,7 @@ public class sqliteDB extends SQLiteOpenHelper {
                 new String[] {Integer.toString(letters), label, blank ? "1" : "0", orderBy});
     }
 
-    public void updateTime(ArrayList<String> guesses, double time, boolean submitted, String cardbox, boolean blank) {
+    public void updateTime(HashSet<String> guesses, double time, boolean submitted, String cardbox, boolean blank) {
         SQLiteDatabase db = this.getWritableDatabase();
         String guess = (((guesses.toString()).replace("[", "(\"")).replace("]", "\")")).replace(", ", "\", \"");
         StringBuilder updates = new StringBuilder();
@@ -2184,33 +2184,34 @@ public class sqliteDB extends SQLiteOpenHelper {
         HashMap<String, String> coloursMap = getColours();
 
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT _word_, _definition_, _time_, _back_, _front_, _answers_, _page_, " + (blank ? "_anagram_" : "_alphagram_") + ", _timestamp_, _csw24_, _csw19_, _csw15_, _csw12_, _csw07_, _nwl23_, _nwl18_, _twl06_, _nswl23_, _wims_, _cel21_, _incorrect_, _wrong_, _tag_ FROM " + (blank ? "blanks WHERE _identity_ IN " : "words WHERE _word_ IN ") + jumbleList + (orderBy.charAt(0) == ' ' ? orderBy : ""), null);
+        Cursor cursor = db.rawQuery("SELECT _word_, _definition_, _time_, _solved_, _back_, _front_, _answers_, _page_, " + (blank ? "_anagram_" : "_alphagram_") + ", _timestamp_, _csw24_, _csw19_, _csw15_, _csw12_, _csw07_, _nwl23_, _nwl18_, _twl06_, _nswl23_, _wims_, _cel21_, _incorrect_, _wrong_, _tag_ FROM " + (blank ? "blanks WHERE _identity_ IN " : "words WHERE _word_ IN ") + jumbleList + (orderBy.charAt(0) == ' ' ? orderBy : ""), null);
 
         if (orderBy.equals("DESC") ? cursor.moveToLast() : cursor.moveToFirst()) {
             do {
                 String data = cursor.getString(0);
                 String definition = cursor.getString(1);
                 String time = cursor.getString(2);
-                String back = cursor.getString(3);
-                String front = cursor.getString(4);
-                String answers = cursor.getString(5);
-                String page = cursor.getString(6);
-                String alphagram = cursor.getString(7);
-                String timestamp = cursor.getString(8);
-                int csw24 = cursor.getInt(9);
-                int csw19 = cursor.getInt(10);
-                int csw15 = cursor.getInt(11);
-                int csw12 = cursor.getInt(12);
-                int csw07 = cursor.getInt(13);
-                int nwl23 = cursor.getInt(14);
-                int nwl18 = cursor.getInt(15);
-                int twl06 = cursor.getInt(16);
-                int nswl23 = cursor.getInt(17);
-                int wims = cursor.getInt(18);
-                int cel21 = cursor.getInt(19);
-                String incorrect = cursor.getString(20);
-                String wrong = cursor.getString(21);
-                String label = cursor.getString(22);
+                int solved = cursor.getInt(3);
+                String back = cursor.getString(4);
+                String front = cursor.getString(5);
+                String answers = cursor.getString(6);
+                String page = cursor.getString(7);
+                String alphagram = cursor.getString(8);
+                String timestamp = cursor.getString(9);
+                int csw24 = cursor.getInt(10);
+                int csw19 = cursor.getInt(11);
+                int csw15 = cursor.getInt(12);
+                int csw12 = cursor.getInt(13);
+                int csw07 = cursor.getInt(14);
+                int nwl23 = cursor.getInt(15);
+                int nwl18 = cursor.getInt(16);
+                int twl06 = cursor.getInt(17);
+                int nswl23 = cursor.getInt(18);
+                int wims = cursor.getInt(19);
+                int cel21 = cursor.getInt(20);
+                String incorrect = cursor.getString(21);
+                String wrong = cursor.getString(22);
+                String label = cursor.getString(23);
 
                 ArrayList<String> lexicons = dictionaries(data.length(), csw24, csw19, csw15, csw12, csw07, nwl23, nwl18, twl06, nswl23, wims, cel21);
 
@@ -2230,6 +2231,7 @@ public class sqliteDB extends SQLiteOpenHelper {
                     wordList.add("<font color=\"" + colourMap + "\">" + lexicons.get(1) + "</font>");
                     wordList.add("<font color=\"" + colourMap + "\">" + lexicons.get(2) + "</font>");
                     wordList.add("<font color=\"" + colourMap + "\">" + lexicons.get(3) + "</font>");
+                    wordList.add("<font color=\"" + colourMap + "\">" + ((solved == 0) ? "Unsolved" : "Solved") + "</font>");
                     wordList.add("<font color=\"" + colourMap + "\">" + timestamp + "</font>");
                     wordList.add("<font color=\"" + colourMap + "\">" + definition + "</font>");
                     wordList.add("<font color=\"" + colourMap + "\">" + incorrect + "</font>");
@@ -2249,6 +2251,7 @@ public class sqliteDB extends SQLiteOpenHelper {
                     wordList.add(lexicons.get(1));
                     wordList.add(lexicons.get(2));
                     wordList.add(lexicons.get(3));
+                    wordList.add((solved == 0) ? "Unsolved" : "Solved");
                     wordList.add(timestamp);
                     wordList.add(definition);
                     wordList.add(incorrect);
