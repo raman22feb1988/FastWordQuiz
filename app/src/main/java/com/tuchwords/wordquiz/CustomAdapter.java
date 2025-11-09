@@ -27,6 +27,7 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
     int size;
     boolean hide;
     int jumble;
+    boolean joker;
 
     /**
      * Provide a reference to the type of views that you are using
@@ -52,7 +53,7 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
      * param dataSet String[] containing the data to populate views to be used
      * by RecyclerView
      */
-    public CustomAdapter(Context context, int resource, List<String> li1, List<Integer> li2, List<Integer> li3, int columns, int font, int shuffle) {
+    public CustomAdapter(Context context, int resource, List<String> li1, List<Integer> li2, List<Integer> li3, int columns, int font, int shuffle, boolean blank) {
         con = context;
         _resource = resource;
         lival1 = li1;
@@ -61,6 +62,7 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
         dimensions = columns;
         size = font;
         jumble = shuffle;
+        joker = blank;
     }
 
     // Create new views (invoked by the layout manager)
@@ -176,15 +178,15 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
                     l.remove(r);
                 }
                 return new String(s);
-            case 2: return ((new StringBuilder(anagram)).reverse()).toString();
-            case 3: return organize(anagram, "AEIOUBCDFGHJKLMNPQRSTVWXYZ");
-            case 4: return organize(anagram, "UOIEAZYXWVTSRQPNMLKJHGFDCB");
-            case 5: return organize(anagram, "BCDFGHJKLMNPQRSTVWXYZAEIOU");
-            case 6: return organize(anagram, "ZYXWVTSRQPNMLKJHGFDCBUOIEA");
-            case 7: return organize(anagram, "AEILNORSTUDGBCMPFHVWYKJXQZ");
-            case 8: return organize(anagram, "UTSRONLIEAGDPMCBYWVHFKXJZQ");
-            case 9: return organize(anagram, "QZJXKFHVWYBCMPDGAEILNORSTU");
-            case 10: return organize(anagram, "ZQXJKYWVHFPMCBGDUTSRONLIEA");
+            case 2: return (joker ? (((new StringBuilder(anagram.substring(0, anagram.length() - 1))).reverse()).append('?')).toString() : ((new StringBuilder(anagram)).reverse()).toString());
+            case 3: return organize(anagram, "AEIOUBCDFGHJKLMNPQRSTVWXYZ?");
+            case 4: return organize(anagram, "UOIEAZYXWVTSRQPNMLKJHGFDCB?");
+            case 5: return organize(anagram, "BCDFGHJKLMNPQRSTVWXYZAEIOU?");
+            case 6: return organize(anagram, "ZYXWVTSRQPNMLKJHGFDCBUOIEA?");
+            case 7: return organize(anagram, "AEILNORSTUDGBCMPFHVWYKJXQZ?");
+            case 8: return organize(anagram, "UTSRONLIEAGDPMCBYWVHFKXJZQ?");
+            case 9: return organize(anagram, "QZJXKFHVWYBCMPDGAEILNORSTU?");
+            case 10: return organize(anagram, "ZQXJKYWVHFPMCBGDUTSRONLIEA?");
             default: return anagram;
         }
     }

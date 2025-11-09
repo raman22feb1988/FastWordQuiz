@@ -663,7 +663,7 @@ public class MainActivity extends AppCompatActivity {
         solvedList.add("Fully solved and fully unsolved only");
 
         aggregate = new ArrayList<>();
-        aggregate.add("");
+        aggregate.add("first word of");
         aggregate.add("maximum of");
         aggregate.add("minimum of");
         aggregate.add("average of");
@@ -857,7 +857,7 @@ public class MainActivity extends AppCompatActivity {
         final View yourCustomView = inflater.inflate(R.layout.prompt, null);
 
         TextView t8 = yourCustomView.findViewById(R.id.textview85);
-        t8.setText("CSW24 or NWL23?");
+        t8.setText(joker ? "Preparing blank database will take 3 hours or more depending upon your device. It is recommended not to interrupt its execution in between and so you can choose to run this before you go to bed at night. If you do not want to run this now, you can click anywhere outside this dialogue box to close this dialogue box. If you want to run this now, you can choose your desired lexicon from below:\n\nCSW24 or NWL23?" :"CSW24 or NWL23?");
 
         CheckBox c1 = yourCustomView.findViewById(R.id.checkbox1);
         c1.setChecked(deleteTable);
@@ -1293,7 +1293,7 @@ public class MainActivity extends AppCompatActivity {
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(this, Math.max(((jumbles.size() - 1) / columns) + 1, 1), GridLayoutManager.HORIZONTAL, false);
         g1.setLayoutManager(layoutManager);
 
-        cusadapter = new CustomAdapter(MainActivity.this, R.layout.cell, jumbles, totals, amounts, columns, font, shuffle);
+        cusadapter = new CustomAdapter(MainActivity.this, R.layout.cell, jumbles, totals, amounts, columns, font, shuffle, blank);
         if (hidden)
         {
             cusadapter.setHidden(true);

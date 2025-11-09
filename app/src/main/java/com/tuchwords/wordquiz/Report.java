@@ -1081,10 +1081,10 @@ public class Report extends AppCompatActivity {
         b7.setEnabled(true);
 
         if (words > 0) {
-            t1.setText("Page " + (counter + 1) + " out of " + (((words - 1) / rows) + 1));
+            t1.setText("Page " + (counter + 1) + " out of " + (((words - 1) / rows) + 1) + " (" + words + (words == 1 ? " word)" : " words)"));
         }
         else {
-            t1.setText("Page " + (counter + 1) + " out of 1");
+            t1.setText("Page " + (counter + 1) + " out of 1 (0 words)");
         }
 
         int commence = counter * rows;
@@ -1397,7 +1397,7 @@ public class Report extends AppCompatActivity {
         final View yourCustomView = inflater.inflate(R.layout.prompt, null);
 
         TextView t6 = yourCustomView.findViewById(R.id.textview85);
-        t6.setText("CSW24 or NWL23?");
+        t6.setText(joker ? "Preparing blank database will take 3 hours or more depending upon your device. It is recommended not to interrupt its execution in between and so you can choose to run this before you go to bed at night. If you do not want to run this now, you can click anywhere outside this dialogue box to close this dialogue box. If you want to run this now, you can choose your desired lexicon from below:\n\nCSW24 or NWL23?" :"CSW24 or NWL23?");
 
         CheckBox c1 = yourCustomView.findViewById(R.id.checkbox1);
         c1.setChecked(deleteTable);
