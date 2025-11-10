@@ -1878,7 +1878,7 @@ public class sqliteDB extends SQLiteOpenHelper {
             updates.append("_tag_ = \"").append(cardbox).append("\", ");
         }
 
-        db.execSQL("UPDATE " + (blank ? "blanks" : "words") + " SET " + new String(updates) + "_time_ = _time_ + " + time + (blank ? " WHERE _identity_ IN " : " WHERE _word_ IN ") + guess);
+        db.execSQL("UPDATE " + (blank ? "blanks" : "words") + " SET " + new String(updates) + "_time_ = _time_ + " + String.format("%.3f", time) + (blank ? " WHERE _identity_ IN " : " WHERE _word_ IN ") + guess);
     }
 
     public void updateTag(String guess, String tag, boolean blank)
@@ -2234,7 +2234,7 @@ public class sqliteDB extends SQLiteOpenHelper {
                     wordList.add("<font color=\"" + colourMap + "\"><b><small>" + back + "</small></b></font>");
                     wordList.add("<font color=\"" + colourMap + "\">" + answers + "</font>");
                     wordList.add("<font color=\"" + colourMap + "\"><b>" + alphagram + "</b></font>");
-                    wordList.add("<font color=\"" + colourMap + "\">" + time + " seconds</font>");
+                    wordList.add("<font color=\"" + colourMap + "\">" + convert(time) + "</font>");
                     wordList.add("<font color=\"" + colourMap + "\">Page " + page + "</font>");
                     wordList.add("<font color=\"" + colourMap + "\"><b>" + (label.isEmpty() ? "(No Tag)" : label) + "</b></font>");
                     wordList.add("<font color=\"" + colourMap + "\">" + lexicons.get(0) + "</font>");
@@ -2254,7 +2254,7 @@ public class sqliteDB extends SQLiteOpenHelper {
                     wordList.add("<b><small>" + back + "</small></b>");
                     wordList.add(answers);
                     wordList.add("<b>" + alphagram + "</b>");
-                    wordList.add(time + " seconds");
+                    wordList.add(convert(time));
                     wordList.add("Page " + page);
                     wordList.add("<b>" + (label.isEmpty() ? "(No Tag)" : label) + "</b>");
                     wordList.add(lexicons.get(0));
@@ -3559,6 +3559,37 @@ public class sqliteDB extends SQLiteOpenHelper {
         }
 
         return blankAnagrams;
+    }
+
+    public String convert(String time) {
+        double period = Double.parseDouble(time);
+        ArrayList<String> conversion = new ArrayList<>();
+        int days = (int) (period / 86400);
+        int hours = (int) ((period / 3600) % 24);
+        int minutes = (int) ((period / 60) % 60);
+        int seconds = (int) (period % 60);
+        int milliseconds = (int) Math.round((period % 1) * 1000);
+
+        if (days > 0) {
+            conversion.add(days + "d");
+        }
+        if (hours > 0) {
+            conversion.add(hours + "h");
+        }
+        if (minutes > 0) {
+            conversion.add(minutes + "m");
+        }
+        if (seconds > 0) {
+            conversion.add(seconds + "s");
+        }
+        if (milliseconds > 0) {
+            conversion.add(milliseconds + "ms");
+        }
+        if (conversion.isEmpty()) {
+            conversion.add("0ms");
+        }
+
+        return String.join(" ", conversion);
     }
 
     public static void main(String[] args) {
