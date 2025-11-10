@@ -94,6 +94,7 @@ public class Report extends AppCompatActivity {
 
     int rows;
     int font;
+    int combo;
     int maximumWordLength;
     int maximumBlankLength;
 
@@ -239,7 +240,7 @@ public class Report extends AppCompatActivity {
                         Spinner s2 = yourCustomView2.findViewById(R.id.spinner2);
                         List<Pair<String, String>> tagList = new ArrayList<>(labelsList.subList(1, labelsList.size()));
 
-                        ColourAdapter spinnerAdapter = new ColourAdapter(Report.this, R.layout.colour, R.id.textview62, tagList, Report.this, true);
+                        ColourAdapter spinnerAdapter = new ColourAdapter(Report.this, R.layout.colour, R.id.textview62, tagList, Report.this, true, combo);
                         s2.setAdapter(spinnerAdapter);
 
                         s2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -295,7 +296,7 @@ public class Report extends AppCompatActivity {
                         break;
                     case R.id.button40:
                         // Show a Toast message for the Reset words by tag item
-                        db.resetByLabel(Report.this, false, blankList, maximumWordLength, maximumBlankLength);
+                        db.resetByLabel(Report.this, false, blankList, maximumWordLength, maximumBlankLength, combo);
                         break;
                     case R.id.button46:
                         // Show a Toast message for the Add new tag item
@@ -303,19 +304,19 @@ public class Report extends AppCompatActivity {
                         break;
                     case R.id.button47:
                         // Show a Toast message for the Rename tag by colour item
-                        db.renameByLabel(Report.this, false, false);
+                        db.renameByLabel(Report.this, false, false, combo);
                         break;
                     case R.id.button48:
                         // Show a Toast message for the Change tag colour by name item
-                        db.renameByLabel(Report.this, false, true);
+                        db.renameByLabel(Report.this, false, true, combo);
                         break;
                     case R.id.button49:
                         // Show a Toast message for the Delete single tag by name item
-                        db.deleteByLabel(Report.this, false, true);
+                        db.deleteByLabel(Report.this, false, true, combo);
                         break;
                     case R.id.button50:
                         // Show a Toast message for the Delete single tag by colour item
-                        db.deleteByLabel(Report.this, false, false);
+                        db.deleteByLabel(Report.this, false, false, combo);
                         break;
                     case R.id.button52:
                         // Show a Toast message for the Hide and show similar words item
@@ -495,6 +496,7 @@ public class Report extends AppCompatActivity {
         ArrayList<Integer> dimensions = db.getZoom("Report");
         rows = dimensions.get(0);
         font = dimensions.get(2);
+        combo = dimensions.get(3);
         maximumWordLength = db.getMaximumWordLength(false);
         maximumBlankLength = db.getMaximumWordLength(true);
 
@@ -968,7 +970,7 @@ public class Report extends AppCompatActivity {
         List<Pair<String, String>> labelList = new ArrayList<>(labelsList.subList(1, labelsList.size()));
         labelList.add(0, new Pair<>("(All Tags)", null));
 
-        ColourAdapter spinnerAdapter = new ColourAdapter(Report.this, R.layout.colour, R.id.textview62, labelList, Report.this, true);
+        ColourAdapter spinnerAdapter = new ColourAdapter(Report.this, R.layout.colour, R.id.textview62, labelList, Report.this, true, combo);
         s1.setAdapter(spinnerAdapter);
 
         s1.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -1186,6 +1188,7 @@ public class Report extends AppCompatActivity {
         ArrayList<Integer> dimensions = db.getZoom("Report");
         rows = dimensions.get(0);
         font = dimensions.get(2);
+        combo = dimensions.get(3);
         maximumWordLength = db.getMaximumWordLength(false);
         maximumBlankLength = db.getMaximumWordLength(true);
 
@@ -1230,7 +1233,7 @@ public class Report extends AppCompatActivity {
         labelsList.add(0, new Pair<>("(No Action)", null));
         colourList = db.getColours();
 
-        ColourAdapter comboBoxAdapter = new ColourAdapter(Report.this, R.layout.colour, R.id.textview62, labelsList, Report.this, true);
+        ColourAdapter comboBoxAdapter = new ColourAdapter(Report.this, R.layout.colour, R.id.textview62, labelsList, Report.this, true, combo);
         s3.setAdapter(comboBoxAdapter);
 
         s3.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -1252,32 +1255,48 @@ public class Report extends AppCompatActivity {
 
         EditText e8 = yourCustomView.findViewById(R.id.edittext15);
         EditText e9 = yourCustomView.findViewById(R.id.edittext16);
+        EditText e13 = yourCustomView.findViewById(R.id.edittext31);
 
         e8.setHint("Enter a value greater than 0");
         e9.setHint("Enter a value greater than 11");
+        e13.setHint("Enter a value greater than 11");
 
         e8.setText(Integer.toString(rows));
         e9.setText(Integer.toString(font));
+        e13.setText(Integer.toString(combo));
 
         AlertDialog dialog = new AlertDialog.Builder(Report.this)
-                .setTitle("Change rows and font size")
+                .setTitle("Change rows and font sizes")
                 .setView(yourCustomView)
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         String old_rows = (e8.getText()).toString();
                         String old_font = (e9.getText()).toString();
+                        String old_combo = (e13.getText()).toString();
 
                         int new_rows = (old_rows.isEmpty() ? 0 : Integer.parseInt(old_rows));
                         int new_font = (old_font.isEmpty() ? 0 : Integer.parseInt(old_font));
+                        int new_combo = (old_combo.isEmpty() ? 0 : Integer.parseInt(old_combo));
 
-                        if (new_rows < 1 || new_font < 11)
+                        StringBuilder sb = new StringBuilder();
+                        if (new_rows < 1) {
+                            sb.append("Rows should be ≥ 1");
+                        }
+                        if (new_font < 11 || new_combo < 11) {
+                            if (sb.length() > 0) {
+                                sb.append("\n");
+                            }
+                            sb.append("Font sizes should be ≥ 11");
+                        }
+
+                        if (sb.length() > 0)
                         {
-                            Toast.makeText(Report.this, "Font size should be greater than 11\nRows should be greater than 0", Toast.LENGTH_LONG).show();
+                            Toast.makeText(Report.this, new String(sb), Toast.LENGTH_LONG).show();
                             zoom();
                         }
                         else
                         {
-                            db.setMagnify("Report", new_rows, new_font);
+                            db.setMagnify("Report", new_rows, new_font, new_combo);
                             refresh();
                         }
                     }

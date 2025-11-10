@@ -115,6 +115,7 @@ public class MainActivity extends AppCompatActivity {
     int rows;
     int columns;
     int font;
+    int combo;
     int maximumWordLength;
     int maximumBlankLength;
 
@@ -329,31 +330,30 @@ public class MainActivity extends AppCompatActivity {
                                             mode = 0;
                                             solvedStatus = solved[0];
                                             orderBy = orderIndex;
-                                            blank = wildIndex;
 
                                             closeCursor();
                                             anagrams = resultSet;
                                             words = anagrams.getCount();
-                                            int[] pair1 = db.getCustomScore(label, solved[0], blank);
+                                            int[] pair1 = db.getCustomScore(label, solved[0], wildIndex);
                                             score = pair1[0];
                                             number = pair1[1];
 
-                                            boolean exists = db.existLabel(letters, label, orderBy, blank);
+                                            boolean exists = db.existLabel(letters, label, orderBy, wildIndex);
 
                                             if (!exists) {
                                                 counter = 0;
-                                                db.insertLabel(letters, label, orderBy, blank);
+                                                db.insertLabel(letters, label, orderBy, wildIndex);
                                             } else {
-                                                counter = db.getCounter(letters, label, solvedStatus, orderBy, blank);
+                                                counter = db.getCounter(letters, label, solvedStatus, orderBy, wildIndex);
                                             }
 
                                             int highest = (words - 1) / (rows * columns);
                                             if (counter > highest && words > 0) {
                                                 counter = highest;
-                                                db.updateCounter(letters, label, counter, solvedStatus, orderBy, blank);
+                                                db.updateCounter(letters, label, counter, solvedStatus, orderBy, wildIndex);
                                             }
 
-                                            nextWord();
+                                            nextWord(wildIndex);
                                         }
                                     }
                                 }).create();
@@ -436,7 +436,7 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     case R.id.button39:
                         // Show a Toast message for the Reset words by tag item
-                        db.resetByLabel(MainActivity.this, true, blankList, maximumWordLength, maximumBlankLength);
+                        db.resetByLabel(MainActivity.this, true, blankList, maximumWordLength, maximumBlankLength, combo);
                         break;
                     case R.id.button41:
                         // Show a Toast message for the Add new tag item
@@ -444,19 +444,19 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     case R.id.button42:
                         // Show a Toast message for the Rename tag by colour item
-                        db.renameByLabel(MainActivity.this, true, false);
+                        db.renameByLabel(MainActivity.this, true, false, combo);
                         break;
                     case R.id.button43:
                         // Show a Toast message for the Change tag colour by name item
-                        db.renameByLabel(MainActivity.this, true, true);
+                        db.renameByLabel(MainActivity.this, true, true, combo);
                         break;
                     case R.id.button44:
                         // Show a Toast message for the Delete single tag by name item
-                        db.deleteByLabel(MainActivity.this, true, true);
+                        db.deleteByLabel(MainActivity.this, true, true, combo);
                         break;
                     case R.id.button45:
                         // Show a Toast message for the Delete single tag by colour item
-                        db.deleteByLabel(MainActivity.this, true, false);
+                        db.deleteByLabel(MainActivity.this, true, false, combo);
                         break;
                     case R.id.button51:
                         // Show a Toast message for the Hide and show similar words item
@@ -646,10 +646,11 @@ public class MainActivity extends AppCompatActivity {
 
         db = new sqliteDB(MainActivity.this, version, null, false);
 
-        ArrayList<Integer> dimensions = db.getZoom("Main");
+        ArrayList<Integer> dimensions = db.getZoom("Quiz");
         rows = dimensions.get(0);
         columns = dimensions.get(1);
         font = dimensions.get(2);
+        combo = dimensions.get(3);
         maximumWordLength = db.getMaximumWordLength(false);
         maximumBlankLength = db.getMaximumWordLength(true);
 
@@ -758,7 +759,7 @@ public class MainActivity extends AppCompatActivity {
                 Spinner s1 = yourCustomView.findViewById(R.id.spinner2);
                 List<Pair<String, String>> labelList = db.getAllLabels();
 
-                ColourAdapter spinnerAdapter = new ColourAdapter(MainActivity.this, R.layout.colour, R.id.textview62, labelList, MainActivity.this, true);
+                ColourAdapter spinnerAdapter = new ColourAdapter(MainActivity.this, R.layout.colour, R.id.textview62, labelList, MainActivity.this, true, combo);
                 s1.setAdapter(spinnerAdapter);
 
                 s1.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -1167,50 +1168,50 @@ public class MainActivity extends AppCompatActivity {
                             label = "*";
                             solvedStatus = solved[0];
                             orderBy = sortBy(sortIndex, wild);
-                            blank = wild;
-                            start();
+                            start(wild);
                         }
                     }
                 }).create();
         dialog.show();
     }
 
-    public void start()
+    public void start(boolean old_blank)
     {
         closeCursor();
 
-        boolean exist = db.existLabel(letters, label, orderBy, blank);
+        boolean exist = db.existLabel(letters, label, orderBy, old_blank);
 
         if (!exist)
         {
-            db.insertLabel(letters, label, orderBy, blank);
+            db.insertLabel(letters, label, orderBy, old_blank);
         }
 
-        anagrams = db.getAllAnagrams(letters, label, solvedStatus, orderBy, blank);
+        anagrams = db.getAllAnagrams(letters, label, solvedStatus, orderBy, old_blank);
         words = anagrams.getCount();
-        int[] pair2 = db.getScore(letters, label, solvedStatus, blank);
+        int[] pair2 = db.getScore(letters, label, solvedStatus, old_blank);
         score = pair2[0];
-        counter = db.getCounter(letters, label, solvedStatus, orderBy, blank);
+        counter = db.getCounter(letters, label, solvedStatus, orderBy, old_blank);
         number = pair2[1];
 
         int high = (words - 1) / (rows * columns);
         if (counter > high && words > 0)
         {
             counter = high;
-            db.updateCounter(letters, label, counter, solvedStatus, orderBy, blank);
+            db.updateCounter(letters, label, counter, solvedStatus, orderBy, old_blank);
         }
 
-        nextWord();
+        nextWord(old_blank);
     }
 
-    public void nextWord()
+    public void nextWord(boolean new_blank)
     {
         if (started) {
             cumulativeTime(null, false, null);
         }
 
-        started = true;
         begin = System.currentTimeMillis();
+        started = true;
+        blank = new_blank;
         jumbles = new ArrayList<>();
         replies = new HashSet<>();
         identities = new HashSet<>();
@@ -1450,7 +1451,7 @@ public class MainActivity extends AppCompatActivity {
                     counter++;
                 }
                 db.updateCounter(letters, label, counter, solvedStatus, orderBy, blank);
-                nextWord();
+                nextWord(blank);
             }
         });
 
@@ -1475,7 +1476,7 @@ public class MainActivity extends AppCompatActivity {
                     counter--;
                 }
                 db.updateCounter(letters, label, counter, solvedStatus, orderBy, blank);
-                nextWord();
+                nextWord(blank);
             }
         });
 
@@ -1516,7 +1517,7 @@ public class MainActivity extends AppCompatActivity {
                     Spinner s2 = yourCustomView.findViewById(R.id.spinner3);
                     List<Pair<String, String>> labelsList = db.getAllLabels();
 
-                    ColourAdapter comboBoxAdapter = new ColourAdapter(MainActivity.this, R.layout.colour, R.id.textview62, labelsList, MainActivity.this, true);
+                    ColourAdapter comboBoxAdapter = new ColourAdapter(MainActivity.this, R.layout.colour, R.id.textview62, labelsList, MainActivity.this, true, combo);
                     s2.setAdapter(comboBoxAdapter);
 
                     s2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -1693,7 +1694,7 @@ public class MainActivity extends AppCompatActivity {
 
                                     counter = page - 1;
                                     db.updateCounter(letters, label, counter, solvedStatus, orderBy, blank);
-                                    nextWord();
+                                    nextWord(blank);
                                 }
                             }
                         }).create();
@@ -1735,10 +1736,11 @@ public class MainActivity extends AppCompatActivity {
 
     public void refresh()
     {
-        ArrayList<Integer> dimensions = db.getZoom("Main");
+        ArrayList<Integer> dimensions = db.getZoom("Quiz");
         rows = dimensions.get(0);
         columns = dimensions.get(1);
         font = dimensions.get(2);
+        combo = dimensions.get(3);
         maximumWordLength = db.getMaximumWordLength(false);
         maximumBlankLength = db.getMaximumWordLength(true);
 
@@ -1761,7 +1763,7 @@ public class MainActivity extends AppCompatActivity {
                     db.updateCounter(letters, label, counter, solvedStatus, orderBy, blank);
                 }
 
-                nextWord();
+                nextWord(blank);
                 refreshDefinition();
             }
         }
@@ -1821,36 +1823,58 @@ public class MainActivity extends AppCompatActivity {
         EditText e8 = yourCustomView.findViewById(R.id.edittext12);
         EditText e9 = yourCustomView.findViewById(R.id.edittext13);
         EditText e10 = yourCustomView.findViewById(R.id.edittext14);
+        EditText e16 = yourCustomView.findViewById(R.id.edittext30);
 
         e8.setHint("Enter a value greater than 0");
         e9.setHint("Enter a value greater than 0");
         e10.setHint("Enter a value greater than 11");
+        e16.setHint("Enter a value greater than 11");
 
         e8.setText(Integer.toString(rows));
         e9.setText(Integer.toString(columns));
         e10.setText(Integer.toString(font));
+        e16.setText(Integer.toString(combo));
 
         AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
-                .setTitle("Change rows, columns and font size")
+                .setTitle("Change rows, columns and font sizes")
                 .setView(yourCustomView)
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         String old_rows = (e8.getText()).toString();
                         String old_columns = (e9.getText()).toString();
                         String old_font = (e10.getText()).toString();
+                        String old_combo = (e16.getText()).toString();
 
                         int new_rows = (old_rows.isEmpty() ? 0 : Integer.parseInt(old_rows));
                         int new_columns = (old_columns.isEmpty() ? 0 : Integer.parseInt(old_columns));
                         int new_font = (old_font.isEmpty() ? 0 : Integer.parseInt(old_font));
+                        int new_combo = (old_combo.isEmpty() ? 0 : Integer.parseInt(old_combo));
 
-                        if (new_rows < 1 || new_columns < 1 || new_font < 11)
+                        StringBuilder sb = new StringBuilder();
+                        if (new_rows < 1 && new_columns < 1) {
+                            sb.append("Rows, columns should be ≥ 1");
+                        }
+                        else if (new_rows < 1) {
+                            sb.append("Rows should be ≥ 1");
+                        }
+                        else if (new_columns < 1) {
+                            sb.append("Columns should be ≥ 1");
+                        }
+                        if (new_font < 11 || new_combo < 11) {
+                            if (sb.length() > 0) {
+                                sb.append("\n");
+                            }
+                            sb.append("Font sizes should be ≥ 11");
+                        }
+
+                        if (sb.length() > 0)
                         {
-                            Toast.makeText(MainActivity.this, "Font size should be greater than 11\nRows and columns should be greater than 0", Toast.LENGTH_LONG).show();
+                            Toast.makeText(MainActivity.this, new String(sb), Toast.LENGTH_LONG).show();
                             zoom();
                         }
                         else
                         {
-                            db.setZoom("Main", new_rows, new_columns, new_font);
+                            db.setZoom("Quiz", new_rows, new_columns, new_font, new_combo);
                             refresh();
                         }
                     }
@@ -2006,7 +2030,7 @@ public class MainActivity extends AppCompatActivity {
         List<Pair<String, String>> tagsList = db.getAllLabels();
         tagsList.add(0, new Pair<>("(All Tags)", null));
 
-        ColourAdapter spinnerAdapter = new ColourAdapter(MainActivity.this, R.layout.colour, R.id.textview62, tagsList, MainActivity.this, true);
+        ColourAdapter spinnerAdapter = new ColourAdapter(MainActivity.this, R.layout.colour, R.id.textview62, tagsList, MainActivity.this, true, combo);
         s3.setAdapter(spinnerAdapter);
 
         s3.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -2079,8 +2103,7 @@ public class MainActivity extends AppCompatActivity {
                             selectedAnagram = null;
                             mode = 0;
                             solvedStatus = solved[0];
-                            blank = wilds;
-                            start();
+                            start(wilds);
                         }
                     }
                 }).create();
@@ -2308,31 +2331,30 @@ public class MainActivity extends AppCompatActivity {
                 mode = 0;
                 solvedStatus = solved[0];
                 orderBy = subanagramIndex;
-                blank = wildsIndex;
 
                 closeCursor();
                 anagrams = resultSet;
                 words = anagrams.getCount();
-                int[] pair4 = db.getCustomScore(label, solved[0], blank);
+                int[] pair4 = db.getCustomScore(label, solved[0], wildsIndex);
                 score = pair4[0];
                 number = pair4[1];
 
-                boolean exists = db.existLabel(letters, label, orderBy, blank);
+                boolean exists = db.existLabel(letters, label, orderBy, wildsIndex);
 
                 if (!exists) {
                     counter = 0;
-                    db.insertLabel(letters, label, orderBy, blank);
+                    db.insertLabel(letters, label, orderBy, wildsIndex);
                 } else {
-                    counter = db.getCounter(letters, label, solvedStatus, orderBy, blank);
+                    counter = db.getCounter(letters, label, solvedStatus, orderBy, wildsIndex);
                 }
 
                 int apex = (words - 1) / (rows * columns);
                 if (counter > apex && words > 0) {
                     counter = apex;
-                    db.updateCounter(letters, label, counter, solvedStatus, orderBy, blank);
+                    db.updateCounter(letters, label, counter, solvedStatus, orderBy, wildsIndex);
                 }
 
-                nextWord();
+                nextWord(wildsIndex);
             }
         }
     }
