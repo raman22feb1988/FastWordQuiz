@@ -515,7 +515,7 @@ public class sqliteDB extends SQLiteOpenHelper {
                     file.createNewFile();
                     CSVWriter csvWrite = new CSVWriter(new FileWriter(file));
                     for (int turn = 0; turn < 2; turn++) {
-                        Cursor curCSV = db.rawQuery("SELECT _word_, " + ((turn == 0) ? "_alphagram_" : "_anagram_") + ", _tag_, _solved_, _time_ FROM " + ((turn == 0) ? "words" : "blanks") + " WHERE _time_ > 0 OR _tag_ != \"\"", null);
+                        Cursor curCSV = db.rawQuery("SELECT _word_, " + ((turn == 0) ? "_alphagram_" : "_anagram_") + ", _tag_, _solved_, _time_, _timestamp_, _incorrect_, _wrong_ FROM " + ((turn == 0) ? "words" : "blanks") + " WHERE _time_ > 0 OR _solved_ > 0 OR _incorrect_ > 0 OR _tag_ != \"\" OR _timestamp_ != \"\" OR _wrong_ != \"\"", null);
                         String[] columnsList = curCSV.getColumnNames();
 
                         if (turn == 0) {
@@ -2186,9 +2186,30 @@ public class sqliteDB extends SQLiteOpenHelper {
         return (new String(ultimateQuery)).trim();
     }
 
-    public ArrayList<String> extract(String jumbleList, int start, String orderBy, boolean blank)
+    public ArrayList<String> extract(String jumbleList, int start, String orderBy, boolean blank, boolean title)
     {
         ArrayList<String> wordList = new ArrayList<>();
+
+        if (title) {
+            wordList.add("<b>No.</b>");
+            wordList.add("<b>Front</b>");
+            wordList.add("<b>Word</b>");
+            wordList.add("<b>Back</b>");
+            wordList.add("<b>Ans</b>");
+            wordList.add("<b>Anagram</b>");
+            wordList.add("<b>Page</b>");
+            wordList.add("<b>Tag</b>");
+            wordList.add("<b>Time</b>");
+            wordList.add("<b>CSW</b>");
+            wordList.add("<b>NWL</b>");
+            wordList.add("<b>CEL</b>");
+            wordList.add("<b>WIMS</b>");
+            wordList.add("<b>Solved</b>");
+            wordList.add("<b>Timestamp</b>");
+            wordList.add("<b>Definition</b>");
+            wordList.add("<b>✗</b>");
+            wordList.add("<b>Wrong</b>");
+        }
 
         int order = start;
         HashMap<String, String> coloursMap = getColours();
@@ -2234,9 +2255,9 @@ public class sqliteDB extends SQLiteOpenHelper {
                     wordList.add("<font color=\"" + colourMap + "\"><b><small>" + back + "</small></b></font>");
                     wordList.add("<font color=\"" + colourMap + "\">" + answers + "</font>");
                     wordList.add("<font color=\"" + colourMap + "\"><b>" + alphagram + "</b></font>");
-                    wordList.add("<font color=\"" + colourMap + "\">" + convert(time) + "</font>");
                     wordList.add("<font color=\"" + colourMap + "\">Page " + page + "</font>");
                     wordList.add("<font color=\"" + colourMap + "\"><b>" + (label.isEmpty() ? "(No Tag)" : label) + "</b></font>");
+                    wordList.add("<font color=\"" + colourMap + "\">" + convert(time) + "</font>");
                     wordList.add("<font color=\"" + colourMap + "\">" + lexicons.get(0) + "</font>");
                     wordList.add("<font color=\"" + colourMap + "\">" + lexicons.get(1) + "</font>");
                     wordList.add("<font color=\"" + colourMap + "\">" + lexicons.get(2) + "</font>");
@@ -2254,9 +2275,9 @@ public class sqliteDB extends SQLiteOpenHelper {
                     wordList.add("<b><small>" + back + "</small></b>");
                     wordList.add(answers);
                     wordList.add("<b>" + alphagram + "</b>");
-                    wordList.add(convert(time));
                     wordList.add("Page " + page);
                     wordList.add("<b>" + (label.isEmpty() ? "(No Tag)" : label) + "</b>");
+                    wordList.add(convert(time));
                     wordList.add(lexicons.get(0));
                     wordList.add(lexicons.get(1));
                     wordList.add(lexicons.get(2));

@@ -1110,12 +1110,12 @@ public class Report extends AppCompatActivity {
         }
 
         String jumbleList = (((jumble.toString()).replace("[", "(\"")).replace("]", "\")")).replace(", ", "\", \"");
-        jumbles = db.extract(jumbleList, commence + 1, orderBy, blank);
+        jumbles = db.extract(jumbleList, commence + 1, orderBy, blank, !jumble.isEmpty());
 
         int open = counter * columns * rows;
         int close = Math.min((counter + 1) * columns * rows, words * columns);
 
-        RecyclerView.LayoutManager layoutManager = new GridLayoutManager(this, Math.max((close - open) / columns, 1), GridLayoutManager.HORIZONTAL, false);
+        RecyclerView.LayoutManager layoutManager = new GridLayoutManager(this, ((close - open) / columns) + 1, GridLayoutManager.HORIZONTAL, false);
         g1.setLayoutManager(layoutManager);
 
         reportAdapter = new ReportAdapter(Report.this, R.layout.word, jumbles, font);
@@ -1309,35 +1309,36 @@ public class Report extends AppCompatActivity {
         if (!tag.equals("(No Action)")) {
             int row = jumbles.size() / columns;
             int column = position % row;
-            int colour = (column * columns) + 2;
-            String location = jumbles.get(colour);
-            char character = location.charAt(1);
-            String word = ((character == 'f') ? location.substring(25, location.length() - 11) : location.substring(3, location.length() - 4));
 
-            int situation = column * columns;
-            String index = jumbles.get(situation);
-            char ch = index.charAt(0);
-            int serial = ((ch == '<') ? Integer.parseInt(index.substring(22, index.length() - 7)) : Integer.parseInt(index));
-            ArrayList<String> wordsList;
+            if (column > 0) {
+                int colour = (column * columns) + 2;
+                String location = jumbles.get(colour);
+                char character = location.charAt(1);
+                String word = ((character == 'f') ? location.substring(25, location.length() - 11) : location.substring(3, location.length() - 4));
 
-            if (blank) {
-                int myBlank = (column * columns) + 5;
-                String myLocation = jumbles.get(myBlank);
-                char myAlphabet = myLocation.charAt(1);
-                String blankAnagram = ((myAlphabet == 'f') ? myLocation.substring(25, myLocation.length() - 11) : myLocation.substring(3, myLocation.length() - 4));
-                String identity = word + " " + blankAnagram;
-                db.updateTag(identity, tag, true);
-                wordsList = db.extract("(\"" + identity + "\")", serial, orderBy, true);
-            }
-            else {
-                db.updateTag(word, tag, false);
-                wordsList = db.extract("(\"" + word + "\")", serial, orderBy, false);
-            }
+                int situation = column * columns;
+                String index = jumbles.get(situation);
+                char ch = index.charAt(0);
+                int serial = ((ch == '<') ? Integer.parseInt(index.substring(22, index.length() - 7)) : Integer.parseInt(index));
+                ArrayList<String> wordsList;
 
-            for (int cell = 0; cell < columns; cell++)
-            {
-                jumbles.set((column * columns) + cell, wordsList.get(cell));
-                reportAdapter.notifyItemChanged((cell * row) + column);
+                if (blank) {
+                    int myBlank = (column * columns) + 5;
+                    String myLocation = jumbles.get(myBlank);
+                    char myAlphabet = myLocation.charAt(1);
+                    String blankAnagram = ((myAlphabet == 'f') ? myLocation.substring(25, myLocation.length() - 11) : myLocation.substring(3, myLocation.length() - 4));
+                    String identity = word + " " + blankAnagram;
+                    db.updateTag(identity, tag, true);
+                    wordsList = db.extract("(\"" + identity + "\")", serial, orderBy, true, false);
+                } else {
+                    db.updateTag(word, tag, false);
+                    wordsList = db.extract("(\"" + word + "\")", serial, orderBy, false, false);
+                }
+
+                for (int cell = 0; cell < columns; cell++) {
+                    jumbles.set((column * columns) + cell, wordsList.get(cell));
+                    reportAdapter.notifyItemChanged((cell * row) + column);
+                }
             }
         }
     }
@@ -1346,40 +1347,42 @@ public class Report extends AppCompatActivity {
     {
         int row = jumbles.size() / columns;
         int column = position % row;
-        int myColour = (column * columns) + 2;
-        String location = jumbles.get(myColour);
-        char character = location.charAt(1);
-        String word = ((character == 'f') ? location.substring(25, location.length() - 11) : location.substring(3, location.length() - 4));
-        ArrayList<String> hook;
 
-        if (blank) {
-            int myBlank = (column * columns) + 5;
-            String myLocation = jumbles.get(myBlank);
-            char myAlphabet = myLocation.charAt(1);
-            String blankAnagram = ((myAlphabet == 'f') ? myLocation.substring(25, myLocation.length() - 11) : myLocation.substring(3, myLocation.length() - 4));
-            hook = db.getDefinition(word + " " + blankAnagram, true);
+        if (column > 0) {
+            int myColour = (column * columns) + 2;
+            String location = jumbles.get(myColour);
+            char character = location.charAt(1);
+            String word = ((character == 'f') ? location.substring(25, location.length() - 11) : location.substring(3, location.length() - 4));
+            ArrayList<String> hook;
+
+            if (blank) {
+                int myBlank = (column * columns) + 5;
+                String myLocation = jumbles.get(myBlank);
+                char myAlphabet = myLocation.charAt(1);
+                String blankAnagram = ((myAlphabet == 'f') ? myLocation.substring(25, myLocation.length() - 11) : myLocation.substring(3, myLocation.length() - 4));
+                hook = db.getDefinition(word + " " + blankAnagram, true);
+            } else {
+                hook = db.getDefinition(word, false);
+            }
+
+            String meaning = hook.get(0);
+            String back = hook.get(1);
+            String front = hook.get(2);
+            String lexicons = hook.get(3);
+            String listbox = hook.get(4);
+
+            HashMap<String, String> colours = db.getColours();
+            String amount;
+
+            if (colours.containsKey(listbox) || colours.containsKey("")) {
+                String colour = (colours.containsKey(listbox) ? colours.get(listbox) : colours.get(""));
+                amount = "<font color=\"" + colour + "\"><b><small>" + front + "</small> " + word + " <small>" + back + "</small></b> " + meaning + " <b>" + (listbox.isEmpty() ? "(No Tag)" : listbox) + " " + lexicons + "</b>" + db.getFullDetails(word) + "</font>";
+            } else {
+                amount = "<b><small>" + front + "</small> " + word + " <small>" + back + "</small></b> " + meaning + " <b>" + (listbox.isEmpty() ? "(No Tag)" : listbox) + " " + lexicons + "</b>" + db.getFullDetails(word);
+            }
+
+            db.messageBox("Similar words for " + word, amount, Report.this);
         }
-        else {
-            hook = db.getDefinition(word, false);
-        }
-
-        String meaning = hook.get(0);
-        String back = hook.get(1);
-        String front = hook.get(2);
-        String lexicons = hook.get(3);
-        String listbox = hook.get(4);
-
-        HashMap<String, String> colours = db.getColours();
-        String amount;
-
-        if (colours.containsKey(listbox) || colours.containsKey("")) {
-            String colour = (colours.containsKey(listbox) ? colours.get(listbox) : colours.get(""));
-            amount = "<font color=\"" + colour + "\"><b><small>" + front + "</small> " + word + " <small>" + back + "</small></b> " + meaning + " <b>" + (listbox.isEmpty() ? "(No Tag)" : listbox) + " " + lexicons + "</b>" + db.getFullDetails(word) + "</font>";
-        } else {
-            amount = "<b><small>" + front + "</small> " + word + " <small>" + back + "</small></b> " + meaning + " <b>" + (listbox.isEmpty() ? "(No Tag)" : listbox) + " " + lexicons + "</b>" + db.getFullDetails(word);
-        }
-
-        db.messageBox("Similar words for " + word, amount, Report.this);
     }
 
     public void setPrepared()
