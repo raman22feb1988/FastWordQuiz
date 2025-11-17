@@ -98,21 +98,15 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
             l1.setBackgroundColor(Color.GREEN);
         }
 
-        v.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                MainActivity mainActivity = (MainActivity) con;
-                mainActivity.onItemClick(viewHolder.getAdapterPosition());
-            }
+        v.setOnClickListener(v1 -> {
+            MainActivity mainActivity = (MainActivity) con;
+            mainActivity.onItemClick(viewHolder.getAdapterPosition());
         });
 
-        v.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                MainActivity mainActivity = (MainActivity) con;
-                mainActivity.onItemLongClick(viewHolder.getAdapterPosition());
-                return true;
-            }
+        v.setOnLongClickListener(v2 -> {
+            MainActivity mainActivity = (MainActivity) con;
+            mainActivity.onItemLongClick(viewHolder.getAdapterPosition());
+            return true;
         });
 
         v.post(new Runnable() {

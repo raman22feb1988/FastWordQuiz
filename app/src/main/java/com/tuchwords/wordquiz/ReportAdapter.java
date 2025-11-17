@@ -74,22 +74,16 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ViewHolder
         t1.setText(Html.fromHtml(lival));
         t1.setTextSize(size);
 
-        v.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Report report = (Report) con;
-                report.onItemClick(viewHolder.getAdapterPosition());
-            }
+        v.setOnClickListener(v2 -> {
+            Report report = (Report) con;
+            report.onItemClick(viewHolder.getAdapterPosition());
         });
 
-        v.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                Report report = (Report) con;
-                report.onItemLongClick(viewHolder.getAdapterPosition());
+        v.setOnLongClickListener(v1 -> {
+            Report report = (Report) con;
+            report.onItemLongClick(viewHolder.getAdapterPosition());
 
-                return true;
-            }
+            return true;
         });
     }
 

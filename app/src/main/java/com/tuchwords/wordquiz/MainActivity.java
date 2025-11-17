@@ -1,7 +1,6 @@
 package com.tuchwords.wordquiz;
 
 import androidx.activity.OnBackPressedCallback;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -30,6 +29,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
     TextView t2;
     TextView t5;
     TextView t6;
-    TextView t11;
+    TextView t4;
     EditText e2;
     Button b1;
     Button b2;
@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
     Button b9;
     Button b10;
     Button b11;
-    Button b15;
+    Button b12;
 
     Cursor anagrams;
     int words;
@@ -155,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // Create an ActionBarDrawerToggle to handle
-        // the drawer's open/close state
+        // the drawer's open / close state
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawerLayout, toolbar, R.string.nav_open, R.string.nav_close);
 
@@ -166,445 +166,426 @@ public class MainActivity extends AppCompatActivity {
         toggle.syncState();
 
         // Set a listener for when an item in the NavigationView is selected
-        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            // Called when an item in the NavigationView is selected.
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                // Handle the selected item based on its ID
-                switch (item.getItemId()) {
-                    case R.id.button20:
-                        // Show a Toast message for the SQL query item
-                        LayoutInflater inflater1 = LayoutInflater.from(MainActivity.this);
-                        final View yourCustomView1 = inflater1.inflate(R.layout.sqlquery, null);
+        // Called when an item in the NavigationView is selected.
+        navigationView.setNavigationItemSelectedListener(item -> {
+            // Handle the selected item based on its ID
+            switch (item.getItemId()) {
+                case R.id.button20:
+                    // Show a Toast message for the SQL query item
+                    LayoutInflater inflater1 = LayoutInflater.from(MainActivity.this);
+                    final View yourCustomView2 = inflater1.inflate(R.layout.sqlquery, null);
 
-                        TextView t3 = yourCustomView1.findViewById(R.id.textview14);
-                        t3.setText(db.getSchema());
+                    EditText e6 = yourCustomView2.findViewById(R.id.edittext8);
+                    CheckBox c3 = yourCustomView2.findViewById(R.id.checkbox3);
+                    FrameLayout f2 = yourCustomView2.findViewById(R.id.framelayout2);
 
-                        EditText e6 = yourCustomView1.findViewById(R.id.edittext8);
-                        CheckBox c3 = yourCustomView1.findViewById(R.id.checkbox3);
+                    LayoutInflater subinflater2 = LayoutInflater.from(MainActivity.this);
+                    final View subCustomView2 = subinflater2.inflate(R.layout.sieve, null);
+                    f2.addView(subCustomView2);
 
-                        Button b12 = yourCustomView1.findViewById(R.id.button73);
-                        b12.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                Help help = new Help();
-                                db.messageBox("Example SQL queries", help.getSqlHelp(), MainActivity.this);
-                            }
-                        });
+                    db.addFunctionalities(MainActivity.this, e6, c3, true, subCustomView2);
 
-                        AlertDialog dialog1 = new AlertDialog.Builder(MainActivity.this)
-                                .setTitle("Enter your SQL query")
-                                .setView(yourCustomView1)
-                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int whichButton) {
-                                        String sqlQuery = ((e6.getText()).toString()).replace("\"", "'");
+                    AlertDialog dialog1 = new AlertDialog.Builder(MainActivity.this)
+                            .setTitle("Enter your SQL query")
+                            .setView(yourCustomView2)
+                            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    String sqlQuery = ((e6.getText()).toString()).replace("\"", "'");
 
-                                        if (!sqlQuery.isEmpty()) {
-                                            db.myQuery(c3.isChecked() ? db.addUnderscores(sqlQuery) : sqlQuery, MainActivity.this, true);
-                                        }
+                                    if (!sqlQuery.isEmpty()) {
+                                        db.myQuery(c3.isChecked() ? db.addUnderscores(sqlQuery) : sqlQuery, MainActivity.this, true);
                                     }
-                                }).create();
-                        dialog1.show();
-                        break;
-                    case R.id.button21:
-                        // Show a Toast message for the Custom quiz item
-                        LayoutInflater inflater2 = LayoutInflater.from(MainActivity.this);
-                        final View yourCustomView2 = inflater2.inflate(R.layout.query, null);
-
-                        TextView t4 = yourCustomView2.findViewById(R.id.textview27);
-                        t4.setText(db.getSchema());
-
-                        EditText e7 = yourCustomView2.findViewById(R.id.edittext18);
-                        CheckBox c2 = yourCustomView2.findViewById(R.id.checkbox2);
-
-                        Button b13 = yourCustomView2.findViewById(R.id.button74);
-                        b13.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                Help help = new Help();
-                                db.messageBox("Example custom queries", help.getCustomHelp(), MainActivity.this);
-                            }
-                        });
-
-                        Spinner s24 = yourCustomView2.findViewById(R.id.spinner36);
-                        ArrayAdapter<String> emptyAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, blankList);
-                        emptyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                        s24.setAdapter(emptyAdapter);
-
-                        final int[] sortIndex = new int[3];
-                        Spinner s16 = yourCustomView2.findViewById(R.id.spinner28);
-                        ArrayAdapter<String> aggregateAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, aggregate);
-                        aggregateAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                        s16.setAdapter(aggregateAdapter);
-
-                        Spinner s17 = yourCustomView2.findViewById(R.id.spinner29);
-                        ArrayAdapter<String> orderAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, allColumns);
-                        orderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                        ArrayAdapter<String> ordersAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, blankColumns);
-                        ordersAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                        s17.setAdapter(orderAdapter);
-
-                        Spinner s18 = yourCustomView2.findViewById(R.id.spinner30);
-                        ArrayAdapter<String> sortAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, sort);
-                        sortAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                        s18.setAdapter(sortAdapter);
-
-                        s16.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                            @Override
-                            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                                sortIndex[0] = i;
-                            }
-
-                            @Override
-                            public void onNothingSelected(AdapterView<?> adapterView) {
-                            }
-                        });
-
-                        s17.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                            @Override
-                            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                                sortIndex[1] = i;
-
-                                if (i < 2) {
-                                    s16.setVisibility(View.GONE);
                                 }
-                                else {
-                                    s16.setVisibility(View.VISIBLE);
-                                }
-                            }
+                            }).create();
+                    dialog1.show();
+                    break;
+                case R.id.button21:
+                    // Show a Toast message for the Custom quiz item
+                    LayoutInflater inflater2 = LayoutInflater.from(MainActivity.this);
+                    final View yourCustomView1 = inflater2.inflate(R.layout.query, null);
 
-                            @Override
-                            public void onNothingSelected(AdapterView<?> adapterView) {
-                            }
-                        });
+                    EditText e7 = yourCustomView1.findViewById(R.id.edittext18);
+                    CheckBox c2 = yourCustomView1.findViewById(R.id.checkbox2);
+                    FrameLayout f1 = yourCustomView1.findViewById(R.id.framelayout1);
 
-                        s18.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                            @Override
-                            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                                sortIndex[2] = i;
-                            }
+                    LayoutInflater subinflater1 = LayoutInflater.from(MainActivity.this);
+                    final View subCustomView1 = subinflater1.inflate(R.layout.sieve, null);
+                    f1.addView(subCustomView1);
 
-                            @Override
-                            public void onNothingSelected(AdapterView<?> adapterView) {
-                            }
-                        });
+                    db.addFunctionalities(MainActivity.this, e7, c2, false, subCustomView1);
 
-                        s17.setSelection(6);
-                        s18.setSelection(1);
+                    Spinner s24 = yourCustomView1.findViewById(R.id.spinner36);
+                    ArrayAdapter<String> emptyAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, blankList);
+                    emptyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    s24.setAdapter(emptyAdapter);
 
-                        final int[] solved = {2};
-                        Spinner s8 = yourCustomView2.findViewById(R.id.spinner7);
-                        ArrayAdapter<String> solvedAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, solvedList);
-                        solvedAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                        s8.setAdapter(solvedAdapter);
-                        s8.setSelection(2);
+                    final int[] sortIndex = new int[3];
+                    Spinner s16 = yourCustomView1.findViewById(R.id.spinner28);
+                    ArrayAdapter<String> aggregateAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, aggregate);
+                    aggregateAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    s16.setAdapter(aggregateAdapter);
 
-                        s8.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                            @Override
-                            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                                solved[0] = i;
-                            }
+                    Spinner s17 = yourCustomView1.findViewById(R.id.spinner29);
+                    ArrayAdapter<String> orderAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, allColumns);
+                    orderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    ArrayAdapter<String> ordersAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, blankColumns);
+                    ordersAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    s17.setAdapter(orderAdapter);
 
-                            @Override
-                            public void onNothingSelected(AdapterView<?> adapterView) {
-                            }
-                        });
+                    Spinner s18 = yourCustomView1.findViewById(R.id.spinner30);
+                    ArrayAdapter<String> sortAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, sort);
+                    sortAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    s18.setAdapter(sortAdapter);
 
-                        AlertDialog dialog2 = new AlertDialog.Builder(MainActivity.this)
-                                .setTitle("SELECT DISTINCT(alphagram) FROM words WHERE")
-                                .setView(yourCustomView2)
-                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int whichButton) {
-                                        String temporaryQuery = ((e7.getText()).toString()).replace("\"", "'");
-                                        String customQuery = (temporaryQuery.isEmpty() ? "1" : temporaryQuery);
-                                        boolean wildIndex = (s24.getSelectedItemPosition() > 0);
-                                        String orderIndex = sortBy(sortIndex, wildIndex);
-                                        String processingQuery = (c2.isChecked() ? db.addUnderscores(customQuery) : customQuery);
-                                        Cursor resultSet = db.getCustomQuiz(processingQuery, MainActivity.this, solved[0], orderIndex, wildIndex);
-
-                                        if (resultSet != null) {
-                                            label = processingQuery;
-                                            letters = 1;
-                                            ultimate = null;
-                                            selectedAnagram = null;
-                                            mode = 0;
-                                            solvedStatus = solved[0];
-                                            orderBy = orderIndex;
-
-                                            closeCursor();
-                                            anagrams = resultSet;
-                                            words = anagrams.getCount();
-                                            int[] pair1 = db.getCustomScore(label, solved[0], wildIndex);
-                                            score = pair1[0];
-                                            number = pair1[1];
-
-                                            boolean exists = db.existLabel(letters, label, orderBy, wildIndex);
-
-                                            if (!exists) {
-                                                counter = 0;
-                                                db.insertLabel(letters, label, orderBy, wildIndex);
-                                            } else {
-                                                counter = db.getCounter(letters, label, solvedStatus, orderBy, wildIndex);
-                                            }
-
-                                            int highest = (words - 1) / (rows * columns);
-                                            if (counter > highest && words > 0) {
-                                                counter = highest;
-                                                db.updateCounter(letters, label, counter, solvedStatus, orderBy, wildIndex);
-                                            }
-
-                                            nextWord(wildIndex);
-                                        }
-                                    }
-                                }).create();
-                        dialog2.show();
-
-                        s24.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                            @Override
-                            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                                dialog2.setTitle((i == 0) ? "SELECT DISTINCT(alphagram) FROM words WHERE" : "SELECT DISTINCT(anagram) FROM blanks WHERE");
-
-                                if (i == 0) {
-                                    s17.setAdapter(orderAdapter);
-                                    s17.setSelection(6);
-                                    s18.setSelection(1);
-                                }
-                                else {
-                                    s17.setAdapter(ordersAdapter);
-                                    s17.setSelection(1);
-                                    s18.setSelection(0);
-                                }
-                            }
-
-                            @Override
-                            public void onNothingSelected(AdapterView<?> adapterView) {
-                            }
-                        });
-                        break;
-                    case R.id.button26:
-                        // Show a Toast message for the View all tag colours item
-                        String labelColours = db.getLabelColours(MainActivity.this);
-                        db.messageBox("Tag colours", labelColours, MainActivity.this);
-                        break;
-                    case R.id.button24:
-                        // Show a Toast message for the Export tags item
-                        db.exportLabels(MainActivity.this, true);
-                        break;
-                    case R.id.button25:
-                        // Show a Toast message for the Import tags item
-                        db.importLabels(MainActivity.this, true);
-                        break;
-                    case R.id.button22:
-                        // Show a Toast message for the Export CSV item
-                        db.exportDB(MainActivity.this, true);
-                        break;
-                    case R.id.button23:
-                        // Show a Toast message for the Import CSV item
-                        db.importDB(MainActivity.this, true);
-                        break;
-                    case R.id.button34:
-                        // Show a Toast message for the Change rows, columns, font size item
-                        zoom();
-                        break;
-                    case R.id.button36:
-                        // Show a Toast message for the Hide and show number of answers item
-                        if (hidden) {
-                            hidden = false;
-                            item.setTitle("Hide number of answers");
-                            SharedPreferences.Editor editor = pref.edit();
-                            editor.putBoolean("hidden", false);
-                            editor.apply();
-                            if (cusadapter != null) {
-                                cusadapter.setHidden(false);
-                                cusadapter.notifyDataSetChanged();
-                            }
-                        } else {
-                            hidden = true;
-                            item.setTitle("Show number of answers");
-                            SharedPreferences.Editor editor = pref.edit();
-                            editor.putBoolean("hidden", true);
-                            editor.apply();
-                            if (cusadapter != null) {
-                                cusadapter.setHidden(true);
-                                cusadapter.notifyDataSetChanged();
-                            }
-                        }
-                        break;
-                    case R.id.button38:
-                        // Show a Toast message for the Filter by tag item
-                        filterByLabel();
-                        break;
-                    case R.id.button39:
-                        // Show a Toast message for the Reset words by tag item
-                        db.resetByLabel(MainActivity.this, true, blankList, maximumWordLength, maximumBlankLength, combo);
-                        break;
-                    case R.id.button41:
-                        // Show a Toast message for the Add new tag item
-                        db.addByLabel(MainActivity.this, true);
-                        break;
-                    case R.id.button42:
-                        // Show a Toast message for the Rename tag by colour item
-                        db.renameByLabel(MainActivity.this, true, false, combo);
-                        break;
-                    case R.id.button43:
-                        // Show a Toast message for the Change tag colour by name item
-                        db.renameByLabel(MainActivity.this, true, true, combo);
-                        break;
-                    case R.id.button44:
-                        // Show a Toast message for the Delete single tag by name item
-                        db.deleteByLabel(MainActivity.this, true, true, combo);
-                        break;
-                    case R.id.button45:
-                        // Show a Toast message for the Delete single tag by colour item
-                        db.deleteByLabel(MainActivity.this, true, false, combo);
-                        break;
-                    case R.id.button51:
-                        // Show a Toast message for the Hide and show similar words item
-                        if (detail) {
-                            detail = false;
-                            item.setTitle("Show similar words (Slower)");
-                            SharedPreferences.Editor editor = pref.edit();
-                            editor.putBoolean("detail", false);
-                            editor.apply();
-                        } else {
-                            detail = true;
-                            item.setTitle("Hide similar words (Faster)");
-                            SharedPreferences.Editor editor = pref.edit();
-                            editor.putBoolean("detail", true);
-                            editor.apply();
+                    s16.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                            sortIndex[0] = i;
                         }
 
-                        if (mode == 1) {
-                            refreshDefinition();
+                        @Override
+                        public void onNothingSelected(AdapterView<?> adapterView) {
                         }
-                        break;
-                    case R.id.button53:
-                        // Show a Toast message for the View all prefixes and suffixes item
-                        db.getSuffix(MainActivity.this);
-                        break;
-                    case R.id.button54:
-                        // Show a Toast message for the Add new prefix item
-                        db.addSuffix(MainActivity.this, true, false, mode);
-                        break;
-                    case R.id.button55:
-                        // Show a Toast message for the Change prefix item
-                        db.changeSuffix(MainActivity.this, true, false, mode);
-                        break;
-                    case R.id.button56:
-                        // Show a Toast message for the Delete single prefix item
-                        db.deleteSuffix(MainActivity.this, true, false, mode);
-                        break;
-                    case R.id.button57:
-                        // Show a Toast message for the Add new suffix item
-                        db.addSuffix(MainActivity.this, true, true, mode);
-                        break;
-                    case R.id.button58:
-                        // Show a Toast message for the Change suffix item
-                        db.changeSuffix(MainActivity.this, true, true, mode);
-                        break;
-                    case R.id.button59:
-                        // Show a Toast message for the Delete single suffix item
-                        db.deleteSuffix(MainActivity.this, true, true, mode);
-                        break;
-                    case R.id.button67:
-                        // Show a Toast message for the Delete all tags item
-                        db.deleteAllRecords(MainActivity.this, true, "colours", mode);
-                        break;
-                    case R.id.button68:
-                        // Show a Toast message for the Delete all prefixes item
-                        db.deleteAllRecords(MainActivity.this, true, "prefixes", mode);
-                        break;
-                    case R.id.button69:
-                        // Show a Toast message for the Delete all suffixes item
-                        db.deleteAllRecords(MainActivity.this, true, "suffixes", mode);
-                        break;
-                    case R.id.button75:
-                        // Show a Toast message for the Prepare regular database item
-                        promptDictionary(true, false);
-                        break;
-                    case R.id.button77:
-                        // Show a Toast message for the Search for anagrams item
-                        getAllSubanagrams(false);
-                        break;
-                    case R.id.button78:
-                        // Show a Toast message for the Search for subanagrams item
-                        getAllSubanagrams(true);
-                        break;
-                    case R.id.button82:
-                        // Show a Toast message for the Prepare blank database item
-                        promptDictionary(false, true);
-                        break;
-                    case R.id.button84:
-                        // Show a Toast message for the Clear answers on submit item
-                        LayoutInflater inflater3 = LayoutInflater.from(MainActivity.this);
-                        final View yourCustomView3 = inflater3.inflate(R.layout.clear, null);
+                    });
 
-                        CheckBox[] checkBoxes = {yourCustomView3.findViewById(R.id.checkbox5),
-                                yourCustomView3.findViewById(R.id.checkbox6),
-                                yourCustomView3.findViewById(R.id.checkbox7),
-                                yourCustomView3.findViewById(R.id.checkbox8),
-                                yourCustomView3.findViewById(R.id.checkbox9),
-                                yourCustomView3.findViewById(R.id.checkbox10),
-                                yourCustomView3.findViewById(R.id.checkbox11),
-                                yourCustomView3.findViewById(R.id.checkbox12),
-                        };
+                    s17.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                            sortIndex[1] = i;
 
-                        for (int clearIndex = 0; clearIndex < checkBoxes.length; clearIndex++) {
-                            if ((clear & (1 << clearIndex)) > 0) {
-                                checkBoxes[clearIndex].setChecked(true);
+                            if (i < 2) {
+                                s16.setVisibility(View.GONE);
+                            }
+                            else {
+                                s16.setVisibility(View.VISIBLE);
                             }
                         }
 
-                        AlertDialog dialog3 = new AlertDialog.Builder(MainActivity.this)
-                                .setTitle("Clear answers on submit")
-                                .setView(yourCustomView3)
-                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int whichButton) {
-                                        int clearValue = 0;
-                                        for (int clearVariable = 0; clearVariable < checkBoxes.length; clearVariable++) {
-                                            if (checkBoxes[clearVariable].isChecked()) {
-                                                clearValue += (1 << clearVariable);
-                                            }
-                                        }
+                        @Override
+                        public void onNothingSelected(AdapterView<?> adapterView) {
+                        }
+                    });
 
-                                        clear = clearValue;
-                                        SharedPreferences.Editor editor = pref.edit();
-                                        editor.putInt("clear", clear);
-                                        editor.apply();
+                    s18.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                            sortIndex[2] = i;
+                        }
+
+                        @Override
+                        public void onNothingSelected(AdapterView<?> adapterView) {
+                        }
+                    });
+
+                    s17.setSelection(6);
+                    s18.setSelection(1);
+
+                    final int[] solved = {2};
+                    Spinner s8 = yourCustomView1.findViewById(R.id.spinner7);
+                    ArrayAdapter<String> solvedAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, solvedList);
+                    solvedAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    s8.setAdapter(solvedAdapter);
+                    s8.setSelection(2);
+
+                    s8.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                            solved[0] = i;
+                        }
+
+                        @Override
+                        public void onNothingSelected(AdapterView<?> adapterView) {
+                        }
+                    });
+
+                    AlertDialog dialog2 = new AlertDialog.Builder(MainActivity.this)
+                            .setTitle("SELECT DISTINCT(alphagram) FROM words WHERE")
+                            .setView(yourCustomView1)
+                            .setPositiveButton("OK", (dialog, whichButton) -> {
+                                String temporaryQuery = ((e7.getText()).toString()).replace("\"", "'");
+                                String customQuery = (temporaryQuery.isEmpty() ? "1" : temporaryQuery);
+                                boolean wildIndex = (s24.getSelectedItemPosition() > 0);
+                                String orderIndex = sortBy(sortIndex, wildIndex);
+                                String processingQuery = (c2.isChecked() ? db.addUnderscores(customQuery) : customQuery);
+                                Cursor resultSet = db.getCustomQuiz(processingQuery, MainActivity.this, solved[0], orderIndex, wildIndex);
+
+                                if (resultSet != null) {
+                                    label = processingQuery;
+                                    letters = 1;
+                                    ultimate = null;
+                                    selectedAnagram = null;
+                                    mode = 0;
+                                    solvedStatus = solved[0];
+                                    orderBy = orderIndex;
+
+                                    closeCursor();
+                                    anagrams = resultSet;
+                                    words = anagrams.getCount();
+                                    int[] pair1 = db.getCustomScore(label, solved[0], wildIndex);
+                                    score = pair1[0];
+                                    number = pair1[1];
+
+                                    boolean exists = db.existLabel(letters, label, orderBy, wildIndex);
+
+                                    if (!exists) {
+                                        counter = 0;
+                                        db.insertLabel(letters, label, orderBy, wildIndex);
+                                    } else {
+                                        counter = db.getCounter(letters, label, solvedStatus, orderBy, wildIndex);
                                     }
-                                }).create();
-                        dialog3.show();
-                        break;
-                    case R.id.button87:
-                        // Show a Toast message for the Shuffle anagrams by item
-                        LayoutInflater inflater4 = LayoutInflater.from(MainActivity.this);
-                        final View yourCustomView4 = inflater4.inflate(R.layout.shuffle, null);
 
-                        RadioGroup r1 = yourCustomView4.findViewById(R.id.radioGroup1);
-                        ((RadioButton) r1.getChildAt(shuffle)).setChecked(true);
-
-                        AlertDialog dialog4 = new AlertDialog.Builder(MainActivity.this)
-                                .setTitle("Shuffle anagrams by")
-                                .setView(yourCustomView4)
-                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int whichButton) {
-                                        RadioButton r2 = yourCustomView4.findViewById(r1.getCheckedRadioButtonId());
-                                        shuffle = r1.indexOfChild(r2);
-                                        SharedPreferences.Editor editor = pref.edit();
-                                        editor.putInt("shuffle", shuffle);
-                                        editor.apply();
-                                        refresh();
+                                    int highest = (words - 1) / (rows * columns);
+                                    if (counter > highest && words > 0) {
+                                        counter = highest;
+                                        db.updateCounter(letters, label, counter, solvedStatus, orderBy, wildIndex);
                                     }
-                                }).create();
-                        dialog4.show();
-                        break;
-                }
 
-                // Close the drawer after selection
-                drawerLayout.closeDrawers();
-                // Indicate that the item selection has been handled
-                return true;
+                                    nextWord(wildIndex);
+                                }
+                            }).create();
+                    dialog2.show();
+
+                    s24.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                            dialog2.setTitle((i == 0) ? "SELECT DISTINCT(alphagram) FROM words WHERE" : "SELECT DISTINCT(anagram) FROM blanks WHERE");
+
+                            if (i == 0) {
+                                s17.setAdapter(orderAdapter);
+                                s17.setSelection(6);
+                                s18.setSelection(1);
+                            }
+                            else {
+                                s17.setAdapter(ordersAdapter);
+                                s17.setSelection(1);
+                                s18.setSelection(0);
+                            }
+                        }
+
+                        @Override
+                        public void onNothingSelected(AdapterView<?> adapterView) {
+                        }
+                    });
+                    break;
+                case R.id.button26:
+                    // Show a Toast message for the View all tag colours item
+                    String labelColours = db.getLabelColours(MainActivity.this);
+                    db.messageBox("Tag colours", labelColours, MainActivity.this);
+                    break;
+                case R.id.button24:
+                    // Show a Toast message for the Export tags item
+                    db.exportLabels(MainActivity.this, true);
+                    break;
+                case R.id.button25:
+                    // Show a Toast message for the Import tags item
+                    db.importLabels(MainActivity.this, true);
+                    break;
+                case R.id.button22:
+                    // Show a Toast message for the Export CSV item
+                    db.exportDB(MainActivity.this, true);
+                    break;
+                case R.id.button23:
+                    // Show a Toast message for the Import CSV item
+                    db.importDB(MainActivity.this, true);
+                    break;
+                case R.id.button34:
+                    // Show a Toast message for the Change rows, columns, font size item
+                    zoom();
+                    break;
+                case R.id.button36:
+                    // Show a Toast message for the Hide and show number of answers item
+                    if (hidden) {
+                        hidden = false;
+                        item.setTitle("Hide number of answers");
+                        SharedPreferences.Editor editor = pref.edit();
+                        editor.putBoolean("hidden", false);
+                        editor.apply();
+                        if (cusadapter != null) {
+                            cusadapter.setHidden(false);
+                            cusadapter.notifyDataSetChanged();
+                        }
+                    } else {
+                        hidden = true;
+                        item.setTitle("Show number of answers");
+                        SharedPreferences.Editor editor = pref.edit();
+                        editor.putBoolean("hidden", true);
+                        editor.apply();
+                        if (cusadapter != null) {
+                            cusadapter.setHidden(true);
+                            cusadapter.notifyDataSetChanged();
+                        }
+                    }
+                    break;
+                case R.id.button38:
+                    // Show a Toast message for the Filter by tag item
+                    filterByLabel();
+                    break;
+                case R.id.button39:
+                    // Show a Toast message for the Reset words by tag item
+                    db.resetByLabel(MainActivity.this, true, blankList, maximumWordLength, maximumBlankLength, combo);
+                    break;
+                case R.id.button41:
+                    // Show a Toast message for the Add new tag item
+                    db.addByLabel(MainActivity.this, true);
+                    break;
+                case R.id.button42:
+                    // Show a Toast message for the Rename tag by colour item
+                    db.renameByLabel(MainActivity.this, true, false, combo);
+                    break;
+                case R.id.button43:
+                    // Show a Toast message for the Change tag colour by name item
+                    db.renameByLabel(MainActivity.this, true, true, combo);
+                    break;
+                case R.id.button44:
+                    // Show a Toast message for the Delete single tag by name item
+                    db.deleteByLabel(MainActivity.this, true, true, combo);
+                    break;
+                case R.id.button45:
+                    // Show a Toast message for the Delete single tag by colour item
+                    db.deleteByLabel(MainActivity.this, true, false, combo);
+                    break;
+                case R.id.button51:
+                    // Show a Toast message for the Hide and show similar words item
+                    if (detail) {
+                        detail = false;
+                        item.setTitle("Show similar words (Slower)");
+                        SharedPreferences.Editor editor = pref.edit();
+                        editor.putBoolean("detail", false);
+                        editor.apply();
+                    } else {
+                        detail = true;
+                        item.setTitle("Hide similar words (Faster)");
+                        SharedPreferences.Editor editor = pref.edit();
+                        editor.putBoolean("detail", true);
+                        editor.apply();
+                    }
+
+                    if (mode == 1) {
+                        refreshDefinition();
+                    }
+                    break;
+                case R.id.button53:
+                    // Show a Toast message for the View all prefixes and suffixes item
+                    db.getSuffix(MainActivity.this);
+                    break;
+                case R.id.button54:
+                    // Show a Toast message for the Add new prefix item
+                    db.addSuffix(MainActivity.this, true, false, mode);
+                    break;
+                case R.id.button55:
+                    // Show a Toast message for the Change prefix item
+                    db.changeSuffix(MainActivity.this, true, false, mode);
+                    break;
+                case R.id.button56:
+                    // Show a Toast message for the Delete single prefix item
+                    db.deleteSuffix(MainActivity.this, true, false, mode);
+                    break;
+                case R.id.button57:
+                    // Show a Toast message for the Add new suffix item
+                    db.addSuffix(MainActivity.this, true, true, mode);
+                    break;
+                case R.id.button58:
+                    // Show a Toast message for the Change suffix item
+                    db.changeSuffix(MainActivity.this, true, true, mode);
+                    break;
+                case R.id.button59:
+                    // Show a Toast message for the Delete single suffix item
+                    db.deleteSuffix(MainActivity.this, true, true, mode);
+                    break;
+                case R.id.button67:
+                    // Show a Toast message for the Delete all tags item
+                    db.deleteAllRecords(MainActivity.this, true, "colours", mode);
+                    break;
+                case R.id.button68:
+                    // Show a Toast message for the Delete all prefixes item
+                    db.deleteAllRecords(MainActivity.this, true, "prefixes", mode);
+                    break;
+                case R.id.button69:
+                    // Show a Toast message for the Delete all suffixes item
+                    db.deleteAllRecords(MainActivity.this, true, "suffixes", mode);
+                    break;
+                case R.id.button75:
+                    // Show a Toast message for the Prepare regular database item
+                    promptDictionary(true, false);
+                    break;
+                case R.id.button77:
+                    // Show a Toast message for the Search for anagrams item
+                    getAllSubanagrams(false);
+                    break;
+                case R.id.button78:
+                    // Show a Toast message for the Search for subanagrams item
+                    getAllSubanagrams(true);
+                    break;
+                case R.id.button82:
+                    // Show a Toast message for the Prepare blank database item
+                    promptDictionary(false, true);
+                    break;
+                case R.id.button84:
+                    // Show a Toast message for the Clear answers on submit item
+                    LayoutInflater inflater3 = LayoutInflater.from(MainActivity.this);
+                    final View yourCustomView5 = inflater3.inflate(R.layout.clear, null);
+
+                    CheckBox[] checkBoxes = {yourCustomView5.findViewById(R.id.checkbox5),
+                            yourCustomView5.findViewById(R.id.checkbox6),
+                            yourCustomView5.findViewById(R.id.checkbox7),
+                            yourCustomView5.findViewById(R.id.checkbox8),
+                            yourCustomView5.findViewById(R.id.checkbox9),
+                            yourCustomView5.findViewById(R.id.checkbox10),
+                            yourCustomView5.findViewById(R.id.checkbox11),
+                            yourCustomView5.findViewById(R.id.checkbox12),
+                    };
+
+                    for (int clearIndex = 0; clearIndex < checkBoxes.length; clearIndex++) {
+                        if ((clear & (1 << clearIndex)) > 0) {
+                            checkBoxes[clearIndex].setChecked(true);
+                        }
+                    }
+
+                    AlertDialog dialog3 = new AlertDialog.Builder(MainActivity.this)
+                            .setTitle("Clear answers on submit")
+                            .setView(yourCustomView5)
+                            .setPositiveButton("OK", (dialog, whichButton) -> {
+                                int clearValue = 0;
+                                for (int clearVariable = 0; clearVariable < checkBoxes.length; clearVariable++) {
+                                    if (checkBoxes[clearVariable].isChecked()) {
+                                        clearValue += (1 << clearVariable);
+                                    }
+                                }
+
+                                clear = clearValue;
+                                SharedPreferences.Editor editor = pref.edit();
+                                editor.putInt("clear", clear);
+                                editor.apply();
+                            }).create();
+                    dialog3.show();
+                    break;
+                case R.id.button87:
+                    // Show a Toast message for the Shuffle anagrams by item
+                    LayoutInflater inflater4 = LayoutInflater.from(MainActivity.this);
+                    final View yourCustomView4 = inflater4.inflate(R.layout.shuffle, null);
+
+                    RadioGroup r1 = yourCustomView4.findViewById(R.id.radioGroup1);
+                    ((RadioButton) r1.getChildAt(shuffle)).setChecked(true);
+
+                    AlertDialog dialog4 = new AlertDialog.Builder(MainActivity.this)
+                            .setTitle("Shuffle anagrams by")
+                            .setView(yourCustomView4)
+                            .setPositiveButton("OK", (dialog, whichButton) -> {
+                                RadioButton r2 = yourCustomView4.findViewById(r1.getCheckedRadioButtonId());
+                                shuffle = r1.indexOfChild(r2);
+                                SharedPreferences.Editor editor = pref.edit();
+                                editor.putInt("shuffle", shuffle);
+                                editor.apply();
+                                refresh();
+                            }).create();
+                    dialog4.show();
+                    break;
             }
+
+            // Close the drawer after selection
+            drawerLayout.closeDrawers();
+            // Indicate that the item selection has been handled
+            return true;
         });
 
         // Add a callback to handle the back button press
@@ -629,7 +610,7 @@ public class MainActivity extends AppCompatActivity {
         t2 = findViewById(R.id.textview4);
         t5 = findViewById(R.id.textview5);
         t6 = findViewById(R.id.textview28);
-        t11 = findViewById(R.id.textview87);
+        t4 = findViewById(R.id.textview87);
         e2 = findViewById(R.id.edittext2);
         b1 = findViewById(R.id.button1);
         b2 = findViewById(R.id.button2);
@@ -642,7 +623,7 @@ public class MainActivity extends AppCompatActivity {
         b9 = findViewById(R.id.button15);
         b10 = findViewById(R.id.button17);
         b11 = findViewById(R.id.button19);
-        b15 = findViewById(R.id.button86);
+        b12 = findViewById(R.id.button86);
 
         db = new sqliteDB(MainActivity.this, version, null, false);
 
@@ -700,142 +681,111 @@ public class MainActivity extends AppCompatActivity {
             blankColumns.add(blankColumn.substring(1, blankColumn.length() - 1));
         }
 
-        b3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                getWordLength();
-            }
+        b3.setOnClickListener(view -> getWordLength());
+
+        b5.setOnClickListener(view -> {
+            Intent intent1 = new Intent(MainActivity.this, Report.class);
+            startActivity(intent1);
+            finish();
         });
 
-        b5.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent1 = new Intent(MainActivity.this, Report.class);
-                startActivity(intent1);
-                finish();
-            }
-        });
+        b6.setOnClickListener(view -> finish());
 
-        b6.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finish();
-            }
-        });
+        b8.setOnClickListener(view -> {
+            LayoutInflater inflater = LayoutInflater.from(MainActivity.this);
+            final View yourCustomView = inflater.inflate(R.layout.label, null);
 
-        b8.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                LayoutInflater inflater = LayoutInflater.from(MainActivity.this);
-                final View yourCustomView = inflater.inflate(R.layout.label, null);
+            EditText e3 = yourCustomView.findViewById(R.id.edittext3);
+            EditText e4 = yourCustomView.findViewById(R.id.edittext4);
+            Spinner s26 = yourCustomView.findViewById(R.id.spinner39);
 
-                EditText e3 = yourCustomView.findViewById(R.id.edittext3);
-                EditText e4 = yourCustomView.findViewById(R.id.edittext4);
-                Spinner s26 = yourCustomView.findViewById(R.id.spinner39);
+            final ArrayList<String>[] anagramItem = new ArrayList[]{new ArrayList<>()};
+            ArrayAdapter<String> anagramAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, anagramItem[0]);
+            anagramAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            s26.setAdapter(anagramAdapter);
 
-                final ArrayList<String>[] anagramItem = new ArrayList[]{new ArrayList<>()};
-                ArrayAdapter<String> anagramAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, anagramItem[0]);
-                anagramAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                s26.setAdapter(anagramAdapter);
+            e3.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                }
 
-                e3.addTextChangedListener(new TextWatcher() {
-                    @Override
-                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                    }
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    anagramItem[0] = db.getBlankAnagrams((s.toString()).toUpperCase());
+                    ArrayAdapter<String> alphagramAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, anagramItem[0]);
+                    alphagramAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    s26.setAdapter(alphagramAdapter);
+                }
 
-                    @Override
-                    public void onTextChanged(CharSequence s, int start, int before, int count) {
-                        anagramItem[0] = db.getBlankAnagrams((s.toString()).toUpperCase());
-                        ArrayAdapter<String> alphagramAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, anagramItem[0]);
-                        alphagramAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                        s26.setAdapter(alphagramAdapter);
-                    }
+                @Override
+                public void afterTextChanged(Editable s) {
+                }
+            });
 
-                    @Override
-                    public void afterTextChanged(Editable s) {
-                    }
-                });
+            Spinner s1 = yourCustomView.findViewById(R.id.spinner2);
+            List<Pair<String, String>> labelList = db.getAllLabels();
 
-                Spinner s1 = yourCustomView.findViewById(R.id.spinner2);
-                List<Pair<String, String>> labelList = db.getAllLabels();
+            ColourAdapter spinnerAdapter = new ColourAdapter(MainActivity.this, R.layout.colour, R.id.textview62, labelList, MainActivity.this, true, combo);
+            s1.setAdapter(spinnerAdapter);
 
-                ColourAdapter spinnerAdapter = new ColourAdapter(MainActivity.this, R.layout.colour, R.id.textview62, labelList, MainActivity.this, true, combo);
-                s1.setAdapter(spinnerAdapter);
+            s1.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                    e4.setText((labelList.get(i)).first);
+                }
 
-                s1.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                        e4.setText((labelList.get(i)).first);
-                    }
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView) {
+                }
+            });
 
-                    @Override
-                    public void onNothingSelected(AdapterView<?> adapterView) {
-                    }
-                });
+            AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
+                    .setTitle("Change tag")
+                    .setView(yourCustomView)
+                    .setPositiveButton("OK", (dialog5, whichButton) -> {
+                        String line = (((e3.getText()).toString()).trim()).toUpperCase();
+                        String category = (e4.getText()).toString();
+                        int anagramIndex = s26.getSelectedItemPosition();
+                        String chosenAnagram = anagramItem[0].get(anagramIndex);
 
-                AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
-                        .setTitle("Change tag")
-                        .setView(yourCustomView)
-                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                String line = (((e3.getText()).toString()).trim()).toUpperCase();
-                                String category = (e4.getText()).toString();
-                                int anagramIndex = s26.getSelectedItemPosition();
-                                String chosenAnagram = anagramItem[0].get(anagramIndex);
+                        if (anagramIndex == 0) {
+                            db.updateTag(line, category, false);
+                        } else {
+                            db.updateTag(line + " " + chosenAnagram, category, true);
+                        }
 
-                                if (anagramIndex == 0) {
-                                    db.updateTag(line, category, false);
-                                } else {
-                                    db.updateTag(line + " " + chosenAnagram, category, true);
-                                }
-
-                                if (mode == 1) {
-                                    if (grid.containsKey(line)) {
-                                        if (line.equals(ultimate) && chosenAnagram.equals(selectedAnagram)) {
-                                            displayDefinition(category);
-                                        }
-                                    }
-                                } else if (mode == 2) {
-                                    if (chosenAnagram.equals(ultimate)) {
-                                        String solved = db.getSolvedAnswers(chosenAnagram, blank);
-                                        t5.setText(Html.fromHtml(solved));
-                                    }
-                                }
-
-                                if (mode == 3)
-                                {
-                                    String revision = db.getSummary(jumbles, blank);
-                                    t5.setText(Html.fromHtml(revision));
+                        if (mode == 1) {
+                            if (grid.containsKey(line)) {
+                                if (line.equals(ultimate) && chosenAnagram.equals(selectedAnagram)) {
+                                    displayDefinition(category);
                                 }
                             }
-                        }).create();
-                dialog.show();
-            }
+                        } else if (mode == 2) {
+                            if (chosenAnagram.equals(ultimate)) {
+                                String solved = db.getSolvedAnswers(chosenAnagram, blank);
+                                t5.setText(Html.fromHtml(solved));
+                            }
+                        }
+
+                        if (mode == 3)
+                        {
+                            String revision = db.getSummary(jumbles, blank);
+                            t5.setText(Html.fromHtml(revision));
+                        }
+                    }).create();
+            dialog.show();
         });
 
-        b10.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ultimate = "";
-                selectedAnagram = "";
-                mode = 3;
-                revise();
-            }
+        b10.setOnClickListener(view -> {
+            ultimate = "";
+            selectedAnagram = "";
+            mode = 3;
+            revise();
         });
 
-        b11.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                e2.setText("");
-            }
-        });
+        b11.setOnClickListener(view -> e2.setText(""));
 
-        b15.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                e2.setText(lastWord);
-            }
-        });
+        b12.setOnClickListener(view -> e2.setText(lastWord));
 
         // Add a callback to handle the back button press
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
@@ -866,29 +816,25 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
                 .setTitle("Choose your lexicon")
                 .setView(yourCustomView)
-                .setPositiveButton("CSW24", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        if (joker) {
-                            Toast.makeText(MainActivity.this, "Loading all blank anagrams into memory. Just a minute...", Toast.LENGTH_LONG).show();
-                        }
-
-                        if (c1.isChecked()) {
-                            db.dropTable(MainActivity.this, true);
-                        }
-                        prepareDictionary(true, joker);
+                .setPositiveButton("CSW24", (dialog1, whichButton) -> {
+                    if (joker) {
+                        Toast.makeText(MainActivity.this, "Loading all blank anagrams into memory. Just a minute...", Toast.LENGTH_LONG).show();
                     }
+
+                    if (c1.isChecked()) {
+                        db.dropTable(MainActivity.this, true);
+                    }
+                    prepareDictionary(true, joker);
                 })
-                .setNegativeButton("NWL23", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        if (joker) {
-                            Toast.makeText(MainActivity.this, "Loading all blank anagrams into memory. Just a minute...", Toast.LENGTH_LONG).show();
-                        }
-
-                        if (c1.isChecked()) {
-                            db.dropTable(MainActivity.this, true);
-                        }
-                        prepareDictionary(false, joker);
+                .setNegativeButton("NWL23", (dialog2, whichButton) -> {
+                    if (joker) {
+                        Toast.makeText(MainActivity.this, "Loading all blank anagrams into memory. Just a minute...", Toast.LENGTH_LONG).show();
                     }
+
+                    if (c1.isChecked()) {
+                        db.dropTable(MainActivity.this, true);
+                    }
+                    prepareDictionary(false, joker);
                 }).create();
         dialog.show();
     }
@@ -1006,7 +952,7 @@ public class MainActivity extends AppCompatActivity {
         final View yourCustomView = inflater.inflate(R.layout.solve, null);
 
         EditText e1 = yourCustomView.findViewById(R.id.edittext17);
-        TextView t10 = yourCustomView.findViewById(R.id.textview80);
+        TextView t3 = yourCustomView.findViewById(R.id.textview80);
         e1.setHint("Enter a value between 2 and " + maximumWordLength);
 
         Spinner s22 = yourCustomView.findViewById(R.id.spinner34);
@@ -1130,12 +1076,12 @@ public class MainActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 if (i == 0) {
                     e1.setVisibility(View.VISIBLE);
-                    t10.setVisibility(View.VISIBLE);
+                    t3.setVisibility(View.VISIBLE);
                     lengthIndex[0] = 0;
                 }
                 else {
                     e1.setVisibility(View.INVISIBLE);
-                    t10.setVisibility(View.INVISIBLE);
+                    t3.setVisibility(View.INVISIBLE);
                     lengthIndex[0] = 1;
                 }
             }
@@ -1148,28 +1094,26 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
                 .setTitle("Change word length")
                 .setView(yourCustomView)
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        String alphabet = (lengthIndex[0] == 0 ? (e1.getText()).toString() : "-1");
-                        int precursor = (alphabet.isEmpty() ? 0 : Integer.parseInt(alphabet));
-                        boolean wild = (s22.getSelectedItemPosition() > 0);
+                .setPositiveButton("OK", (dialog1, whichButton) -> {
+                    String alphabet = (lengthIndex[0] == 0 ? (e1.getText()).toString() : "-1");
+                    int precursor = (alphabet.isEmpty() ? 0 : Integer.parseInt(alphabet));
+                    boolean wild = (s22.getSelectedItemPosition() > 0);
 
-                        if (lengthIndex[0] == 0 && precursor < 2)
-                        {
-                            Toast.makeText(MainActivity.this, "Enter a value between 2 and " + (wild ? maximumBlankLength : maximumWordLength) + " for word length", Toast.LENGTH_LONG).show();
-                            getWordLength();
-                        }
-                        else
-                        {
-                            mode = 0;
-                            ultimate = null;
-                            selectedAnagram = null;
-                            letters = precursor;
-                            label = "*";
-                            solvedStatus = solved[0];
-                            orderBy = sortBy(sortIndex, wild);
-                            start(wild);
-                        }
+                    if (lengthIndex[0] == 0 && precursor < 2)
+                    {
+                        Toast.makeText(MainActivity.this, "Enter a value between 2 and " + (wild ? maximumBlankLength : maximumWordLength) + " for word length", Toast.LENGTH_LONG).show();
+                        getWordLength();
+                    }
+                    else
+                    {
+                        mode = 0;
+                        ultimate = null;
+                        selectedAnagram = null;
+                        letters = precursor;
+                        label = "*";
+                        solvedStatus = solved[0];
+                        orderBy = sortBy(sortIndex, wild);
+                        start(wild);
                     }
                 }).create();
         dialog.show();
@@ -1283,7 +1227,7 @@ public class MainActivity extends AppCompatActivity {
 
         t1.setText("Page " + (counter + 1) + " out of " + (((words - 1) / (rows * columns)) + 1));
         t2.setText("Score: " + score + "/" + number);
-        t11.setText("This page: " + numerator + "/" + denominator);
+        t4.setText("This page: " + numerator + "/" + denominator);
         if (ultimate == null) {
             t5.setText("");
             t6.setText("");
@@ -1301,405 +1245,375 @@ public class MainActivity extends AppCompatActivity {
         }
         g1.setAdapter(cusadapter);
 
-        b1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String guess = (((e2.getText()).toString()).trim()).toUpperCase();
-                if (replies.contains(guess))
-                {
-                    t6.setText("Correct answer");
-                    t6.setTextColor(Color.rgb(0, 128, 0));
+        b1.setOnClickListener(view -> {
+            String guess = (((e2.getText()).toString()).trim()).toUpperCase();
+            if (replies.contains(guess))
+            {
+                t6.setText("Correct answer");
+                t6.setTextColor(Color.rgb(0, 128, 0));
 
-                    if ((clear & 1) > 0) {
-                        e2.setText("");
-                    }
-
-                    if ((clear & 2) > 0) {
-                        lastWord = guess;
-                    }
-
-                    mode = 1;
-                    ultimate = guess;
-
-                    HashSet<String> guesses = new HashSet<>();
-                    ArrayList<Integer> anagramMap = grid.get(guess);
-
-                    for (int index : anagramMap) {
-                        String blankMap = (blank ? guess + " " + jumbles.get(index) : guess);
-                        guesses.add(blankMap);
-                        identities.remove(blankMap);
-                        totals.set(index, totals.get(index) - 1);
-                        cusadapter.notifyItemChanged(index);
-                    }
-
-                    cumulativeTime(guesses, true, null);
-                    selectedAnagram = jumbles.get(anagramMap.get(anagramMap.size() - 1));
-                    String blankMaps = (blank ? guess + " " + selectedAnagram : guess);
-                    ArrayList<String> hook = db.getDefinition(blankMaps, blank);
-                    String meaning = hook.get(0);
-                    String back = hook.get(1);
-                    String front = hook.get(2);
-                    String lexicons = hook.get(3);
-                    HashMap<String, String> colourList = db.getColours();
-                    String coloursList = db.getLabel(blankMaps, blank);
-                    String amount;
-
-                    if (colourList.containsKey(coloursList) || colourList.containsKey("")) {
-                        String coloured = (colourList.containsKey(coloursList) ? colourList.get(coloursList) : colourList.get(""));
-                        amount = "<font color=\"" + coloured + "\"><b><small>" + front + "</small> " + guess + " <small>" + back + "</small></b> " + meaning + " <b>" + (coloursList.isEmpty() ? "(No Tag)" : coloursList) + " " + lexicons + "</b>" + (detail ? db.getFullDetails(guess) : "") + "</font>";
-                    } else {
-                        amount = "<b><small>" + front + "</small> " + guess + " <small>" + back + "</small></b> " + meaning + " <b>" + (coloursList.isEmpty() ? "(No Tag)" : coloursList) + " " + lexicons + "</b>" + (detail ? db.getFullDetails(guess) : "");
-                    }
-
-                    t5.setText(Html.fromHtml(amount));
-                    replies.remove(guess);
-                    int thisPage = anagramMap.size();
-                    score += thisPage;
-                    numerator += thisPage;
-                    t2.setText("Score: " + score + "/" + number);
-                    t11.setText("This page: " + numerator + "/" + denominator);
+                if ((clear & 1) > 0) {
+                    e2.setText("");
                 }
-                else
-                {
-                    boolean exist = db.containsWord(guess, blank);
-                    ArrayList<String> wrongAnswers = new ArrayList<>();
 
-                    if (blank) {
-                        ArrayList<String> blankAnagrams = db.getBlankAlphagrams(guess);
-                        for (String blankAnagram : blankAnagrams) {
-                            if (allList.containsKey(blankAnagram)) {
-                                wrongAnswers.add(blankAnagram);
-                            }
-                        }
-                    }
-                    else {
-                        char[] character = guess.toCharArray();
-                        Arrays.sort(character);
-                        String wrongAnswer = new String(character);
-
-                        if (allList.containsKey(wrongAnswer)) {
-                            wrongAnswers.add(wrongAnswer);
-                        }
-                    }
-
-                    if (!exist) {
-                        t6.setTextColor(Color.RED);
-                        if (!wrongAnswers.isEmpty()) {
-                            t6.setText("Wrong answer");
-                            db.trackWrongAnswers(wrongAnswers, guess, blank);
-
-                            if ((clear & 4) > 0) {
-                                e2.setText("");
-                            }
-
-                            if ((clear & 8) > 0) {
-                                lastWord = guess;
-                            }
-                        }
-                        else {
-                            t6.setText("Anagram not here");
-
-                            if ((clear & 64) > 0) {
-                                e2.setText("");
-                            }
-
-                            if ((clear & 128) > 0) {
-                                lastWord = guess;
-                            }
-                        }
-                    }
-                    else {
-                        t6.setTextColor(Color.rgb(0, 128, 0));
-                        if (!wrongAnswers.isEmpty()) {
-                            t6.setText("Already solved");
-
-                            if ((clear & 16) > 0) {
-                                e2.setText("");
-                            }
-
-                            if ((clear & 32) > 0) {
-                                lastWord = guess;
-                            }
-                        }
-                        else {
-                            t6.setText("Anagram not here");
-
-                            if ((clear & 64) > 0) {
-                                e2.setText("");
-                            }
-
-                            if ((clear & 128) > 0) {
-                                lastWord = guess;
-                            }
-                        }
-                    }
+                if ((clear & 2) > 0) {
+                    lastWord = guess;
                 }
+
+                mode = 1;
+                ultimate = guess;
+
+                HashSet<String> guesses = new HashSet<>();
+                ArrayList<Integer> anagramMap = grid.get(guess);
+
+                for (int index : anagramMap) {
+                    String blankMap = (blank ? guess + " " + jumbles.get(index) : guess);
+                    guesses.add(blankMap);
+                    identities.remove(blankMap);
+                    totals.set(index, totals.get(index) - 1);
+                    cusadapter.notifyItemChanged(index);
+                }
+
+                cumulativeTime(guesses, true, null);
+                selectedAnagram = jumbles.get(anagramMap.get(anagramMap.size() - 1));
+                String blankMaps = (blank ? guess + " " + selectedAnagram : guess);
+                ArrayList<String> hook = db.getDefinition(blankMaps, blank);
+                String meaning = hook.get(0);
+                String back = hook.get(1);
+                String front = hook.get(2);
+                String lexicons = hook.get(3);
+                HashMap<String, String> colourList = db.getColours();
+                String coloursList = db.getLabel(blankMaps, blank);
+                String amount;
+
+                if (colourList.containsKey(coloursList) || colourList.containsKey("")) {
+                    String coloured = (colourList.containsKey(coloursList) ? colourList.get(coloursList) : colourList.get(""));
+                    amount = "<font color=\"" + coloured + "\"><b><small>" + front + "</small> " + guess + " <small>" + back + "</small></b> " + meaning + " <b>" + (coloursList.isEmpty() ? "(No Tag)" : coloursList) + " " + lexicons + "</b>" + (detail ? db.getFullDetails(guess) : "") + "</font>";
+                } else {
+                    amount = "<b><small>" + front + "</small> " + guess + " <small>" + back + "</small></b> " + meaning + " <b>" + (coloursList.isEmpty() ? "(No Tag)" : coloursList) + " " + lexicons + "</b>" + (detail ? db.getFullDetails(guess) : "");
+                }
+
+                t5.setText(Html.fromHtml(amount));
+                replies.remove(guess);
+                int thisPage = anagramMap.size();
+                score += thisPage;
+                numerator += thisPage;
+                t2.setText("Score: " + score + "/" + number);
+                t4.setText("This page: " + numerator + "/" + denominator);
             }
-        });
+            else
+            {
+                boolean exist = db.containsWord(guess, blank);
+                ArrayList<String> wrongAnswers = new ArrayList<>();
 
-        b2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mode = 0;
-                ultimate = null;
-                selectedAnagram = null;
-
-                if (counter == (words - 1) / (rows * columns)) {
-                    counter = 0;
+                if (blank) {
+                    ArrayList<String> blankAnagrams = db.getBlankAlphagrams(guess);
+                    for (String blankAnagram : blankAnagrams) {
+                        if (allList.containsKey(blankAnagram)) {
+                            wrongAnswers.add(blankAnagram);
+                        }
+                    }
                 }
                 else {
-                    counter++;
+                    char[] character = guess.toCharArray();
+                    Arrays.sort(character);
+                    String wrongAnswer = new String(character);
+
+                    if (allList.containsKey(wrongAnswer)) {
+                        wrongAnswers.add(wrongAnswer);
+                    }
                 }
-                db.updateCounter(letters, label, counter, solvedStatus, orderBy, blank);
-                nextWord(blank);
-            }
-        });
 
-        b3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                getWordLength();
-            }
-        });
+                if (!exist) {
+                    t6.setTextColor(Color.RED);
+                    if (!wrongAnswers.isEmpty()) {
+                        t6.setText("Wrong answer");
+                        db.trackWrongAnswers(wrongAnswers, guess, blank);
 
-        b4.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mode = 0;
-                ultimate = null;
-                selectedAnagram = null;
+                        if ((clear & 4) > 0) {
+                            e2.setText("");
+                        }
 
-                if (counter == 0) {
-                    counter = (words - 1) / (rows * columns);
+                        if ((clear & 8) > 0) {
+                            lastWord = guess;
+                        }
+                    }
+                    else {
+                        t6.setText("Anagram not here");
+
+                        if ((clear & 64) > 0) {
+                            e2.setText("");
+                        }
+
+                        if ((clear & 128) > 0) {
+                            lastWord = guess;
+                        }
+                    }
                 }
                 else {
-                    counter--;
-                }
-                db.updateCounter(letters, label, counter, solvedStatus, orderBy, blank);
-                nextWord(blank);
-            }
-        });
-
-        b5.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                cumulativeTime(null, false, null);
-                Intent intent1 = new Intent(MainActivity.this, Report.class);
-                startActivity(intent1);
-                closeCursor();
-                finish();
-            }
-        });
-
-        b6.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                terminate();
-            }
-        });
-
-        b7.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String guess = (((e2.getText()).toString()).trim()).toUpperCase();
-                if (replies.contains(guess))
-                {
-                    t6.setText("Yet to submit");
                     t6.setTextColor(Color.rgb(0, 128, 0));
+                    if (!wrongAnswers.isEmpty()) {
+                        t6.setText("Already solved");
 
-                    LayoutInflater inflater = LayoutInflater.from(MainActivity.this);
-                    final View yourCustomView = inflater.inflate(R.layout.output, null);
-
-                    EditText e5 = yourCustomView.findViewById(R.id.edittext5);
-                    final int[] selection = {0};
-                    ArrayList<Integer> anagramMap = grid.get(guess);
-
-                    Spinner s2 = yourCustomView.findViewById(R.id.spinner3);
-                    List<Pair<String, String>> labelsList = db.getAllLabels();
-
-                    ColourAdapter comboBoxAdapter = new ColourAdapter(MainActivity.this, R.layout.colour, R.id.textview62, labelsList, MainActivity.this, true, combo);
-                    s2.setAdapter(comboBoxAdapter);
-
-                    s2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                        @Override
-                        public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                            selection[0]++;
-
-                            if (selection[0] <= 1) {
-                                String newTag = db.getLabel(blank ? guess + " " + jumbles.get(anagramMap.get(anagramMap.size() - 1)) : guess, blank);
-                                e5.setText(newTag);
-
-                                if (labelsList.contains(newTag)) {
-                                    int choice = labelsList.lastIndexOf(newTag);
-                                    s2.setSelection(choice);
-                                }
-                            }
-                            else {
-                                e5.setText((labelsList.get(i)).first);
-                            }
+                        if ((clear & 16) > 0) {
+                            e2.setText("");
                         }
 
-                        @Override
-                        public void onNothingSelected(AdapterView<?> adapterView) {
-                        }
-                    });
-
-                    AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
-                            .setTitle("Set tag for " + guess)
-                            .setView(yourCustomView)
-                            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int whichButton) {
-                                    mode = 1;
-                                    ultimate = guess;
-
-                                    t6.setText("Correct answer");
-                                    t6.setTextColor(Color.rgb(0, 128, 0));
-
-                                    if ((clear & 1) > 0) {
-                                        e2.setText("");
-                                    }
-
-                                    if ((clear & 2) > 0) {
-                                        lastWord = guess;
-                                    }
-
-                                    String cardbox = (e5.getText()).toString();
-                                    HashSet<String> guesses = new HashSet<>();
-
-                                    for(int index : anagramMap) {
-                                        String blankMap = (blank ? guess + " " + jumbles.get(index) : guess);
-                                        guesses.add(blankMap);
-                                        identities.remove(blankMap);
-                                        totals.set(index, totals.get(index) - 1);
-                                        cusadapter.notifyItemChanged(index);
-                                    }
-
-                                    cumulativeTime(guesses, true, cardbox);
-                                    selectedAnagram = jumbles.get(anagramMap.get(anagramMap.size() - 1));
-                                    displayDefinition(cardbox);
-                                    replies.remove(guess);
-                                    int thatPage = anagramMap.size();
-                                    score += thatPage;
-                                    numerator += thatPage;
-                                    t2.setText("Score: " + score + "/" + number);
-                                    t11.setText("This page: " + numerator + "/" + denominator);
-                                }
-                            }).create();
-                    dialog.show();
-                }
-                else
-                {
-                    boolean exist = db.containsWord(guess, blank);
-                    ArrayList<String> wrongAnswers = new ArrayList<>();
-
-                    if (blank) {
-                        ArrayList<String> blankAnagrams = db.getBlankAlphagrams(guess);
-                        for (String blankAnagram : blankAnagrams) {
-                            if (allList.containsKey(blankAnagram)) {
-                                wrongAnswers.add(blankAnagram);
-                            }
+                        if ((clear & 32) > 0) {
+                            lastWord = guess;
                         }
                     }
                     else {
-                        char[] character = guess.toCharArray();
-                        Arrays.sort(character);
-                        String wrongAnswer = new String(character);
+                        t6.setText("Anagram not here");
 
-                        if (allList.containsKey(wrongAnswer)) {
-                            wrongAnswers.add(wrongAnswer);
+                        if ((clear & 64) > 0) {
+                            e2.setText("");
                         }
-                    }
 
-                    if (!exist) {
-                        t6.setTextColor(Color.RED);
-                        if (!wrongAnswers.isEmpty()) {
-                            t6.setText("Wrong answer");
-                            db.trackWrongAnswers(wrongAnswers, guess, blank);
-
-                            if ((clear & 4) > 0) {
-                                e2.setText("");
-                            }
-
-                            if ((clear & 8) > 0) {
-                                lastWord = guess;
-                            }
-                        }
-                        else {
-                            t6.setText("Anagram not here");
-
-                            if ((clear & 64) > 0) {
-                                e2.setText("");
-                            }
-
-                            if ((clear & 128) > 0) {
-                                lastWord = guess;
-                            }
-                        }
-                    }
-                    else {
-                        t6.setTextColor(Color.rgb(0, 128, 0));
-                        if (!wrongAnswers.isEmpty()) {
-                            t6.setText("Already solved");
-
-                            if ((clear & 16) > 0) {
-                                e2.setText("");
-                            }
-
-                            if ((clear & 32) > 0) {
-                                lastWord = guess;
-                            }
-                        }
-                        else {
-                            t6.setText("Anagram not here");
-
-                            if ((clear & 64) > 0) {
-                                e2.setText("");
-                            }
-
-                            if ((clear & 128) > 0) {
-                                lastWord = guess;
-                            }
+                        if ((clear & 128) > 0) {
+                            lastWord = guess;
                         }
                     }
                 }
             }
         });
 
-        b9.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        b2.setOnClickListener(view -> {
+            mode = 0;
+            ultimate = null;
+            selectedAnagram = null;
+
+            if (counter == (words - 1) / (rows * columns)) {
+                counter = 0;
+            }
+            else {
+                counter++;
+            }
+            db.updateCounter(letters, label, counter, solvedStatus, orderBy, blank);
+            nextWord(blank);
+        });
+
+        b3.setOnClickListener(view -> getWordLength());
+
+        b4.setOnClickListener(view -> {
+            mode = 0;
+            ultimate = null;
+            selectedAnagram = null;
+
+            if (counter == 0) {
+                counter = (words - 1) / (rows * columns);
+            }
+            else {
+                counter--;
+            }
+            db.updateCounter(letters, label, counter, solvedStatus, orderBy, blank);
+            nextWord(blank);
+        });
+
+        b5.setOnClickListener(view -> {
+            cumulativeTime(null, false, null);
+            Intent intent1 = new Intent(MainActivity.this, Report.class);
+            startActivity(intent1);
+            closeCursor();
+            finish();
+        });
+
+        b6.setOnClickListener(view -> terminate());
+
+        b7.setOnClickListener(view -> {
+            String guess = (((e2.getText()).toString()).trim()).toUpperCase();
+            if (replies.contains(guess))
+            {
+                t6.setText("Yet to submit");
+                t6.setTextColor(Color.rgb(0, 128, 0));
+
                 LayoutInflater inflater = LayoutInflater.from(MainActivity.this);
-                final View yourCustomView = inflater.inflate(R.layout.input, null);
+                final View yourCustomView = inflater.inflate(R.layout.output, null);
 
-                EditText e1 = yourCustomView.findViewById(R.id.edittext1);
-                int maximum = ((words - 1) / (rows * columns)) + 1;
-                e1.setHint("Enter a value between 1 and " + maximum);
+                EditText e5 = yourCustomView.findViewById(R.id.edittext5);
+                final int[] selection = {0};
+                ArrayList<Integer> anagramMap = grid.get(guess);
+
+                Spinner s2 = yourCustomView.findViewById(R.id.spinner3);
+                List<Pair<String, String>> labelsList = db.getAllLabels();
+
+                ColourAdapter comboBoxAdapter = new ColourAdapter(MainActivity.this, R.layout.colour, R.id.textview62, labelsList, MainActivity.this, true, combo);
+                s2.setAdapter(comboBoxAdapter);
+
+                s2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                        selection[0]++;
+
+                        if (selection[0] <= 1) {
+                            String newTag = db.getLabel(blank ? guess + " " + jumbles.get(anagramMap.get(anagramMap.size() - 1)) : guess, blank);
+                            e5.setText(newTag);
+
+                            if (labelsList.contains(newTag)) {
+                                int choice = labelsList.lastIndexOf(newTag);
+                                s2.setSelection(choice);
+                            }
+                        }
+                        else {
+                            e5.setText((labelsList.get(i)).first);
+                        }
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> adapterView) {
+                    }
+                });
 
                 AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
-                        .setTitle("Go to page")
+                        .setTitle("Set tag for " + guess)
                         .setView(yourCustomView)
-                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                String pages = (e1.getText()).toString();
-                                int page = (pages.isEmpty() ? 0 : Integer.parseInt(pages));
-                                if (page < 1 || page > maximum)
-                                {
-                                    Toast.makeText(MainActivity.this, "Enter a value between 1 and " + maximum, Toast.LENGTH_LONG).show();
-                                }
-                                else
-                                {
-                                    mode = 0;
-                                    ultimate = null;
-                                    selectedAnagram = null;
+                        .setPositiveButton("OK", (dialog1, whichButton) -> {
+                            mode = 1;
+                            ultimate = guess;
 
-                                    counter = page - 1;
-                                    db.updateCounter(letters, label, counter, solvedStatus, orderBy, blank);
-                                    nextWord(blank);
-                                }
+                            t6.setText("Correct answer");
+                            t6.setTextColor(Color.rgb(0, 128, 0));
+
+                            if ((clear & 1) > 0) {
+                                e2.setText("");
                             }
+
+                            if ((clear & 2) > 0) {
+                                lastWord = guess;
+                            }
+
+                            String cardbox = (e5.getText()).toString();
+                            HashSet<String> guesses = new HashSet<>();
+
+                            for(int index : anagramMap) {
+                                String blankMap = (blank ? guess + " " + jumbles.get(index) : guess);
+                                guesses.add(blankMap);
+                                identities.remove(blankMap);
+                                totals.set(index, totals.get(index) - 1);
+                                cusadapter.notifyItemChanged(index);
+                            }
+
+                            cumulativeTime(guesses, true, cardbox);
+                            selectedAnagram = jumbles.get(anagramMap.get(anagramMap.size() - 1));
+                            displayDefinition(cardbox);
+                            replies.remove(guess);
+                            int thatPage = anagramMap.size();
+                            score += thatPage;
+                            numerator += thatPage;
+                            t2.setText("Score: " + score + "/" + number);
+                            t4.setText("This page: " + numerator + "/" + denominator);
                         }).create();
                 dialog.show();
             }
+            else
+            {
+                boolean exist = db.containsWord(guess, blank);
+                ArrayList<String> wrongAnswers = new ArrayList<>();
+
+                if (blank) {
+                    ArrayList<String> blankAnagrams = db.getBlankAlphagrams(guess);
+                    for (String blankAnagram : blankAnagrams) {
+                        if (allList.containsKey(blankAnagram)) {
+                            wrongAnswers.add(blankAnagram);
+                        }
+                    }
+                }
+                else {
+                    char[] character = guess.toCharArray();
+                    Arrays.sort(character);
+                    String wrongAnswer = new String(character);
+
+                    if (allList.containsKey(wrongAnswer)) {
+                        wrongAnswers.add(wrongAnswer);
+                    }
+                }
+
+                if (!exist) {
+                    t6.setTextColor(Color.RED);
+                    if (!wrongAnswers.isEmpty()) {
+                        t6.setText("Wrong answer");
+                        db.trackWrongAnswers(wrongAnswers, guess, blank);
+
+                        if ((clear & 4) > 0) {
+                            e2.setText("");
+                        }
+
+                        if ((clear & 8) > 0) {
+                            lastWord = guess;
+                        }
+                    }
+                    else {
+                        t6.setText("Anagram not here");
+
+                        if ((clear & 64) > 0) {
+                            e2.setText("");
+                        }
+
+                        if ((clear & 128) > 0) {
+                            lastWord = guess;
+                        }
+                    }
+                }
+                else {
+                    t6.setTextColor(Color.rgb(0, 128, 0));
+                    if (!wrongAnswers.isEmpty()) {
+                        t6.setText("Already solved");
+
+                        if ((clear & 16) > 0) {
+                            e2.setText("");
+                        }
+
+                        if ((clear & 32) > 0) {
+                            lastWord = guess;
+                        }
+                    }
+                    else {
+                        t6.setText("Anagram not here");
+
+                        if ((clear & 64) > 0) {
+                            e2.setText("");
+                        }
+
+                        if ((clear & 128) > 0) {
+                            lastWord = guess;
+                        }
+                    }
+                }
+            }
+        });
+
+        b9.setOnClickListener(view -> {
+            LayoutInflater inflater = LayoutInflater.from(MainActivity.this);
+            final View yourCustomView = inflater.inflate(R.layout.input, null);
+
+            EditText e1 = yourCustomView.findViewById(R.id.edittext1);
+            int maximum = ((words - 1) / (rows * columns)) + 1;
+            e1.setHint("Enter a value between 1 and " + maximum);
+
+            AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
+                    .setTitle("Go to page")
+                    .setView(yourCustomView)
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            String pages = (e1.getText()).toString();
+                            int page = (pages.isEmpty() ? 0 : Integer.parseInt(pages));
+                            if (page < 1 || page > maximum)
+                            {
+                                Toast.makeText(MainActivity.this, "Enter a value between 1 and " + maximum, Toast.LENGTH_LONG).show();
+                            }
+                            else
+                            {
+                                mode = 0;
+                                ultimate = null;
+                                selectedAnagram = null;
+
+                                counter = page - 1;
+                                db.updateCounter(letters, label, counter, solvedStatus, orderBy, blank);
+                                nextWord(blank);
+                            }
+                        }
+                    }).create();
+            dialog.show();
         });
     }
 
@@ -1838,45 +1752,43 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
                 .setTitle("Change rows, columns and font sizes")
                 .setView(yourCustomView)
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        String old_rows = (e8.getText()).toString();
-                        String old_columns = (e9.getText()).toString();
-                        String old_font = (e10.getText()).toString();
-                        String old_combo = (e16.getText()).toString();
+                .setPositiveButton("OK", (dialog1, whichButton) -> {
+                    String old_rows = (e8.getText()).toString();
+                    String old_columns = (e9.getText()).toString();
+                    String old_font = (e10.getText()).toString();
+                    String old_combo = (e16.getText()).toString();
 
-                        int new_rows = (old_rows.isEmpty() ? 0 : Integer.parseInt(old_rows));
-                        int new_columns = (old_columns.isEmpty() ? 0 : Integer.parseInt(old_columns));
-                        int new_font = (old_font.isEmpty() ? 0 : Integer.parseInt(old_font));
-                        int new_combo = (old_combo.isEmpty() ? 0 : Integer.parseInt(old_combo));
+                    int new_rows = (old_rows.isEmpty() ? 0 : Integer.parseInt(old_rows));
+                    int new_columns = (old_columns.isEmpty() ? 0 : Integer.parseInt(old_columns));
+                    int new_font = (old_font.isEmpty() ? 0 : Integer.parseInt(old_font));
+                    int new_combo = (old_combo.isEmpty() ? 0 : Integer.parseInt(old_combo));
 
-                        StringBuilder sb = new StringBuilder();
-                        if (new_rows < 1 && new_columns < 1) {
-                            sb.append("Rows, columns should be ≥ 1");
+                    StringBuilder sb = new StringBuilder();
+                    if (new_rows < 1 && new_columns < 1) {
+                        sb.append("Rows, columns should be ≥ 1");
+                    }
+                    else if (new_rows < 1) {
+                        sb.append("Rows should be ≥ 1");
+                    }
+                    else if (new_columns < 1) {
+                        sb.append("Columns should be ≥ 1");
+                    }
+                    if (new_font < 11 || new_combo < 11) {
+                        if (sb.length() > 0) {
+                            sb.append("\n");
                         }
-                        else if (new_rows < 1) {
-                            sb.append("Rows should be ≥ 1");
-                        }
-                        else if (new_columns < 1) {
-                            sb.append("Columns should be ≥ 1");
-                        }
-                        if (new_font < 11 || new_combo < 11) {
-                            if (sb.length() > 0) {
-                                sb.append("\n");
-                            }
-                            sb.append("Font sizes should be ≥ 11");
-                        }
+                        sb.append("Font sizes should be ≥ 11");
+                    }
 
-                        if (sb.length() > 0)
-                        {
-                            Toast.makeText(MainActivity.this, new String(sb), Toast.LENGTH_LONG).show();
-                            zoom();
-                        }
-                        else
-                        {
-                            db.setZoom("Quiz", new_rows, new_columns, new_font, new_combo);
-                            refresh();
-                        }
+                    if (sb.length() > 0)
+                    {
+                        Toast.makeText(MainActivity.this, new String(sb), Toast.LENGTH_LONG).show();
+                        zoom();
+                    }
+                    else
+                    {
+                        db.setZoom("Quiz", new_rows, new_columns, new_font, new_combo);
+                        refresh();
                     }
                 }).create();
         dialog.show();
@@ -2082,29 +1994,27 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
                 .setTitle("Filter by tag")
                 .setView(yourCustomView)
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        String intermediate = (e11.getText()).toString();
-                        String alphabets = (lengthIndex[0] == 0 ? (e12.getText()).toString() : "-1");
-                        int temporary = (alphabets.isEmpty() ? 0 : Integer.parseInt(alphabets));
-                        boolean wilds = (s23.getSelectedItemPosition() > 0);
+                .setPositiveButton("OK", (dialog1, whichButton) -> {
+                    String intermediate = (e11.getText()).toString();
+                    String alphabets = (lengthIndex[0] == 0 ? (e12.getText()).toString() : "-1");
+                    int temporary = (alphabets.isEmpty() ? 0 : Integer.parseInt(alphabets));
+                    boolean wilds = (s23.getSelectedItemPosition() > 0);
 
-                        if (lengthIndex[0] == 0 && temporary < 2)
-                        {
-                            Toast.makeText(MainActivity.this, "Enter a value between 2 and " + (wilds ? maximumBlankLength : maximumWordLength) + " for word length", Toast.LENGTH_LONG).show();
-                            filterByLabel();
-                        }
-                        else
-                        {
-                            letters = temporary;
-                            label = intermediate;
-                            orderBy = sortBy(sortIndex, wilds);
-                            ultimate = null;
-                            selectedAnagram = null;
-                            mode = 0;
-                            solvedStatus = solved[0];
-                            start(wilds);
-                        }
+                    if (lengthIndex[0] == 0 && temporary < 2)
+                    {
+                        Toast.makeText(MainActivity.this, "Enter a value between 2 and " + (wilds ? maximumBlankLength : maximumWordLength) + " for word length", Toast.LENGTH_LONG).show();
+                        filterByLabel();
+                    }
+                    else
+                    {
+                        letters = temporary;
+                        label = intermediate;
+                        orderBy = sortBy(sortIndex, wilds);
+                        ultimate = null;
+                        selectedAnagram = null;
+                        mode = 0;
+                        solvedStatus = solved[0];
+                        start(wilds);
                     }
                 }).create();
         dialog.show();
@@ -2113,44 +2023,39 @@ public class MainActivity extends AppCompatActivity {
     public void getAllSubanagrams(boolean subanagram)
     {
         LayoutInflater inflater = LayoutInflater.from(MainActivity.this);
-        final View yourCustomView = inflater.inflate(R.layout.subanagram, null);
+        final View yourCustomView3 = inflater.inflate(R.layout.subanagram, null);
 
-        EditText e13 = yourCustomView.findViewById(R.id.edittext19);
-        EditText e14 = yourCustomView.findViewById(R.id.edittext20);
-        EditText e15 = yourCustomView.findViewById(R.id.edittext29);
-        CheckBox c4 = yourCustomView.findViewById(R.id.checkbox4);
+        EditText e13 = yourCustomView3.findViewById(R.id.edittext19);
+        EditText e14 = yourCustomView3.findViewById(R.id.edittext20);
+        EditText e15 = yourCustomView3.findViewById(R.id.edittext29);
+        CheckBox c4 = yourCustomView3.findViewById(R.id.checkbox4);
+        FrameLayout f3 = yourCustomView3.findViewById(R.id.framelayout3);
 
-        TextView t9 = yourCustomView.findViewById(R.id.textview32);
-        t9.setText(db.getSchema());
+        LayoutInflater subinflater3 = LayoutInflater.from(MainActivity.this);
+        final View subCustomView3 = subinflater3.inflate(R.layout.sieve, null);
+        f3.addView(subCustomView3);
 
-        Button b14 = yourCustomView.findViewById(R.id.button81);
-        b14.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Help help = new Help();
-                db.messageBox("Example custom queries", help.getCustomHelp(), MainActivity.this);
-            }
-        });
+        db.addFunctionalities(MainActivity.this, e13, c4, false, subCustomView3);
 
-        Spinner s25 = yourCustomView.findViewById(R.id.spinner37);
+        Spinner s25 = yourCustomView3.findViewById(R.id.spinner37);
         ArrayAdapter<String> subanagramAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, jokerList);
         subanagramAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s25.setAdapter(subanagramAdapter);
 
         final int[] sortIndex = new int[3];
-        Spinner s19 = yourCustomView.findViewById(R.id.spinner31);
+        Spinner s19 = yourCustomView3.findViewById(R.id.spinner31);
         ArrayAdapter<String> aggregateAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, aggregate);
         aggregateAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s19.setAdapter(aggregateAdapter);
 
-        Spinner s20 = yourCustomView.findViewById(R.id.spinner32);
+        Spinner s20 = yourCustomView3.findViewById(R.id.spinner32);
         ArrayAdapter<String> orderAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, allColumns);
         orderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         ArrayAdapter<String> ordersAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, blankColumns);
         ordersAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s20.setAdapter(orderAdapter);
 
-        Spinner s21 = yourCustomView.findViewById(R.id.spinner33);
+        Spinner s21 = yourCustomView3.findViewById(R.id.spinner33);
         ArrayAdapter<String> sortAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, sort);
         sortAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s21.setAdapter(sortAdapter);
@@ -2225,7 +2130,7 @@ public class MainActivity extends AppCompatActivity {
         s21.setSelection(1);
 
         final int[] solved = {2};
-        Spinner s7 = yourCustomView.findViewById(R.id.spinner10);
+        Spinner s7 = yourCustomView3.findViewById(R.id.spinner10);
         ArrayAdapter<String> solvedAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, solvedList);
         solvedAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s7.setAdapter(solvedAdapter);
@@ -2244,12 +2149,8 @@ public class MainActivity extends AppCompatActivity {
 
         AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
                 .setTitle(subanagram ? "Search for subanagrams" : "Search for anagrams")
-                .setView(yourCustomView)
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        subanagrams((((e13.getText()).toString()).trim()).toUpperCase(), (e14.getText()).toString(), subanagram, ((e15.getText()).toString()).replace("\"", "'"), c4.isChecked(), sortIndex, solved, true, s25.getSelectedItemPosition());
-                    }
-                }).create();
+                .setView(yourCustomView3)
+                .setPositiveButton("OK", (dialog1, whichButton) -> subanagrams((((e13.getText()).toString()).trim()).toUpperCase(), (e14.getText()).toString(), subanagram, ((e15.getText()).toString()).replace("\"", "'"), c4.isChecked(), sortIndex, solved, true, s25.getSelectedItemPosition())).create();
         dialog.show();
     }
 
@@ -2270,7 +2171,7 @@ public class MainActivity extends AppCompatActivity {
         blanks += (digit.isEmpty() ? 0 : Integer.parseInt(digit));
 
         if (flag && extraSql) {
-            Toast.makeText(MainActivity.this, "Letters field can contain only letters and full stops for blanks", Toast.LENGTH_LONG).show();
+            Toast.makeText(MainActivity.this, "Letters field can contain only letters and dots for blanks", Toast.LENGTH_LONG).show();
             getAllSubanagrams(subanagram);
         }
         else {

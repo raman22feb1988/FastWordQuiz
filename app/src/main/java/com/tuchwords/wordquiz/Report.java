@@ -1,7 +1,6 @@
 package com.tuchwords.wordquiz;
 
 import androidx.activity.OnBackPressedCallback;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -28,6 +27,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
@@ -133,7 +133,7 @@ public class Report extends AppCompatActivity {
         }
 
         // Create an ActionBarDrawerToggle to handle
-        // the drawer's open/close state
+        // the drawer's open / close state
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawerLayout, toolbar, R.string.nav_open, R.string.nav_close);
 
@@ -144,322 +144,308 @@ public class Report extends AppCompatActivity {
         toggle.syncState();
 
         // Set a listener for when an item in the NavigationView is selected
-        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            // Called when an item in the NavigationView is selected.
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                // Handle the selected item based on its ID
-                switch (item.getItemId()) {
-                    case R.id.button27:
-                        // Show a Toast message for the SQL query item
-                        LayoutInflater inflater1 = LayoutInflater.from(Report.this);
-                        final View yourCustomView1 = inflater1.inflate(R.layout.sqlquery, null);
+        // Called when an item in the NavigationView is selected.
+        navigationView.setNavigationItemSelectedListener(item -> {
+            // Handle the selected item based on its ID
+            switch (item.getItemId()) {
+                case R.id.button27:
+                    // Show a Toast message for the SQL query item
+                    LayoutInflater inflater1 = LayoutInflater.from(Report.this);
+                    final View yourCustomView2 = inflater1.inflate(R.layout.sqlquery, null);
 
-                        TextView t2 = yourCustomView1.findViewById(R.id.textview14);
-                        t2.setText(db.getSchema());
+                    EditText e5 = yourCustomView2.findViewById(R.id.edittext8);
+                    CheckBox c3 = yourCustomView2.findViewById(R.id.checkbox3);
+                    FrameLayout f2 = yourCustomView2.findViewById(R.id.framelayout2);
 
-                        EditText e5 = yourCustomView1.findViewById(R.id.edittext8);
-                        CheckBox c3 = yourCustomView1.findViewById(R.id.checkbox3);
+                    LayoutInflater subinflater2 = LayoutInflater.from(Report.this);
+                    final View subCustomView2 = subinflater2.inflate(R.layout.sieve, null);
+                    f2.addView(subCustomView2);
 
-                        Button b9 = yourCustomView1.findViewById(R.id.button73);
-                        b9.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                Help help = new Help();
-                                db.messageBox("Example SQL queries", help.getSqlHelp(), Report.this);
-                            }
-                        });
+                    db.addFunctionalities(Report.this, e5, c3, true, subCustomView2);
 
-                        AlertDialog dialog1 = new AlertDialog.Builder(Report.this)
-                                .setTitle("Enter your SQL query")
-                                .setView(yourCustomView1)
-                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int whichButton) {
-                                        String sqlQuery = (e5.getText()).toString();
+                    AlertDialog dialog1 = new AlertDialog.Builder(Report.this)
+                            .setTitle("Enter your SQL query")
+                            .setView(yourCustomView2)
+                            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    String sqlQuery = (e5.getText()).toString();
 
-                                        if (!sqlQuery.isEmpty()) {
-                                            db.myQuery(c3.isChecked() ? db.addUnderscores(sqlQuery) : sqlQuery, Report.this, false);
-                                        }
+                                    if (!sqlQuery.isEmpty()) {
+                                        db.myQuery(c3.isChecked() ? db.addUnderscores(sqlQuery) : sqlQuery, Report.this, false);
                                     }
-                                }).create();
-                        dialog1.show();
-                        break;
-                    case R.id.button32:
-                        // Show a Toast message for the View all tag colours item
-                        String labelColours = db.getLabelColours(Report.this);
-                        db.messageBox("Tag colours", labelColours, Report.this);
-                        break;
-                    case R.id.button30:
-                        // Show a Toast message for the Export tags item
-                        db.exportLabels(Report.this, false);
-                        break;
-                    case R.id.button31:
-                        // Show a Toast message for the Import tags item
-                        db.importLabels(Report.this, false);
-                        break;
-                    case R.id.button28:
-                        // Show a Toast message for the Export CSV item
-                        db.exportDB(Report.this, false);
-                        break;
-                    case R.id.button29:
-                        // Show a Toast message for the Import CSV item
-                        db.importDB(Report.this, false);
-                        break;
-                    case R.id.button33:
-                        // Show a Toast message for the Change tag of a word item
-                        LayoutInflater inflater2 = LayoutInflater.from(Report.this);
-                        final View yourCustomView2 = inflater2.inflate(R.layout.label, null);
+                                }
+                            }).create();
+                    dialog1.show();
+                    break;
+                case R.id.button32:
+                    // Show a Toast message for the View all tag colours item
+                    String labelColours = db.getLabelColours(Report.this);
+                    db.messageBox("Tag colours", labelColours, Report.this);
+                    break;
+                case R.id.button30:
+                    // Show a Toast message for the Export tags item
+                    db.exportLabels(Report.this, false);
+                    break;
+                case R.id.button31:
+                    // Show a Toast message for the Import tags item
+                    db.importLabels(Report.this, false);
+                    break;
+                case R.id.button28:
+                    // Show a Toast message for the Export CSV item
+                    db.exportDB(Report.this, false);
+                    break;
+                case R.id.button29:
+                    // Show a Toast message for the Import CSV item
+                    db.importDB(Report.this, false);
+                    break;
+                case R.id.button33:
+                    // Show a Toast message for the Change tag of a word item
+                    LayoutInflater inflater2 = LayoutInflater.from(Report.this);
+                    final View yourCustomView5 = inflater2.inflate(R.layout.label, null);
 
-                        EditText e3 = yourCustomView2.findViewById(R.id.edittext3);
-                        EditText e4 = yourCustomView2.findViewById(R.id.edittext4);
-                        Spinner s26 = yourCustomView2.findViewById(R.id.spinner39);
+                    EditText e3 = yourCustomView5.findViewById(R.id.edittext3);
+                    EditText e4 = yourCustomView5.findViewById(R.id.edittext4);
+                    Spinner s26 = yourCustomView5.findViewById(R.id.spinner39);
 
-                        final ArrayList<String>[] anagramItem = new ArrayList[]{new ArrayList<>()};
-                        ArrayAdapter<String> anagramAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, anagramItem[0]);
-                        anagramAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                        s26.setAdapter(anagramAdapter);
+                    final ArrayList<String>[] anagramItem = new ArrayList[]{new ArrayList<>()};
+                    ArrayAdapter<String> anagramAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, anagramItem[0]);
+                    anagramAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    s26.setAdapter(anagramAdapter);
 
-                        e3.addTextChangedListener(new TextWatcher() {
-                            @Override
-                            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                            }
-
-                            @Override
-                            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                                anagramItem[0] = db.getBlankAnagrams((s.toString()).toUpperCase());
-                                ArrayAdapter<String> alphagramAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, anagramItem[0]);
-                                alphagramAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                                s26.setAdapter(alphagramAdapter);
-                            }
-
-                            @Override
-                            public void afterTextChanged(Editable s) {
-                            }
-                        });
-
-                        Spinner s2 = yourCustomView2.findViewById(R.id.spinner2);
-                        List<Pair<String, String>> tagList = new ArrayList<>(labelsList.subList(1, labelsList.size()));
-
-                        ColourAdapter spinnerAdapter = new ColourAdapter(Report.this, R.layout.colour, R.id.textview62, tagList, Report.this, true, combo);
-                        s2.setAdapter(spinnerAdapter);
-
-                        s2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                            @Override
-                            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                                e4.setText((tagList.get(i)).first);
-                            }
-
-                            @Override
-                            public void onNothingSelected(AdapterView<?> adapterView) {
-                            }
-                        });
-
-                        AlertDialog dialog2 = new AlertDialog.Builder(Report.this)
-                                .setTitle("Change tag")
-                                .setView(yourCustomView2)
-                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int whichButton) {
-                                        String line = (((e3.getText()).toString()).trim()).toUpperCase();
-                                        String category = (e4.getText()).toString();
-                                        int anagramIndex = s26.getSelectedItemPosition();
-
-                                        if (anagramIndex == 0) {
-                                            db.updateTag(line, category, false);
-                                        } else {
-                                            db.updateTag(line + " " + anagramItem[0].get(anagramIndex), category, true);
-                                        }
-
-                                        refresh();
-                                    }
-                                }).create();
-                        dialog2.show();
-                        break;
-                    case R.id.button35:
-                        // Show a Toast message for the Change rows and font size item
-                        zoom();
-                        break;
-                    case R.id.button37:
-                        // Show a Toast message for the Hide and show number of answers item
-                        if (hidden) {
-                            hidden = false;
-                            item.setTitle("Hide number of answers");
-                            SharedPreferences.Editor editor = pref.edit();
-                            editor.putBoolean("hidden", false);
-                            editor.apply();
-                        } else {
-                            hidden = true;
-                            item.setTitle("Show number of answers");
-                            SharedPreferences.Editor editor = pref.edit();
-                            editor.putBoolean("hidden", true);
-                            editor.apply();
-                        }
-                        break;
-                    case R.id.button40:
-                        // Show a Toast message for the Reset words by tag item
-                        db.resetByLabel(Report.this, false, blankList, maximumWordLength, maximumBlankLength, combo);
-                        break;
-                    case R.id.button46:
-                        // Show a Toast message for the Add new tag item
-                        db.addByLabel(Report.this, false);
-                        break;
-                    case R.id.button47:
-                        // Show a Toast message for the Rename tag by colour item
-                        db.renameByLabel(Report.this, false, false, combo);
-                        break;
-                    case R.id.button48:
-                        // Show a Toast message for the Change tag colour by name item
-                        db.renameByLabel(Report.this, false, true, combo);
-                        break;
-                    case R.id.button49:
-                        // Show a Toast message for the Delete single tag by name item
-                        db.deleteByLabel(Report.this, false, true, combo);
-                        break;
-                    case R.id.button50:
-                        // Show a Toast message for the Delete single tag by colour item
-                        db.deleteByLabel(Report.this, false, false, combo);
-                        break;
-                    case R.id.button52:
-                        // Show a Toast message for the Hide and show similar words item
-                        if (detail) {
-                            detail = false;
-                            item.setTitle("Show similar words (Slower)");
-                            SharedPreferences.Editor editor = pref.edit();
-                            editor.putBoolean("detail", false);
-                            editor.apply();
-                        } else {
-                            detail = true;
-                            item.setTitle("Hide similar words (Faster)");
-                            SharedPreferences.Editor editor = pref.edit();
-                            editor.putBoolean("detail", true);
-                            editor.apply();
-                        }
-                        break;
-                    case R.id.button60:
-                        // Show a Toast message for the View all prefixes and suffixes item
-                        db.getSuffix(Report.this);
-                        break;
-                    case R.id.button61:
-                        // Show a Toast message for the Add new prefix item
-                        db.addSuffix(Report.this, false, false, 0);
-                        break;
-                    case R.id.button62:
-                        // Show a Toast message for the Change prefix item
-                        db.changeSuffix(Report.this, false, false, 0);
-                        break;
-                    case R.id.button63:
-                        // Show a Toast message for the Delete single prefix item
-                        db.deleteSuffix(Report.this, false, false, 0);
-                        break;
-                    case R.id.button64:
-                        // Show a Toast message for the Add new suffix item
-                        db.addSuffix(Report.this, false, true, 0);
-                        break;
-                    case R.id.button65:
-                        // Show a Toast message for the Change suffix item
-                        db.changeSuffix(Report.this, false, true, 0);
-                        break;
-                    case R.id.button66:
-                        // Show a Toast message for the Delete single suffix item
-                        db.deleteSuffix(Report.this, false, true, 0);
-                        break;
-                    case R.id.button70:
-                        // Show a Toast message for the Delete all tags item
-                        db.deleteAllRecords(Report.this, false, "colours", 0);
-                        break;
-                    case R.id.button71:
-                        // Show a Toast message for the Delete all prefixes item
-                        db.deleteAllRecords(Report.this, false, "prefixes", 0);
-                        break;
-                    case R.id.button72:
-                        // Show a Toast message for the Delete all suffixes item
-                        db.deleteAllRecords(Report.this, false, "suffixes", 0);
-                        break;
-                    case R.id.button76:
-                        // Show a Toast message for the Prepare regular database item
-                        promptDictionary(true, false);
-                        break;
-                    case R.id.button79:
-                        // Show a Toast message for the Search for anagrams item
-                        getAllSubanagrams(false);
-                        break;
-                    case R.id.button80:
-                        // Show a Toast message for the Search for subanagrams item
-                        getAllSubanagrams(true);
-                        break;
-                    case R.id.button83:
-                        // Show a Toast message for the Prepare blank database item
-                        promptDictionary(false, true);
-                        break;
-                    case R.id.button85:
-                        // Show a Toast message for the Clear answers on submit item
-                        LayoutInflater inflater3 = LayoutInflater.from(Report.this);
-                        final View yourCustomView3 = inflater3.inflate(R.layout.clear, null);
-
-                        CheckBox[] checkBoxes = {yourCustomView3.findViewById(R.id.checkbox5),
-                                yourCustomView3.findViewById(R.id.checkbox6),
-                                yourCustomView3.findViewById(R.id.checkbox7),
-                                yourCustomView3.findViewById(R.id.checkbox8),
-                                yourCustomView3.findViewById(R.id.checkbox9),
-                                yourCustomView3.findViewById(R.id.checkbox10),
-                                yourCustomView3.findViewById(R.id.checkbox11),
-                                yourCustomView3.findViewById(R.id.checkbox12),
-                        };
-
-                        for (int clearIndex = 0; clearIndex < checkBoxes.length; clearIndex++) {
-                            if ((clear & (1 << clearIndex)) > 0) {
-                                checkBoxes[clearIndex].setChecked(true);
-                            }
+                    e3.addTextChangedListener(new TextWatcher() {
+                        @Override
+                        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
                         }
 
-                        AlertDialog dialog3 = new AlertDialog.Builder(Report.this)
-                                .setTitle("Clear answers on submit")
-                                .setView(yourCustomView3)
-                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int whichButton) {
-                                        int clearValue = 0;
-                                        for (int clearVariable = 0; clearVariable < checkBoxes.length; clearVariable++) {
-                                            if (checkBoxes[clearVariable].isChecked()) {
-                                                clearValue += (1 << clearVariable);
-                                            }
-                                        }
+                        @Override
+                        public void onTextChanged(CharSequence s, int start, int before, int count) {
+                            anagramItem[0] = db.getBlankAnagrams((s.toString()).toUpperCase());
+                            ArrayAdapter<String> alphagramAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, anagramItem[0]);
+                            alphagramAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                            s26.setAdapter(alphagramAdapter);
+                        }
 
-                                        clear = clearValue;
-                                        SharedPreferences.Editor editor = pref.edit();
-                                        editor.putInt("clear", clear);
-                                        editor.apply();
+                        @Override
+                        public void afterTextChanged(Editable s) {
+                        }
+                    });
+
+                    Spinner s2 = yourCustomView5.findViewById(R.id.spinner2);
+                    List<Pair<String, String>> tagList = new ArrayList<>(labelsList.subList(1, labelsList.size()));
+
+                    ColourAdapter spinnerAdapter = new ColourAdapter(Report.this, R.layout.colour, R.id.textview62, tagList, Report.this, true, combo);
+                    s2.setAdapter(spinnerAdapter);
+
+                    s2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                            e4.setText((tagList.get(i)).first);
+                        }
+
+                        @Override
+                        public void onNothingSelected(AdapterView<?> adapterView) {
+                        }
+                    });
+
+                    AlertDialog dialog2 = new AlertDialog.Builder(Report.this)
+                            .setTitle("Change tag")
+                            .setView(yourCustomView5)
+                            .setPositiveButton("OK", (dialog, whichButton) -> {
+                                String line = (((e3.getText()).toString()).trim()).toUpperCase();
+                                String category = (e4.getText()).toString();
+                                int anagramIndex = s26.getSelectedItemPosition();
+
+                                if (anagramIndex == 0) {
+                                    db.updateTag(line, category, false);
+                                } else {
+                                    db.updateTag(line + " " + anagramItem[0].get(anagramIndex), category, true);
+                                }
+
+                                refresh();
+                            }).create();
+                    dialog2.show();
+                    break;
+                case R.id.button35:
+                    // Show a Toast message for the Change rows and font size item
+                    zoom();
+                    break;
+                case R.id.button37:
+                    // Show a Toast message for the Hide and show number of answers item
+                    if (hidden) {
+                        hidden = false;
+                        item.setTitle("Hide number of answers");
+                        SharedPreferences.Editor editor = pref.edit();
+                        editor.putBoolean("hidden", false);
+                        editor.apply();
+                    } else {
+                        hidden = true;
+                        item.setTitle("Show number of answers");
+                        SharedPreferences.Editor editor = pref.edit();
+                        editor.putBoolean("hidden", true);
+                        editor.apply();
+                    }
+                    break;
+                case R.id.button40:
+                    // Show a Toast message for the Reset words by tag item
+                    db.resetByLabel(Report.this, false, blankList, maximumWordLength, maximumBlankLength, combo);
+                    break;
+                case R.id.button46:
+                    // Show a Toast message for the Add new tag item
+                    db.addByLabel(Report.this, false);
+                    break;
+                case R.id.button47:
+                    // Show a Toast message for the Rename tag by colour item
+                    db.renameByLabel(Report.this, false, false, combo);
+                    break;
+                case R.id.button48:
+                    // Show a Toast message for the Change tag colour by name item
+                    db.renameByLabel(Report.this, false, true, combo);
+                    break;
+                case R.id.button49:
+                    // Show a Toast message for the Delete single tag by name item
+                    db.deleteByLabel(Report.this, false, true, combo);
+                    break;
+                case R.id.button50:
+                    // Show a Toast message for the Delete single tag by colour item
+                    db.deleteByLabel(Report.this, false, false, combo);
+                    break;
+                case R.id.button52:
+                    // Show a Toast message for the Hide and show similar words item
+                    if (detail) {
+                        detail = false;
+                        item.setTitle("Show similar words (Slower)");
+                        SharedPreferences.Editor editor = pref.edit();
+                        editor.putBoolean("detail", false);
+                        editor.apply();
+                    } else {
+                        detail = true;
+                        item.setTitle("Hide similar words (Faster)");
+                        SharedPreferences.Editor editor = pref.edit();
+                        editor.putBoolean("detail", true);
+                        editor.apply();
+                    }
+                    break;
+                case R.id.button60:
+                    // Show a Toast message for the View all prefixes and suffixes item
+                    db.getSuffix(Report.this);
+                    break;
+                case R.id.button61:
+                    // Show a Toast message for the Add new prefix item
+                    db.addSuffix(Report.this, false, false, 0);
+                    break;
+                case R.id.button62:
+                    // Show a Toast message for the Change prefix item
+                    db.changeSuffix(Report.this, false, false, 0);
+                    break;
+                case R.id.button63:
+                    // Show a Toast message for the Delete single prefix item
+                    db.deleteSuffix(Report.this, false, false, 0);
+                    break;
+                case R.id.button64:
+                    // Show a Toast message for the Add new suffix item
+                    db.addSuffix(Report.this, false, true, 0);
+                    break;
+                case R.id.button65:
+                    // Show a Toast message for the Change suffix item
+                    db.changeSuffix(Report.this, false, true, 0);
+                    break;
+                case R.id.button66:
+                    // Show a Toast message for the Delete single suffix item
+                    db.deleteSuffix(Report.this, false, true, 0);
+                    break;
+                case R.id.button70:
+                    // Show a Toast message for the Delete all tags item
+                    db.deleteAllRecords(Report.this, false, "colours", 0);
+                    break;
+                case R.id.button71:
+                    // Show a Toast message for the Delete all prefixes item
+                    db.deleteAllRecords(Report.this, false, "prefixes", 0);
+                    break;
+                case R.id.button72:
+                    // Show a Toast message for the Delete all suffixes item
+                    db.deleteAllRecords(Report.this, false, "suffixes", 0);
+                    break;
+                case R.id.button76:
+                    // Show a Toast message for the Prepare regular database item
+                    promptDictionary(true, false);
+                    break;
+                case R.id.button79:
+                    // Show a Toast message for the Search for anagrams item
+                    getAllSubanagrams(false);
+                    break;
+                case R.id.button80:
+                    // Show a Toast message for the Search for subanagrams item
+                    getAllSubanagrams(true);
+                    break;
+                case R.id.button83:
+                    // Show a Toast message for the Prepare blank database item
+                    promptDictionary(false, true);
+                    break;
+                case R.id.button85:
+                    // Show a Toast message for the Clear answers on submit item
+                    LayoutInflater inflater3 = LayoutInflater.from(Report.this);
+                    final View yourCustomView6 = inflater3.inflate(R.layout.clear, null);
+
+                    CheckBox[] checkBoxes = {yourCustomView6.findViewById(R.id.checkbox5),
+                            yourCustomView6.findViewById(R.id.checkbox6),
+                            yourCustomView6.findViewById(R.id.checkbox7),
+                            yourCustomView6.findViewById(R.id.checkbox8),
+                            yourCustomView6.findViewById(R.id.checkbox9),
+                            yourCustomView6.findViewById(R.id.checkbox10),
+                            yourCustomView6.findViewById(R.id.checkbox11),
+                            yourCustomView6.findViewById(R.id.checkbox12),
+                    };
+
+                    for (int clearIndex = 0; clearIndex < checkBoxes.length; clearIndex++) {
+                        if ((clear & (1 << clearIndex)) > 0) {
+                            checkBoxes[clearIndex].setChecked(true);
+                        }
+                    }
+
+                    AlertDialog dialog3 = new AlertDialog.Builder(Report.this)
+                            .setTitle("Clear answers on submit")
+                            .setView(yourCustomView6)
+                            .setPositiveButton("OK", (dialog, whichButton) -> {
+                                int clearValue = 0;
+                                for (int clearVariable = 0; clearVariable < checkBoxes.length; clearVariable++) {
+                                    if (checkBoxes[clearVariable].isChecked()) {
+                                        clearValue += (1 << clearVariable);
                                     }
-                                }).create();
-                        dialog3.show();
-                        break;
-                    case R.id.button88:
-                        // Show a Toast message for the Shuffle anagrams by item
-                        LayoutInflater inflater4 = LayoutInflater.from(Report.this);
-                        final View yourCustomView4 = inflater4.inflate(R.layout.shuffle, null);
+                                }
 
-                        RadioGroup r1 = yourCustomView4.findViewById(R.id.radioGroup1);
-                        ((RadioButton) r1.getChildAt(shuffle)).setChecked(true);
+                                clear = clearValue;
+                                SharedPreferences.Editor editor = pref.edit();
+                                editor.putInt("clear", clear);
+                                editor.apply();
+                            }).create();
+                    dialog3.show();
+                    break;
+                case R.id.button88:
+                    // Show a Toast message for the Shuffle anagrams by item
+                    LayoutInflater inflater4 = LayoutInflater.from(Report.this);
+                    final View yourCustomView4 = inflater4.inflate(R.layout.shuffle, null);
 
-                        AlertDialog dialog4 = new AlertDialog.Builder(Report.this)
-                                .setTitle("Shuffle anagrams by")
-                                .setView(yourCustomView4)
-                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int whichButton) {
-                                        RadioButton r2 = yourCustomView4.findViewById(r1.getCheckedRadioButtonId());
-                                        shuffle = r1.indexOfChild(r2);
-                                        SharedPreferences.Editor editor = pref.edit();
-                                        editor.putInt("shuffle", shuffle);
-                                        editor.apply();
-                                    }
-                                }).create();
-                        dialog4.show();
-                        break;
-                }
+                    RadioGroup r1 = yourCustomView4.findViewById(R.id.radioGroup1);
+                    ((RadioButton) r1.getChildAt(shuffle)).setChecked(true);
 
-                // Close the drawer after selection
-                drawerLayout.closeDrawers();
-                // Indicate that the item selection has been handled
-                return true;
+                    AlertDialog dialog4 = new AlertDialog.Builder(Report.this)
+                            .setTitle("Shuffle anagrams by")
+                            .setView(yourCustomView4)
+                            .setPositiveButton("OK", (dialog, whichButton) -> {
+                                RadioButton r2 = yourCustomView4.findViewById(r1.getCheckedRadioButtonId());
+                                shuffle = r1.indexOfChild(r2);
+                                SharedPreferences.Editor editor = pref.edit();
+                                editor.putInt("shuffle", shuffle);
+                                editor.apply();
+                            }).create();
+                    dialog4.show();
+                    break;
             }
+
+            // Close the drawer after selection
+            drawerLayout.closeDrawers();
+            // Indicate that the item selection has been handled
+            return true;
         });
 
         // Add a callback to handle the back button press
@@ -536,186 +522,160 @@ public class Report extends AppCompatActivity {
             blankColumns.add(blankColumn.substring(1, blankColumn.length() - 1));
         }
 
-        b3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                getWordLength();
-            }
+        b3.setOnClickListener(view -> getWordLength());
+
+        b4.setOnClickListener(view -> {
+            Intent intent2 = new Intent(Report.this, MainActivity.class);
+            startActivity(intent2);
+            closeCursor();
+            finish();
         });
 
-        b4.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent2 = new Intent(Report.this, MainActivity.class);
-                startActivity(intent2);
-                closeCursor();
-                finish();
-            }
+        b5.setOnClickListener(view -> filterByLabel());
+
+        b6.setOnClickListener(view -> {
+            closeCursor();
+            finish();
         });
 
-        b5.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                filterByLabel();
-            }
-        });
+        b8.setOnClickListener(view -> {
+            LayoutInflater inflater = LayoutInflater.from(Report.this);
+            final View yourCustomView1 = inflater.inflate(R.layout.query, null);
 
-        b6.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                closeCursor();
-                finish();
-            }
-        });
+            EditText e2 = yourCustomView1.findViewById(R.id.edittext18);
+            CheckBox c2 = yourCustomView1.findViewById(R.id.checkbox2);
+            FrameLayout f1 = yourCustomView1.findViewById(R.id.framelayout1);
 
-        b8.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                LayoutInflater inflater = LayoutInflater.from(Report.this);
-                final View yourCustomView = inflater.inflate(R.layout.query, null);
+            LayoutInflater subinflater1 = LayoutInflater.from(Report.this);
+            final View subCustomView1 = subinflater1.inflate(R.layout.sieve, null);
+            f1.addView(subCustomView1);
 
-                TextView t3 = yourCustomView.findViewById(R.id.textview27);
-                t3.setText(db.getSchema());
+            db.addFunctionalities(Report.this, e2, c2, false, subCustomView1);
 
-                EditText e2 = yourCustomView.findViewById(R.id.edittext18);
-                CheckBox c2 = yourCustomView.findViewById(R.id.checkbox2);
+            Spinner s24 = yourCustomView1.findViewById(R.id.spinner36);
+            ArrayAdapter<String> emptyAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, blankList);
+            emptyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            s24.setAdapter(emptyAdapter);
 
-                Button b10 = yourCustomView.findViewById(R.id.button74);
-                b10.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Help help = new Help();
-                        db.messageBox("Example custom queries", help.getCustomHelp(), Report.this);
-                    }
-                });
+            final int[] sortIndex = new int[2];
+            Spinner s16 = yourCustomView1.findViewById(R.id.spinner28);
+            s16.setVisibility(View.GONE);
 
-                Spinner s24 = yourCustomView.findViewById(R.id.spinner36);
-                ArrayAdapter<String> emptyAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, blankList);
-                emptyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                s24.setAdapter(emptyAdapter);
+            Spinner s17 = yourCustomView1.findViewById(R.id.spinner29);
+            ArrayAdapter<String> orderAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, allColumns);
+            orderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            ArrayAdapter<String> ordersAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, blankColumns);
+            ordersAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            s17.setAdapter(orderAdapter);
 
-                final int[] sortIndex = new int[2];
-                Spinner s16 = yourCustomView.findViewById(R.id.spinner28);
-                s16.setVisibility(View.GONE);
+            Spinner s18 = yourCustomView1.findViewById(R.id.spinner30);
+            ArrayAdapter<String> sortAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, sort);
+            sortAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            s18.setAdapter(sortAdapter);
 
-                Spinner s17 = yourCustomView.findViewById(R.id.spinner29);
-                ArrayAdapter<String> orderAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, allColumns);
-                orderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                ArrayAdapter<String> ordersAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, blankColumns);
-                ordersAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                s17.setAdapter(orderAdapter);
+            s17.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                    sortIndex[0] = i;
+                }
 
-                Spinner s18 = yourCustomView.findViewById(R.id.spinner30);
-                ArrayAdapter<String> sortAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, sort);
-                sortAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                s18.setAdapter(sortAdapter);
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView) {
+                }
+            });
 
-                s17.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                        sortIndex[0] = i;
-                    }
+            s18.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                    sortIndex[1] = i;
+                }
 
-                    @Override
-                    public void onNothingSelected(AdapterView<?> adapterView) {
-                    }
-                });
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView) {
+                }
+            });
 
-                s18.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                        sortIndex[1] = i;
-                    }
+            s17.setSelection(7);
+            s18.setSelection(1);
 
-                    @Override
-                    public void onNothingSelected(AdapterView<?> adapterView) {
-                    }
-                });
+            final int[] solved = {0};
+            Spinner s6 = yourCustomView1.findViewById(R.id.spinner7);
+            ArrayAdapter<String> solvedAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, solvedList);
+            solvedAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            s6.setAdapter(solvedAdapter);
 
-                s17.setSelection(7);
-                s18.setSelection(1);
+            s6.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                    solved[0] = i;
+                }
 
-                final int[] solved = {0};
-                Spinner s6 = yourCustomView.findViewById(R.id.spinner7);
-                ArrayAdapter<String> solvedAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, solvedList);
-                solvedAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                s6.setAdapter(solvedAdapter);
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView) {
+                }
+            });
 
-                s6.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                        solved[0] = i;
-                    }
+            AlertDialog dialog = new AlertDialog.Builder(Report.this)
+                    .setTitle("SELECT front, word, back, definition, time, tag FROM words WHERE")
+                    .setView(yourCustomView1)
+                    .setPositiveButton("OK", (dialog5, whichButton) -> {
+                        String temporaryQuery = ((e2.getText()).toString()).replace("\"", "'");
+                        String customQuery = (temporaryQuery.isEmpty() ? "1" : temporaryQuery);
+                        boolean wildIndex = (s24.getSelectedItemPosition() > 0);
+                        String orderIndex = sortBy(sortIndex, wildIndex);
+                        String processingQuery = (c2.isChecked() ? db.addUnderscores(customQuery) : customQuery);
+                        Cursor resultSet = db.getSqlQuery(processingQuery, Report.this, solved[0], orderIndex, wildIndex);
 
-                    @Override
-                    public void onNothingSelected(AdapterView<?> adapterView) {
-                    }
-                });
+                        if (resultSet != null) {
+                            label = processingQuery;
+                            letters = 0;
+                            solvedStatus = solved[0];
+                            orderBy = orderIndex;
+                            blank = wildIndex;
 
-                AlertDialog dialog = new AlertDialog.Builder(Report.this)
-                        .setTitle("SELECT front, word, back, definition, time, tag FROM words WHERE")
-                        .setView(yourCustomView)
-                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                String temporaryQuery = ((e2.getText()).toString()).replace("\"", "'");
-                                String customQuery = (temporaryQuery.isEmpty() ? "1" : temporaryQuery);
-                                boolean wildIndex = (s24.getSelectedItemPosition() > 0);
-                                String orderIndex = sortBy(sortIndex, wildIndex);
-                                String processingQuery = (c2.isChecked() ? db.addUnderscores(customQuery) : customQuery);
-                                Cursor resultSet = db.getSqlQuery(processingQuery, Report.this, solved[0], orderIndex, wildIndex);
+                            closeCursor();
+                            anagrams = resultSet;
+                            words = anagrams.getCount();
 
-                                if (resultSet != null) {
-                                    label = processingQuery;
-                                    letters = 0;
-                                    solvedStatus = solved[0];
-                                    orderBy = orderIndex;
-                                    blank = wildIndex;
+                            boolean exists = db.existLabel(letters, label, orderBy, blank);
 
-                                    closeCursor();
-                                    anagrams = resultSet;
-                                    words = anagrams.getCount();
-
-                                    boolean exists = db.existLabel(letters, label, orderBy, blank);
-
-                                    if (!exists) {
-                                        counter = 0;
-                                        db.insertLabel(letters, label, orderBy, blank);
-                                    } else {
-                                        counter = db.getPage(letters, label, solvedStatus, orderBy, blank);
-                                    }
-
-                                    int highest = (words - 1) / rows;
-                                    if (counter > highest && words > 0) {
-                                        counter = highest;
-                                        db.updatePage(letters, label, counter, solvedStatus, orderBy, blank);
-                                    }
-
-                                    nextWord();
-                                }
+                            if (!exists) {
+                                counter = 0;
+                                db.insertLabel(letters, label, orderBy, blank);
+                            } else {
+                                counter = db.getPage(letters, label, solvedStatus, orderBy, blank);
                             }
-                        }).create();
-                dialog.show();
 
-                s24.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                        dialog.setTitle("SELECT front, word, back, definition, time, tag FROM " + ((i == 0) ? "words" : "blanks") + " WHERE");
+                            int highest = (words - 1) / rows;
+                            if (counter > highest && words > 0) {
+                                counter = highest;
+                                db.updatePage(letters, label, counter, solvedStatus, orderBy, blank);
+                            }
 
-                        if (i == 0) {
-                            s17.setAdapter(orderAdapter);
-                            s17.setSelection(7);
+                            nextWord();
                         }
-                        else {
-                            s17.setAdapter(ordersAdapter);
-                            s17.setSelection(10);
-                        }
-                    }
+                    }).create();
+            dialog.show();
 
-                    @Override
-                    public void onNothingSelected(AdapterView<?> adapterView) {
+            s24.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                    dialog.setTitle("SELECT front, word, back, definition, time, tag FROM " + ((i == 0) ? "words" : "blanks") + " WHERE");
+
+                    if (i == 0) {
+                        s17.setAdapter(orderAdapter);
+                        s17.setSelection(7);
                     }
-                });
-            }
+                    else {
+                        s17.setAdapter(ordersAdapter);
+                        s17.setSelection(10);
+                    }
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView) {
+                }
+            });
         });
 
         if (!prepared) {
@@ -729,7 +689,7 @@ public class Report extends AppCompatActivity {
         final View yourCustomView = inflater.inflate(R.layout.solve, null);
 
         EditText e1 = yourCustomView.findViewById(R.id.edittext17);
-        TextView t8 = yourCustomView.findViewById(R.id.textview80);
+        TextView t3 = yourCustomView.findViewById(R.id.textview80);
         e1.setHint("Enter a value between 2 and " + maximumWordLength);
 
         Spinner s22 = yourCustomView.findViewById(R.id.spinner34);
@@ -830,12 +790,12 @@ public class Report extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 if (i == 0) {
                     e1.setVisibility(View.VISIBLE);
-                    t8.setVisibility(View.VISIBLE);
+                    t3.setVisibility(View.VISIBLE);
                     lengthIndex[0] = 0;
                 }
                 else {
                     e1.setVisibility(View.INVISIBLE);
-                    t8.setVisibility(View.INVISIBLE);
+                    t3.setVisibility(View.INVISIBLE);
                     lengthIndex[0] = 1;
                 }
             }
@@ -848,26 +808,24 @@ public class Report extends AppCompatActivity {
         AlertDialog dialog = new AlertDialog.Builder(Report.this)
                 .setTitle("Change word length")
                 .setView(yourCustomView)
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        String alphabet = (lengthIndex[0] == 0 ? (e1.getText()).toString() : "-1");
-                        int precursor = (alphabet.isEmpty() ? 0 : Integer.parseInt(alphabet));
-                        boolean wild = (s22.getSelectedItemPosition() > 0);
+                .setPositiveButton("OK", (dialog1, whichButton) -> {
+                    String alphabet = (lengthIndex[0] == 0 ? (e1.getText()).toString() : "-1");
+                    int precursor = (alphabet.isEmpty() ? 0 : Integer.parseInt(alphabet));
+                    boolean wild = (s22.getSelectedItemPosition() > 0);
 
-                        if (lengthIndex[0] == 0 && precursor < 2)
-                        {
-                            Toast.makeText(Report.this, "Enter a value between 2 and " + (wild ? maximumBlankLength : maximumWordLength) + " for word length", Toast.LENGTH_LONG).show();
-                            getWordLength();
-                        }
-                        else
-                        {
-                            letters = precursor;
-                            solvedStatus = solved[0];
-                            orderBy = sortBy(sortIndex, wild);
-                            label = "*";
-                            blank = wild;
-                            start(true);
-                        }
+                    if (lengthIndex[0] == 0 && precursor < 2)
+                    {
+                        Toast.makeText(Report.this, "Enter a value between 2 and " + (wild ? maximumBlankLength : maximumWordLength) + " for word length", Toast.LENGTH_LONG).show();
+                        getWordLength();
+                    }
+                    else
+                    {
+                        letters = precursor;
+                        solvedStatus = solved[0];
+                        orderBy = sortBy(sortIndex, wild);
+                        label = "*";
+                        blank = wild;
+                        start(true);
                     }
                 }).create();
         dialog.show();
@@ -1022,27 +980,25 @@ public class Report extends AppCompatActivity {
         AlertDialog dialog = new AlertDialog.Builder(Report.this)
                 .setTitle("Filter by tag")
                 .setView(yourCustomView)
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        String intermediate = (e6.getText()).toString();
-                        String alphabets = (lengthIndex[0] == 0 ? (e7.getText()).toString() : "-1");
-                        int temporary = (alphabets.isEmpty() ? 0 : Integer.parseInt(alphabets));
-                        boolean wilds = (s23.getSelectedItemPosition() > 0);
+                .setPositiveButton("OK", (dialog1, whichButton) -> {
+                    String intermediate = (e6.getText()).toString();
+                    String alphabets = (lengthIndex[0] == 0 ? (e7.getText()).toString() : "-1");
+                    int temporary = (alphabets.isEmpty() ? 0 : Integer.parseInt(alphabets));
+                    boolean wilds = (s23.getSelectedItemPosition() > 0);
 
-                        if (lengthIndex[0] == 0 && temporary < 2)
-                        {
-                            Toast.makeText(Report.this, "Enter a value between 2 and " + (wilds ? maximumBlankLength : maximumWordLength) + " for word length", Toast.LENGTH_LONG).show();
-                            filterByLabel();
-                        }
-                        else
-                        {
-                            letters = temporary;
-                            label = intermediate;
-                            solvedStatus = solved[0];
-                            orderBy = sortBy(sortIndex, wilds);
-                            blank = wilds;
-                            start(true);
-                        }
+                    if (lengthIndex[0] == 0 && temporary < 2)
+                    {
+                        Toast.makeText(Report.this, "Enter a value between 2 and " + (wilds ? maximumBlankLength : maximumWordLength) + " for word length", Toast.LENGTH_LONG).show();
+                        filterByLabel();
+                    }
+                    else
+                    {
+                        letters = temporary;
+                        label = intermediate;
+                        solvedStatus = solved[0];
+                        orderBy = sortBy(sortIndex, wilds);
+                        blank = wilds;
+                        start(true);
                     }
                 }).create();
         dialog.show();
@@ -1121,65 +1077,56 @@ public class Report extends AppCompatActivity {
         reportAdapter = new ReportAdapter(Report.this, R.layout.word, jumbles, font);
         g1.setAdapter(reportAdapter);
 
-        b1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (words > rows) {
-                    counter--;
-                    if (counter < 0) {
-                        counter = (words - 1) / rows;
-                    }
-                    db.updatePage(letters, label, counter, solvedStatus, orderBy, blank);
-                    nextWord();
+        b1.setOnClickListener(view -> {
+            if (words > rows) {
+                counter--;
+                if (counter < 0) {
+                    counter = (words - 1) / rows;
                 }
+                db.updatePage(letters, label, counter, solvedStatus, orderBy, blank);
+                nextWord();
             }
         });
 
-        b2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (words > rows) {
-                    counter++;
-                    if (counter == ((words - 1) / rows) + 1) {
-                        counter = 0;
-                    }
-                    db.updatePage(letters, label, counter, solvedStatus, orderBy, blank);
-                    nextWord();
+        b2.setOnClickListener(view -> {
+            if (words > rows) {
+                counter++;
+                if (counter == ((words - 1) / rows) + 1) {
+                    counter = 0;
                 }
+                db.updatePage(letters, label, counter, solvedStatus, orderBy, blank);
+                nextWord();
             }
         });
 
-        b7.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                LayoutInflater inflater = LayoutInflater.from(Report.this);
-                final View yourCustomView = inflater.inflate(R.layout.input, null);
+        b7.setOnClickListener(view -> {
+            LayoutInflater inflater = LayoutInflater.from(Report.this);
+            final View yourCustomView = inflater.inflate(R.layout.input, null);
 
-                EditText e1 = yourCustomView.findViewById(R.id.edittext1);
-                int maximum = (((words - 1) / rows) + 1);
-                e1.setHint("Enter a value between 1 and " + maximum);
+            EditText e1 = yourCustomView.findViewById(R.id.edittext1);
+            int maximum = (((words - 1) / rows) + 1);
+            e1.setHint("Enter a value between 1 and " + maximum);
 
-                AlertDialog dialog = new AlertDialog.Builder(Report.this)
-                        .setTitle("Go to page")
-                        .setView(yourCustomView)
-                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                String pages = (e1.getText()).toString();
-                                int page = (pages.isEmpty() ? 0 : Integer.parseInt(pages));
-                                if (page < 1 || page > maximum)
-                                {
-                                    Toast.makeText(Report.this, "Enter a value between 1 and " + maximum, Toast.LENGTH_LONG).show();
-                                }
-                                else
-                                {
-                                    counter = page - 1;
-                                    db.updatePage(letters, label, counter, solvedStatus, orderBy, blank);
-                                    nextWord();
-                                }
+            AlertDialog dialog = new AlertDialog.Builder(Report.this)
+                    .setTitle("Go to page")
+                    .setView(yourCustomView)
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            String pages = (e1.getText()).toString();
+                            int page = (pages.isEmpty() ? 0 : Integer.parseInt(pages));
+                            if (page < 1 || page > maximum)
+                            {
+                                Toast.makeText(Report.this, "Enter a value between 1 and " + maximum, Toast.LENGTH_LONG).show();
                             }
-                        }).create();
-                dialog.show();
-            }
+                            else
+                            {
+                                counter = page - 1;
+                                db.updatePage(letters, label, counter, solvedStatus, orderBy, blank);
+                                nextWord();
+                            }
+                        }
+                    }).create();
+            dialog.show();
         });
     }
 
@@ -1418,8 +1365,8 @@ public class Report extends AppCompatActivity {
         LayoutInflater inflater = LayoutInflater.from(Report.this);
         final View yourCustomView = inflater.inflate(R.layout.prompt, null);
 
-        TextView t6 = yourCustomView.findViewById(R.id.textview85);
-        t6.setText(joker ? "Preparing blank database will take 3 hours or more depending upon your device. It is recommended not to interrupt its execution in between and so you can choose to run this before you go to bed at night. If you do not want to run this now, you can click anywhere outside this dialogue box to close this dialogue box. If you want to run this now, you can choose your desired lexicon from below:\n\nCSW24 or NWL23?" :"CSW24 or NWL23?");
+        TextView t2 = yourCustomView.findViewById(R.id.textview85);
+        t2.setText(joker ? "Preparing blank database will take 3 hours or more depending upon your device. It is recommended not to interrupt its execution in between and so you can choose to run this before you go to bed at night. If you do not want to run this now, you can click anywhere outside this dialogue box to close this dialogue box. If you want to run this now, you can choose your desired lexicon from below:\n\nCSW24 or NWL23?" :"CSW24 or NWL23?");
 
         CheckBox c1 = yourCustomView.findViewById(R.id.checkbox1);
         c1.setChecked(deleteTable);
@@ -1427,29 +1374,25 @@ public class Report extends AppCompatActivity {
         AlertDialog dialog = new AlertDialog.Builder(Report.this)
                 .setTitle("Choose your lexicon")
                 .setView(yourCustomView)
-                .setPositiveButton("CSW24", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        if (joker) {
-                            Toast.makeText(Report.this, "Loading all blank anagrams into memory. Just a minute...", Toast.LENGTH_LONG).show();
-                        }
-
-                        if (c1.isChecked()) {
-                            db.dropTable(Report.this, false);
-                        }
-                        prepareDictionary(true, joker);
+                .setPositiveButton("CSW24", (dialog1, whichButton) -> {
+                    if (joker) {
+                        Toast.makeText(Report.this, "Loading all blank anagrams into memory. Just a minute...", Toast.LENGTH_LONG).show();
                     }
+
+                    if (c1.isChecked()) {
+                        db.dropTable(Report.this, false);
+                    }
+                    prepareDictionary(true, joker);
                 })
-                .setNegativeButton("NWL23", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        if (joker) {
-                            Toast.makeText(Report.this, "Loading all blank anagrams into memory. Just a minute...", Toast.LENGTH_LONG).show();
-                        }
-
-                        if (c1.isChecked()) {
-                            db.dropTable(Report.this, false);
-                        }
-                        prepareDictionary(false, joker);
+                .setNegativeButton("NWL23", (dialog2, whichButton) -> {
+                    if (joker) {
+                        Toast.makeText(Report.this, "Loading all blank anagrams into memory. Just a minute...", Toast.LENGTH_LONG).show();
                     }
+
+                    if (c1.isChecked()) {
+                        db.dropTable(Report.this, false);
+                    }
+                    prepareDictionary(false, joker);
                 }).create();
         dialog.show();
     }
@@ -1562,42 +1505,37 @@ public class Report extends AppCompatActivity {
     public void getAllSubanagrams(boolean subanagram)
     {
         LayoutInflater inflater = LayoutInflater.from(Report.this);
-        final View yourCustomView = inflater.inflate(R.layout.subanagram, null);
+        final View yourCustomView3 = inflater.inflate(R.layout.subanagram, null);
 
-        EditText e10 = yourCustomView.findViewById(R.id.edittext19);
-        EditText e11 = yourCustomView.findViewById(R.id.edittext20);
-        EditText e12 = yourCustomView.findViewById(R.id.edittext29);
-        CheckBox c4 = yourCustomView.findViewById(R.id.checkbox4);
+        EditText e10 = yourCustomView3.findViewById(R.id.edittext19);
+        EditText e11 = yourCustomView3.findViewById(R.id.edittext20);
+        EditText e12 = yourCustomView3.findViewById(R.id.edittext29);
+        CheckBox c4 = yourCustomView3.findViewById(R.id.checkbox4);
+        FrameLayout f3 = yourCustomView3.findViewById(R.id.framelayout3);
 
-        TextView t7 = yourCustomView.findViewById(R.id.textview32);
-        t7.setText(db.getSchema());
+        LayoutInflater subinflater3 = LayoutInflater.from(Report.this);
+        final View subCustomView3 = subinflater3.inflate(R.layout.sieve, null);
+        f3.addView(subCustomView3);
 
-        Button b11 = yourCustomView.findViewById(R.id.button81);
-        b11.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Help help = new Help();
-                db.messageBox("Example custom queries", help.getCustomHelp(), Report.this);
-            }
-        });
+        db.addFunctionalities(Report.this, e10, c4, false, subCustomView3);
 
-        Spinner s25 = yourCustomView.findViewById(R.id.spinner37);
+        Spinner s25 = yourCustomView3.findViewById(R.id.spinner37);
         ArrayAdapter<String> subanagramAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, jokerList);
         subanagramAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s25.setAdapter(subanagramAdapter);
 
         final int[] sortIndex = new int[2];
-        Spinner s19 = yourCustomView.findViewById(R.id.spinner31);
+        Spinner s19 = yourCustomView3.findViewById(R.id.spinner31);
         s19.setVisibility(View.GONE);
 
-        Spinner s20 = yourCustomView.findViewById(R.id.spinner32);
+        Spinner s20 = yourCustomView3.findViewById(R.id.spinner32);
         ArrayAdapter<String> orderAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, allColumns);
         orderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         ArrayAdapter<String> ordersAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, blankColumns);
         ordersAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s20.setAdapter(orderAdapter);
 
-        Spinner s21 = yourCustomView.findViewById(R.id.spinner33);
+        Spinner s21 = yourCustomView3.findViewById(R.id.spinner33);
         ArrayAdapter<String> sortAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, sort);
         sortAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s21.setAdapter(sortAdapter);
@@ -1646,7 +1584,7 @@ public class Report extends AppCompatActivity {
         s21.setSelection(1);
 
         final int[] solved = {0};
-        Spinner s8 = yourCustomView.findViewById(R.id.spinner10);
+        Spinner s8 = yourCustomView3.findViewById(R.id.spinner10);
         ArrayAdapter<String> solvedAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, solvedList);
         solvedAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s8.setAdapter(solvedAdapter);
@@ -1664,12 +1602,8 @@ public class Report extends AppCompatActivity {
 
         AlertDialog dialog = new AlertDialog.Builder(Report.this)
                 .setTitle(subanagram ? "Search for subanagrams" : "Search for anagrams")
-                .setView(yourCustomView)
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        subanagrams((((e10.getText()).toString()).trim()).toUpperCase(), (e11.getText()).toString(), subanagram, ((e12.getText()).toString()).replace("\"", "'"), c4.isChecked(), sortIndex, solved, true, s25.getSelectedItemPosition());
-                    }
-                }).create();
+                .setView(yourCustomView3)
+                .setPositiveButton("OK", (dialog1, whichButton) -> subanagrams((((e10.getText()).toString()).trim()).toUpperCase(), (e11.getText()).toString(), subanagram, ((e12.getText()).toString()).replace("\"", "'"), c4.isChecked(), sortIndex, solved, true, s25.getSelectedItemPosition())).create();
         dialog.show();
     }
 
@@ -1690,7 +1624,7 @@ public class Report extends AppCompatActivity {
         blanks += (digit.isEmpty() ? 0 : Integer.parseInt(digit));
 
         if (flag && extraSql) {
-            Toast.makeText(Report.this, "Letters field can contain only letters and full stops for blanks", Toast.LENGTH_LONG).show();
+            Toast.makeText(Report.this, "Letters field can contain only letters and dots for blanks", Toast.LENGTH_LONG).show();
             getAllSubanagrams(subanagram);
         }
         else {
