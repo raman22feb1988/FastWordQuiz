@@ -102,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
     Button b10;
     Button b11;
     Button b12;
+    Button b13;
 
     Cursor anagrams;
     int words;
@@ -580,6 +581,10 @@ public class MainActivity extends AppCompatActivity {
                             }).create();
                     dialog4.show();
                     break;
+                case R.id.button102:
+                    // Show a Toast message for the View all tables and columns item
+                    db.alertBox("View all tables and columns", db.getSchema(), MainActivity.this);
+                    break;
             }
 
             // Close the drawer after selection
@@ -610,7 +615,7 @@ public class MainActivity extends AppCompatActivity {
         t2 = findViewById(R.id.textview4);
         t5 = findViewById(R.id.textview5);
         t6 = findViewById(R.id.textview28);
-        t4 = findViewById(R.id.textview87);
+        t4 = findViewById(R.id.textview27);
         e2 = findViewById(R.id.edittext2);
         b1 = findViewById(R.id.button1);
         b2 = findViewById(R.id.button2);
@@ -624,8 +629,10 @@ public class MainActivity extends AppCompatActivity {
         b10 = findViewById(R.id.button17);
         b11 = findViewById(R.id.button19);
         b12 = findViewById(R.id.button86);
+        b13 = findViewById(R.id.button100);
 
         db = new sqliteDB(MainActivity.this, version, null, false);
+        db.initialize();
 
         ArrayList<Integer> dimensions = db.getZoom("Quiz");
         rows = dimensions.get(0);
@@ -807,7 +814,7 @@ public class MainActivity extends AppCompatActivity {
         LayoutInflater inflater = LayoutInflater.from(MainActivity.this);
         final View yourCustomView = inflater.inflate(R.layout.prompt, null);
 
-        TextView t8 = yourCustomView.findViewById(R.id.textview85);
+        TextView t8 = yourCustomView.findViewById(R.id.textview14);
         t8.setText(joker ? "Preparing blank database will take 3 hours or more depending upon your device. It is recommended not to interrupt its execution in between and so you can choose to run this before you go to bed at night. If you do not want to run this now, you can click anywhere outside this dialogue box to close this dialogue box. If you want to run this now, you can choose your desired lexicon from below:\n\nCSW24 or NWL23?" :"CSW24 or NWL23?");
 
         CheckBox c1 = yourCustomView.findViewById(R.id.checkbox1);
@@ -1153,6 +1160,8 @@ public class MainActivity extends AppCompatActivity {
             cumulativeTime(null, false, null);
         }
 
+        db.initialize();
+
         begin = System.currentTimeMillis();
         started = true;
         blank = new_blank;
@@ -1224,6 +1233,7 @@ public class MainActivity extends AppCompatActivity {
         b4.setEnabled(true);
         b7.setEnabled(true);
         b9.setEnabled(true);
+        b13.setEnabled(true);
 
         t1.setText("Page " + (counter + 1) + " out of " + (((words - 1) / (rows * columns)) + 1));
         t2.setText("Score: " + score + "/" + number);

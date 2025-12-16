@@ -25,15 +25,16 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Custom Query"
-            android:id="@+id/button18">
+            android:text="Next"
+            android:enabled="false"
+            android:id="@+id/button7">
         </Button>
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Next"
+            android:text="Go To Page"
             android:enabled="false"
-            android:id="@+id/button7">
+            android:id="@+id/button16">
         </Button>
     </LinearLayout>
     <LinearLayout
@@ -49,9 +50,9 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Go To Page"
+            android:text="Save List"
             android:enabled="false"
-            android:id="@+id/button16">
+            android:id="@+id/button101">
         </Button>
     </LinearLayout>
     <LinearLayout

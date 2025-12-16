@@ -54,7 +54,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Anagram:"
-            android:id="@+id/textview86">
+            android:id="@+id/textview32">
         </TextView>
         <FrameLayout
             android:layout_width="match_parent"

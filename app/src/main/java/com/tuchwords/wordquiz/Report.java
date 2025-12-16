@@ -148,6 +148,146 @@ public class Report extends AppCompatActivity {
         navigationView.setNavigationItemSelectedListener(item -> {
             // Handle the selected item based on its ID
             switch (item.getItemId()) {
+                case R.id.button18:
+                    // Show a Toast message for the Custom query item
+                    LayoutInflater inflater = LayoutInflater.from(Report.this);
+                    final View yourCustomView1 = inflater.inflate(R.layout.query, null);
+
+                    EditText e2 = yourCustomView1.findViewById(R.id.edittext18);
+                    CheckBox c2 = yourCustomView1.findViewById(R.id.checkbox2);
+                    FrameLayout f1 = yourCustomView1.findViewById(R.id.framelayout1);
+
+                    LayoutInflater subinflater1 = LayoutInflater.from(Report.this);
+                    final View subCustomView1 = subinflater1.inflate(R.layout.sieve, null);
+                    f1.addView(subCustomView1);
+
+                    db.addFunctionalities(Report.this, e2, c2, false, subCustomView1);
+
+                    Spinner s24 = yourCustomView1.findViewById(R.id.spinner36);
+                    ArrayAdapter<String> emptyAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, blankList);
+                    emptyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    s24.setAdapter(emptyAdapter);
+
+                    final int[] sortIndex = new int[2];
+                    Spinner s16 = yourCustomView1.findViewById(R.id.spinner28);
+                    s16.setVisibility(View.GONE);
+
+                    Spinner s17 = yourCustomView1.findViewById(R.id.spinner29);
+                    ArrayAdapter<String> orderAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, allColumns);
+                    orderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    ArrayAdapter<String> ordersAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, blankColumns);
+                    ordersAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    s17.setAdapter(orderAdapter);
+
+                    Spinner s18 = yourCustomView1.findViewById(R.id.spinner30);
+                    ArrayAdapter<String> sortAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, sort);
+                    sortAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    s18.setAdapter(sortAdapter);
+
+                    s17.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                            sortIndex[0] = i;
+                        }
+
+                        @Override
+                        public void onNothingSelected(AdapterView<?> adapterView) {
+                        }
+                    });
+
+                    s18.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                            sortIndex[1] = i;
+                        }
+
+                        @Override
+                        public void onNothingSelected(AdapterView<?> adapterView) {
+                        }
+                    });
+
+                    s17.setSelection(7);
+                    s18.setSelection(1);
+
+                    final int[] solved = {0};
+                    Spinner s6 = yourCustomView1.findViewById(R.id.spinner7);
+                    ArrayAdapter<String> solvedAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, solvedList);
+                    solvedAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    s6.setAdapter(solvedAdapter);
+
+                    s6.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                            solved[0] = i;
+                        }
+
+                        @Override
+                        public void onNothingSelected(AdapterView<?> adapterView) {
+                        }
+                    });
+
+                    AlertDialog dialog6 = new AlertDialog.Builder(Report.this)
+                            .setTitle("SELECT front, word, back, definition, time, tag FROM words WHERE")
+                            .setView(yourCustomView1)
+                            .setPositiveButton("OK", (dialog5, whichButton) -> {
+                                String temporaryQuery = ((e2.getText()).toString()).replace("\"", "'");
+                                String customQuery = (temporaryQuery.isEmpty() ? "1" : temporaryQuery);
+                                boolean wildIndex = (s24.getSelectedItemPosition() > 0);
+                                String orderIndex = sortBy(sortIndex, wildIndex);
+                                String processingQuery = (c2.isChecked() ? db.addUnderscores(customQuery) : customQuery);
+                                Cursor resultSet = db.getSqlQuery(processingQuery, Report.this, solved[0], orderIndex, wildIndex);
+
+                                if (resultSet != null) {
+                                    label = processingQuery;
+                                    letters = 0;
+                                    solvedStatus = solved[0];
+                                    orderBy = orderIndex;
+                                    blank = wildIndex;
+
+                                    closeCursor();
+                                    anagrams = resultSet;
+                                    words = anagrams.getCount();
+
+                                    boolean exists = db.existLabel(letters, label, orderBy, blank);
+
+                                    if (!exists) {
+                                        counter = 0;
+                                        db.insertLabel(letters, label, orderBy, blank);
+                                    } else {
+                                        counter = db.getPage(letters, label, solvedStatus, orderBy, blank);
+                                    }
+
+                                    int highest = (words - 1) / rows;
+                                    if (counter > highest && words > 0) {
+                                        counter = highest;
+                                        db.updatePage(letters, label, counter, solvedStatus, orderBy, blank);
+                                    }
+
+                                    nextWord();
+                                }
+                            }).create();
+                    dialog6.show();
+
+                    s24.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                            dialog6.setTitle("SELECT front, word, back, definition, time, tag FROM " + ((i == 0) ? "words" : "blanks") + " WHERE");
+
+                            if (i == 0) {
+                                s17.setAdapter(orderAdapter);
+                                s17.setSelection(7);
+                            }
+                            else {
+                                s17.setAdapter(ordersAdapter);
+                                s17.setSelection(10);
+                            }
+                        }
+
+                        @Override
+                        public void onNothingSelected(AdapterView<?> adapterView) {
+                        }
+                    });
+                    break;
                 case R.id.button27:
                     // Show a Toast message for the SQL query item
                     LayoutInflater inflater1 = LayoutInflater.from(Report.this);
@@ -440,6 +580,10 @@ public class Report extends AppCompatActivity {
                             }).create();
                     dialog4.show();
                     break;
+                case R.id.button103:
+                    // Show a Toast message for the View all tables and columns item
+                    db.alertBox("View all tables and columns", db.getSchema(), Report.this);
+                    break;
             }
 
             // Close the drawer after selection
@@ -473,13 +617,13 @@ public class Report extends AppCompatActivity {
         b5 = findViewById(R.id.button13);
         b6 = findViewById(R.id.button14);
         b7 = findViewById(R.id.button16);
-        b8 = findViewById(R.id.button18);
+        b8 = findViewById(R.id.button101);
         g1 = findViewById(R.id.gridview2);
         s3 = findViewById(R.id.spinner4);
 
         db = new sqliteDB(Report.this, version, null, false);
 
-        ArrayList<Integer> dimensions = db.getZoom("Report");
+        ArrayList<Integer> dimensions = db.getZoom("List");
         rows = dimensions.get(0);
         font = dimensions.get(2);
         combo = dimensions.get(3);
@@ -536,146 +680,6 @@ public class Report extends AppCompatActivity {
         b6.setOnClickListener(view -> {
             closeCursor();
             finish();
-        });
-
-        b8.setOnClickListener(view -> {
-            LayoutInflater inflater = LayoutInflater.from(Report.this);
-            final View yourCustomView1 = inflater.inflate(R.layout.query, null);
-
-            EditText e2 = yourCustomView1.findViewById(R.id.edittext18);
-            CheckBox c2 = yourCustomView1.findViewById(R.id.checkbox2);
-            FrameLayout f1 = yourCustomView1.findViewById(R.id.framelayout1);
-
-            LayoutInflater subinflater1 = LayoutInflater.from(Report.this);
-            final View subCustomView1 = subinflater1.inflate(R.layout.sieve, null);
-            f1.addView(subCustomView1);
-
-            db.addFunctionalities(Report.this, e2, c2, false, subCustomView1);
-
-            Spinner s24 = yourCustomView1.findViewById(R.id.spinner36);
-            ArrayAdapter<String> emptyAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, blankList);
-            emptyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            s24.setAdapter(emptyAdapter);
-
-            final int[] sortIndex = new int[2];
-            Spinner s16 = yourCustomView1.findViewById(R.id.spinner28);
-            s16.setVisibility(View.GONE);
-
-            Spinner s17 = yourCustomView1.findViewById(R.id.spinner29);
-            ArrayAdapter<String> orderAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, allColumns);
-            orderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            ArrayAdapter<String> ordersAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, blankColumns);
-            ordersAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            s17.setAdapter(orderAdapter);
-
-            Spinner s18 = yourCustomView1.findViewById(R.id.spinner30);
-            ArrayAdapter<String> sortAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, sort);
-            sortAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            s18.setAdapter(sortAdapter);
-
-            s17.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                    sortIndex[0] = i;
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> adapterView) {
-                }
-            });
-
-            s18.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                    sortIndex[1] = i;
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> adapterView) {
-                }
-            });
-
-            s17.setSelection(7);
-            s18.setSelection(1);
-
-            final int[] solved = {0};
-            Spinner s6 = yourCustomView1.findViewById(R.id.spinner7);
-            ArrayAdapter<String> solvedAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, solvedList);
-            solvedAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            s6.setAdapter(solvedAdapter);
-
-            s6.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                    solved[0] = i;
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> adapterView) {
-                }
-            });
-
-            AlertDialog dialog = new AlertDialog.Builder(Report.this)
-                    .setTitle("SELECT front, word, back, definition, time, tag FROM words WHERE")
-                    .setView(yourCustomView1)
-                    .setPositiveButton("OK", (dialog5, whichButton) -> {
-                        String temporaryQuery = ((e2.getText()).toString()).replace("\"", "'");
-                        String customQuery = (temporaryQuery.isEmpty() ? "1" : temporaryQuery);
-                        boolean wildIndex = (s24.getSelectedItemPosition() > 0);
-                        String orderIndex = sortBy(sortIndex, wildIndex);
-                        String processingQuery = (c2.isChecked() ? db.addUnderscores(customQuery) : customQuery);
-                        Cursor resultSet = db.getSqlQuery(processingQuery, Report.this, solved[0], orderIndex, wildIndex);
-
-                        if (resultSet != null) {
-                            label = processingQuery;
-                            letters = 0;
-                            solvedStatus = solved[0];
-                            orderBy = orderIndex;
-                            blank = wildIndex;
-
-                            closeCursor();
-                            anagrams = resultSet;
-                            words = anagrams.getCount();
-
-                            boolean exists = db.existLabel(letters, label, orderBy, blank);
-
-                            if (!exists) {
-                                counter = 0;
-                                db.insertLabel(letters, label, orderBy, blank);
-                            } else {
-                                counter = db.getPage(letters, label, solvedStatus, orderBy, blank);
-                            }
-
-                            int highest = (words - 1) / rows;
-                            if (counter > highest && words > 0) {
-                                counter = highest;
-                                db.updatePage(letters, label, counter, solvedStatus, orderBy, blank);
-                            }
-
-                            nextWord();
-                        }
-                    }).create();
-            dialog.show();
-
-            s24.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                    dialog.setTitle("SELECT front, word, back, definition, time, tag FROM " + ((i == 0) ? "words" : "blanks") + " WHERE");
-
-                    if (i == 0) {
-                        s17.setAdapter(orderAdapter);
-                        s17.setSelection(7);
-                    }
-                    else {
-                        s17.setAdapter(ordersAdapter);
-                        s17.setSelection(10);
-                    }
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> adapterView) {
-                }
-            });
         });
 
         if (!prepared) {
@@ -1037,6 +1041,7 @@ public class Report extends AppCompatActivity {
         b1.setEnabled(true);
         b2.setEnabled(true);
         b7.setEnabled(true);
+        b8.setEnabled(true);
 
         if (words > 0) {
             t1.setText("Page " + (counter + 1) + " out of " + (((words - 1) / rows) + 1) + " (" + words + (words == 1 ? " word)" : " words)"));
@@ -1132,7 +1137,7 @@ public class Report extends AppCompatActivity {
 
     public void refresh()
     {
-        ArrayList<Integer> dimensions = db.getZoom("Report");
+        ArrayList<Integer> dimensions = db.getZoom("List");
         rows = dimensions.get(0);
         font = dimensions.get(2);
         combo = dimensions.get(3);
@@ -1215,37 +1220,35 @@ public class Report extends AppCompatActivity {
         AlertDialog dialog = new AlertDialog.Builder(Report.this)
                 .setTitle("Change rows and font sizes")
                 .setView(yourCustomView)
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        String old_rows = (e8.getText()).toString();
-                        String old_font = (e9.getText()).toString();
-                        String old_combo = (e13.getText()).toString();
+                .setPositiveButton("OK", (dialog1, whichButton) -> {
+                    String old_rows = (e8.getText()).toString();
+                    String old_font = (e9.getText()).toString();
+                    String old_combo = (e13.getText()).toString();
 
-                        int new_rows = (old_rows.isEmpty() ? 0 : Integer.parseInt(old_rows));
-                        int new_font = (old_font.isEmpty() ? 0 : Integer.parseInt(old_font));
-                        int new_combo = (old_combo.isEmpty() ? 0 : Integer.parseInt(old_combo));
+                    int new_rows = (old_rows.isEmpty() ? 0 : Integer.parseInt(old_rows));
+                    int new_font = (old_font.isEmpty() ? 0 : Integer.parseInt(old_font));
+                    int new_combo = (old_combo.isEmpty() ? 0 : Integer.parseInt(old_combo));
 
-                        StringBuilder sb = new StringBuilder();
-                        if (new_rows < 1) {
-                            sb.append("Rows should be ≥ 1");
+                    StringBuilder sb = new StringBuilder();
+                    if (new_rows < 1) {
+                        sb.append("Rows should be ≥ 1");
+                    }
+                    if (new_font < 11 || new_combo < 11) {
+                        if (sb.length() > 0) {
+                            sb.append("\n");
                         }
-                        if (new_font < 11 || new_combo < 11) {
-                            if (sb.length() > 0) {
-                                sb.append("\n");
-                            }
-                            sb.append("Font sizes should be ≥ 11");
-                        }
+                        sb.append("Font sizes should be ≥ 11");
+                    }
 
-                        if (sb.length() > 0)
-                        {
-                            Toast.makeText(Report.this, new String(sb), Toast.LENGTH_LONG).show();
-                            zoom();
-                        }
-                        else
-                        {
-                            db.setMagnify("Report", new_rows, new_font, new_combo);
-                            refresh();
-                        }
+                    if (sb.length() > 0)
+                    {
+                        Toast.makeText(Report.this, new String(sb), Toast.LENGTH_LONG).show();
+                        zoom();
+                    }
+                    else
+                    {
+                        db.setMagnify("List", new_rows, new_font, new_combo);
+                        refresh();
                     }
                 }).create();
         dialog.show();
@@ -1365,7 +1368,7 @@ public class Report extends AppCompatActivity {
         LayoutInflater inflater = LayoutInflater.from(Report.this);
         final View yourCustomView = inflater.inflate(R.layout.prompt, null);
 
-        TextView t2 = yourCustomView.findViewById(R.id.textview85);
+        TextView t2 = yourCustomView.findViewById(R.id.textview14);
         t2.setText(joker ? "Preparing blank database will take 3 hours or more depending upon your device. It is recommended not to interrupt its execution in between and so you can choose to run this before you go to bed at night. If you do not want to run this now, you can click anywhere outside this dialogue box to close this dialogue box. If you want to run this now, you can choose your desired lexicon from below:\n\nCSW24 or NWL23?" :"CSW24 or NWL23?");
 
         CheckBox c1 = yourCustomView.findViewById(R.id.checkbox1);

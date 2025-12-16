@@ -15,6 +15,9 @@
     <item android:title="Word filter">
         <menu>
             <item
+                android:id="@+id/button18"
+                android:title="Custom query" />
+            <item
                 android:id="@+id/button40"
                 android:title="Reset words by tag" />
             <item
@@ -108,6 +111,9 @@
             <item
                 android:id="@+id/button27"
                 android:title="SQL query" />
+            <item
+                android:id="@+id/button103"
+                android:title="View all tables and columns" />
         </menu>
     </item>
     <item android:title="Import and export">

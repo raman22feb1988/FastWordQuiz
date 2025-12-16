@@ -111,6 +111,9 @@
             <item
                 android:id="@+id/button20"
                 android:title="SQL query" />
+            <item
+                android:id="@+id/button102"
+                android:title="View all tables and columns" />
         </menu>
     </item>
     <item android:title="Import and export">
