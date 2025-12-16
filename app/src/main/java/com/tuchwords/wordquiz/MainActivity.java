@@ -583,7 +583,11 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case R.id.button102:
                     // Show a Toast message for the View all tables and columns item
-                    db.alertBox("View all tables and columns", db.getSchema(), MainActivity.this);
+                    db.messageBox("View all tables and columns", db.getSchema(), MainActivity.this);
+                    break;
+                case R.id.button104:
+                    // Show a Toast message for the Letter distribution item
+                    db.letterDistribution(MainActivity.this);
                     break;
             }
 
@@ -632,7 +636,6 @@ public class MainActivity extends AppCompatActivity {
         b13 = findViewById(R.id.button100);
 
         db = new sqliteDB(MainActivity.this, version, null, false);
-        db.initialize();
 
         ArrayList<Integer> dimensions = db.getZoom("Quiz");
         rows = dimensions.get(0);
@@ -1159,8 +1162,6 @@ public class MainActivity extends AppCompatActivity {
         if (started) {
             cumulativeTime(null, false, null);
         }
-
-        db.initialize();
 
         begin = System.currentTimeMillis();
         started = true;

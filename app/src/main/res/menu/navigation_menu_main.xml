@@ -114,6 +114,9 @@
             <item
                 android:id="@+id/button102"
                 android:title="View all tables and columns" />
+            <item
+                android:id="@+id/button104"
+                android:title="Letter distribution" />
         </menu>
     </item>
     <item android:title="Import and export">

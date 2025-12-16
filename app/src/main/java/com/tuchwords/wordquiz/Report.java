@@ -582,7 +582,11 @@ public class Report extends AppCompatActivity {
                     break;
                 case R.id.button103:
                     // Show a Toast message for the View all tables and columns item
-                    db.alertBox("View all tables and columns", db.getSchema(), Report.this);
+                    db.messageBox("View all tables and columns", db.getSchema(), Report.this);
+                    break;
+                case R.id.button105:
+                    // Show a Toast message for the Letter distribution item
+                    db.letterDistribution(Report.this);
                     break;
             }
 
