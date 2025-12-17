@@ -1,0 +1,23 @@
+package com.tuchwords.wordquiz;
+
+public class Filter {
+    int length;
+    String query;
+    String sort;
+    int blank;
+    String name;
+    int serial;
+
+    public Filter(int length, String query, String sort, int blank, String name, int serial) {
+        this.length = length;
+        this.query = query;
+        this.sort = sort;
+        this.blank = blank;
+        this.name = name;
+        this.serial = serial;
+    }
+
+    public String getName() {
+        return name;
+    }
+}

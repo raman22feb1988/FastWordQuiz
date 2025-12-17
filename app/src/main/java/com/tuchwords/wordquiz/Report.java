@@ -7,6 +7,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.AlertDialog;
@@ -97,6 +98,7 @@ public class Report extends AppCompatActivity {
     int combo;
     int maximumWordLength;
     int maximumBlankLength;
+    int filterSerial;
 
     // Declare the DrawerLayout, NavigationView and Toolbar
     private DrawerLayout drawerLayout;
@@ -248,14 +250,9 @@ public class Report extends AppCompatActivity {
                                     anagrams = resultSet;
                                     words = anagrams.getCount();
 
-                                    boolean exists = db.existLabel(letters, label, orderBy, blank);
-
-                                    if (!exists) {
-                                        counter = 0;
-                                        db.insertLabel(letters, label, orderBy, blank);
-                                    } else {
-                                        counter = db.getPage(letters, label, solvedStatus, orderBy, blank);
-                                    }
+                                    int exists = db.existLabel(letters, label, orderBy, blank);
+                                    filterSerial = (exists == 0 ? db.insertLabel(letters, label, orderBy, blank) : exists);
+                                    counter = (exists == 0 ? 0 : db.getPage(letters, label, solvedStatus, orderBy, blank));
 
                                     int highest = (words - 1) / rows;
                                     if (counter > highest && words > 0) {
@@ -588,6 +585,25 @@ public class Report extends AppCompatActivity {
                     // Show a Toast message for the Letter distribution item
                     db.letterDistribution(Report.this);
                     break;
+                case R.id.button107:
+                    // Show a Toast message for the Load saved word list item
+                    LayoutInflater inflater6 = LayoutInflater.from(Report.this);
+                    final View yourCustomView8 = inflater6.inflate(R.layout.list, null);
+
+                    RecyclerView g2 = yourCustomView8.findViewById(R.id.gridview4);
+                    RecyclerView.LayoutManager listManager = new LinearLayoutManager(Report.this, LinearLayoutManager.VERTICAL, false);
+                    g2.setLayoutManager(listManager);
+
+                    FilterAdapter filterAdapter = new FilterAdapter(Report.this, R.layout.list, db.loadFilter());
+                    g2.setAdapter(filterAdapter);
+
+                    AlertDialog dialog9 = new AlertDialog.Builder(Report.this)
+                            .setTitle("Load saved word list")
+                            .setView(yourCustomView8)
+                            .setPositiveButton("OK", (dialog10, whichButton3) -> {
+
+                            }).create();
+                    dialog9.show();
             }
 
             // Close the drawer after selection
@@ -684,6 +700,22 @@ public class Report extends AppCompatActivity {
         b6.setOnClickListener(view -> {
             closeCursor();
             finish();
+        });
+
+        b8.setOnClickListener(view2 -> {
+            LayoutInflater inflater5 = LayoutInflater.from(Report.this);
+            final View yourCustomView7 = inflater5.inflate(R.layout.edit, null);
+
+            EditText e14 = yourCustomView7.findViewById(R.id.edittext37);
+            e14.setText(db.getFilterName(filterSerial));
+
+            AlertDialog dialog7 = new AlertDialog.Builder(Report.this)
+                    .setTitle("List name")
+                    .setView(yourCustomView7)
+                    .setPositiveButton("OK", (dialog8, whichButton2) -> {
+                        db.saveFilter(filterSerial, ((e14.getText()).toString()).replace("\"", "'"));
+                    }).create();
+            dialog7.show();
         });
 
         if (!prepared) {
@@ -1018,12 +1050,8 @@ public class Report extends AppCompatActivity {
 
         if (checkExist)
         {
-            boolean exist = db.existLabel(letters, label, orderBy, blank);
-
-            if (!exist)
-            {
-                db.insertLabel(letters, label, orderBy, blank);
-            }
+            int exist = db.existLabel(letters, label, orderBy, blank);
+            filterSerial = (exist == 0 ? db.insertLabel(letters, label, orderBy, blank) : exist);
         }
 
         anagrams = (label.equals("*") ? db.getSolvedWords(letters, solvedStatus, orderBy, blank) : db.getLabelledWords(letters, label, solvedStatus, orderBy, blank));
@@ -1159,14 +1187,9 @@ public class Report extends AppCompatActivity {
                     anagrams = resultSet;
                     words = anagrams.getCount();
 
-                    boolean exists = db.existLabel(letters, label, orderBy, blank);
-
-                    if (!exists) {
-                        counter = 0;
-                        db.insertLabel(letters, label, orderBy, blank);
-                    } else {
-                        counter = db.getPage(letters, label, solvedStatus, orderBy, blank);
-                    }
+                    int exists = db.existLabel(letters, label, orderBy, blank);
+                    filterSerial = (exists == 0 ? db.insertLabel(letters, label, orderBy, blank) : exists);
+                    counter = (exists == 0 ? 0 : db.getPage(letters, label, solvedStatus, orderBy, blank));
 
                     int peak = (words - 1) / rows;
                     if (counter > peak && words > 0) {
@@ -1696,14 +1719,9 @@ public class Report extends AppCompatActivity {
                 anagrams = resultSet;
                 words = anagrams.getCount();
 
-                boolean exists = db.existLabel(letters, label, orderBy, blank);
-
-                if (!exists) {
-                    counter = 0;
-                    db.insertLabel(letters, label, orderBy, blank);
-                } else {
-                    counter = db.getPage(letters, label, solvedStatus, orderBy, blank);
-                }
+                int exists = db.existLabel(letters, label, orderBy, blank);
+                filterSerial = (exists == 0 ? db.insertLabel(letters, label, orderBy, blank) : exists);
+                counter = (exists == 0 ? 0 : db.getPage(letters, label, solvedStatus, orderBy, blank));
 
                 int apex = (words - 1) / rows;
                 if (counter > apex && words > 0) {

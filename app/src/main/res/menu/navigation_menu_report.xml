@@ -26,6 +26,9 @@
             <item
                 android:id="@+id/button80"
                 android:title="Search for subanagrams" />
+            <item
+                android:id="@+id/button107"
+                android:title="Load saved word list" />
         </menu>
     </item>
     <item android:title="Settings">

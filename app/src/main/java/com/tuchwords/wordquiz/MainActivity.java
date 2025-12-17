@@ -7,6 +7,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.AlertDialog;
@@ -119,6 +120,7 @@ public class MainActivity extends AppCompatActivity {
     int combo;
     int maximumWordLength;
     int maximumBlankLength;
+    int filterSerial;
 
     // Declare the DrawerLayout, NavigationView and Toolbar
     private DrawerLayout drawerLayout;
@@ -326,14 +328,9 @@ public class MainActivity extends AppCompatActivity {
                                     score = pair1[0];
                                     number = pair1[1];
 
-                                    boolean exists = db.existLabel(letters, label, orderBy, wildIndex);
-
-                                    if (!exists) {
-                                        counter = 0;
-                                        db.insertLabel(letters, label, orderBy, wildIndex);
-                                    } else {
-                                        counter = db.getCounter(letters, label, solvedStatus, orderBy, wildIndex);
-                                    }
+                                    int exists = db.existLabel(letters, label, orderBy, wildIndex);
+                                    filterSerial = (exists == 0 ? db.insertLabel(letters, label, orderBy, wildIndex) : exists);
+                                    counter = (exists == 0 ? 0 : db.getCounter(letters, label, solvedStatus, orderBy, wildIndex));
 
                                     int highest = (words - 1) / (rows * columns);
                                     if (counter > highest && words > 0) {
@@ -589,6 +586,26 @@ public class MainActivity extends AppCompatActivity {
                     // Show a Toast message for the Letter distribution item
                     db.letterDistribution(MainActivity.this);
                     break;
+                case R.id.button106:
+                    // Show a Toast message for the Load saved word list item
+                    LayoutInflater inflater6 = LayoutInflater.from(MainActivity.this);
+                    final View yourCustomView7 = inflater6.inflate(R.layout.list, null);
+
+                    RecyclerView g2 = yourCustomView7.findViewById(R.id.gridview4);
+                    RecyclerView.LayoutManager listManager = new LinearLayoutManager(MainActivity.this, LinearLayoutManager.VERTICAL, false);
+                    g2.setLayoutManager(listManager);
+
+                    FilterAdapter filterAdapter = new FilterAdapter(MainActivity.this, R.layout.list, db.loadFilter());
+                    g2.setAdapter(filterAdapter);
+
+                    AlertDialog dialog8 = new AlertDialog.Builder(MainActivity.this)
+                            .setTitle("Load saved word list")
+                            .setView(yourCustomView7)
+                            .setPositiveButton("OK", (dialog9, whichButton3) -> {
+
+                            }).create();
+                    dialog8.show();
+                    break;
             }
 
             // Close the drawer after selection
@@ -796,6 +813,22 @@ public class MainActivity extends AppCompatActivity {
         b11.setOnClickListener(view -> e2.setText(""));
 
         b12.setOnClickListener(view -> e2.setText(lastWord));
+
+        b13.setOnClickListener(view2 -> {
+            LayoutInflater inflater5 = LayoutInflater.from(MainActivity.this);
+            final View yourCustomView6 = inflater5.inflate(R.layout.edit, null);
+
+            EditText e17 = yourCustomView6.findViewById(R.id.edittext37);
+            e17.setText(db.getFilterName(filterSerial));
+
+            AlertDialog dialog6 = new AlertDialog.Builder(MainActivity.this)
+                    .setTitle("List name")
+                    .setView(yourCustomView6)
+                    .setPositiveButton("OK", (dialog7, whichButton2) -> {
+                        db.saveFilter(filterSerial, ((e17.getText()).toString()).replace("\"", "'"));
+                    }).create();
+            dialog6.show();
+        });
 
         // Add a callback to handle the back button press
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
@@ -1133,12 +1166,8 @@ public class MainActivity extends AppCompatActivity {
     {
         closeCursor();
 
-        boolean exist = db.existLabel(letters, label, orderBy, old_blank);
-
-        if (!exist)
-        {
-            db.insertLabel(letters, label, orderBy, old_blank);
-        }
+        int exist = db.existLabel(letters, label, orderBy, old_blank);
+        filterSerial = (exist == 0 ? db.insertLabel(letters, label, orderBy, old_blank) : exist);
 
         anagrams = db.getAllAnagrams(letters, label, solvedStatus, orderBy, old_blank);
         words = anagrams.getCount();
@@ -2251,14 +2280,9 @@ public class MainActivity extends AppCompatActivity {
                 score = pair4[0];
                 number = pair4[1];
 
-                boolean exists = db.existLabel(letters, label, orderBy, wildsIndex);
-
-                if (!exists) {
-                    counter = 0;
-                    db.insertLabel(letters, label, orderBy, wildsIndex);
-                } else {
-                    counter = db.getCounter(letters, label, solvedStatus, orderBy, wildsIndex);
-                }
+                int exists = db.existLabel(letters, label, orderBy, wildsIndex);
+                filterSerial = (exists == 0 ? db.insertLabel(letters, label, orderBy, wildsIndex) : exists);
+                counter = (exists == 0 ? 0 : db.getCounter(letters, label, solvedStatus, orderBy, wildsIndex));
 
                 int apex = (words - 1) / (rows * columns);
                 if (counter > apex && words > 0) {
