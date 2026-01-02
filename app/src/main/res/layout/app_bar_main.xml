@@ -38,10 +38,10 @@
                 <Button
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Clear"
+                    android:text="Exit"
                     android:padding="0dp"
                     android:layout_gravity="center"
-                    android:id="@+id/button19">
+                    android:id="@+id/button10">
                 </Button>
             </LinearLayout>
             <LinearLayout
@@ -198,8 +198,8 @@
                 <Button
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Exit"
-                    android:id="@+id/button10">
+                    android:text="Clear"
+                    android:id="@+id/button19">
                 </Button>
             </LinearLayout>
             <TextView
