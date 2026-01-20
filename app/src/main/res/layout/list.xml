@@ -3,6 +3,15 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/rectangle">
+        <Spinner
+            android:id="@+id/spinner46"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </FrameLayout>
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content">

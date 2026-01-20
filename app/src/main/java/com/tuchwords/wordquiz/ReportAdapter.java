@@ -76,12 +76,12 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ViewHolder
 
         v.setOnClickListener(v2 -> {
             Report report = (Report) con;
-            report.onItemClick(viewHolder.getAdapterPosition());
+            report.onItemClick(viewHolder.getBindingAdapterPosition());
         });
 
         v.setOnLongClickListener(v1 -> {
             Report report = (Report) con;
-            report.onItemLongClick(viewHolder.getAdapterPosition());
+            report.onItemLongClick(viewHolder.getBindingAdapterPosition());
 
             return true;
         });

@@ -1,6 +1,8 @@
 package com.tuchwords.wordquiz;
 
 import android.content.Context;
+import android.content.res.Configuration;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +16,10 @@ public class FilterAdapter extends RecyclerView.Adapter<FilterAdapter.ViewHolder
     Context con;
     int _resource;
     List<Filter> lival1;
+    int loading;
+
+    final TextView[] previous = {null};
+    Filter selection = null;
 
     /**
      * Provide a reference to the type of views that you are using
@@ -39,10 +45,11 @@ public class FilterAdapter extends RecyclerView.Adapter<FilterAdapter.ViewHolder
      * param dataSet String[] containing the data to populate views to be used
      * by RecyclerView
      */
-    public FilterAdapter(Context context, int resource, List<Filter> li1) {
+    public FilterAdapter(Context context, int resource, List<Filter> li1, int loader) {
         con = context;
         _resource = resource;
         lival1 = li1;
+        loading = loader;
     }
 
     // Create new views (invoked by the layout manager)
@@ -50,7 +57,7 @@ public class FilterAdapter extends RecyclerView.Adapter<FilterAdapter.ViewHolder
     public FilterAdapter.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         // Create a new view, which defines the UI of the list item
         View view = LayoutInflater.from(viewGroup.getContext())
-                .inflate(R.layout.text, viewGroup, false);
+                .inflate(R.layout.load, viewGroup, false);
         return new FilterAdapter.ViewHolder(view);
     }
 
@@ -61,13 +68,35 @@ public class FilterAdapter extends RecyclerView.Adapter<FilterAdapter.ViewHolder
         // contents of the view with that element
         View v = viewHolder.getView();
 
-        TextView t1 = v.findViewById(R.id.textview85);
+        int nightModeFlags =
+                con.getResources().getConfiguration().uiMode &
+                        Configuration.UI_MODE_NIGHT_MASK;
+        int white = (nightModeFlags == Configuration.UI_MODE_NIGHT_YES ? Color.BLACK : Color.WHITE);
+
+        TextView t1 = v.findViewById(R.id.textview86);
         t1.setText((lival1.get(position)).getName());
+        t1.setTextSize(loading);
+        t1.setBackgroundColor(white);
+
+        v.setOnClickListener(v1 -> {
+            if (previous[0] != null) {
+                previous[0].setBackgroundColor(white);
+            }
+
+            TextView t2 = v1.findViewById(R.id.textview86);
+            t2.setBackgroundColor(Color.BLUE);
+            previous[0] = t2;
+            selection = lival1.get(viewHolder.getBindingAdapterPosition());
+        });
     }
 
     // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
         return lival1.size();
+    }
+
+    public Filter getSelection() {
+        return selection;
     }
 }

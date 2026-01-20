@@ -96,6 +96,7 @@ public class Report extends AppCompatActivity {
     int rows;
     int font;
     int combo;
+    int loader;
     int maximumWordLength;
     int maximumBlankLength;
     int filterSerial;
@@ -236,32 +237,7 @@ public class Report extends AppCompatActivity {
                                 String customQuery = (temporaryQuery.isEmpty() ? "1" : temporaryQuery);
                                 boolean wildIndex = (s24.getSelectedItemPosition() > 0);
                                 String orderIndex = sortBy(sortIndex, wildIndex);
-                                String processingQuery = (c2.isChecked() ? db.addUnderscores(customQuery) : customQuery);
-                                Cursor resultSet = db.getSqlQuery(processingQuery, Report.this, solved[0], orderIndex, wildIndex);
-
-                                if (resultSet != null) {
-                                    label = processingQuery;
-                                    letters = 0;
-                                    solvedStatus = solved[0];
-                                    orderBy = orderIndex;
-                                    blank = wildIndex;
-
-                                    closeCursor();
-                                    anagrams = resultSet;
-                                    words = anagrams.getCount();
-
-                                    int exists = db.existLabel(letters, label, orderBy, blank);
-                                    filterSerial = (exists == 0 ? db.insertLabel(letters, label, orderBy, blank) : exists);
-                                    counter = (exists == 0 ? 0 : db.getPage(letters, label, solvedStatus, orderBy, blank));
-
-                                    int highest = (words - 1) / rows;
-                                    if (counter > highest && words > 0) {
-                                        counter = highest;
-                                        db.updatePage(letters, label, counter, solvedStatus, orderBy, blank);
-                                    }
-
-                                    nextWord();
-                                }
+                                execute(c2.isChecked(), customQuery, orderIndex, solved[0], wildIndex);
                             }).create();
                     dialog6.show();
 
@@ -594,14 +570,35 @@ public class Report extends AppCompatActivity {
                     RecyclerView.LayoutManager listManager = new LinearLayoutManager(Report.this, LinearLayoutManager.VERTICAL, false);
                     g2.setLayoutManager(listManager);
 
-                    FilterAdapter filterAdapter = new FilterAdapter(Report.this, R.layout.list, db.loadFilter());
+                    FilterAdapter filterAdapter = new FilterAdapter(Report.this, R.layout.list, db.loadFilter(), loader);
                     g2.setAdapter(filterAdapter);
+
+                    Spinner s27 = yourCustomView8.findViewById(R.id.spinner46);
+                    ArrayAdapter<String> selectionAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, solvedList);
+                    s27.setAdapter(selectionAdapter);
+                    s27.setSelection(0);
 
                     AlertDialog dialog9 = new AlertDialog.Builder(Report.this)
                             .setTitle("Load saved word list")
                             .setView(yourCustomView8)
                             .setPositiveButton("OK", (dialog10, whichButton3) -> {
-
+                                Filter filterObject = filterAdapter.getSelection();
+                                if (filterObject == null) {
+                                    db.alertBox("Load saved word list", "No item selected.", Report.this);
+                                }
+                                else {
+                                    int numberOfLetters = filterObject.getLength();
+                                    if (numberOfLetters == 0) {
+                                        execute(false, filterObject.getQuery(), filterObject.getSort(), s27.getSelectedItemPosition(), filterObject.getBlank());
+                                    } else {
+                                        letters = numberOfLetters;
+                                        label = filterObject.getQuery();
+                                        solvedStatus = s27.getSelectedItemPosition();
+                                        orderBy = filterObject.getSort();
+                                        blank = filterObject.getBlank();
+                                        start(true);
+                                    }
+                                }
                             }).create();
                     dialog9.show();
             }
@@ -647,6 +644,7 @@ public class Report extends AppCompatActivity {
         rows = dimensions.get(0);
         font = dimensions.get(2);
         combo = dimensions.get(3);
+        loader = dimensions.get(4);
         maximumWordLength = db.getMaximumWordLength(false);
         maximumBlankLength = db.getMaximumWordLength(true);
 
@@ -849,7 +847,7 @@ public class Report extends AppCompatActivity {
                 .setTitle("Change word length")
                 .setView(yourCustomView)
                 .setPositiveButton("OK", (dialog1, whichButton) -> {
-                    String alphabet = (lengthIndex[0] == 0 ? (e1.getText()).toString() : "-1");
+                    String alphabet = (lengthIndex[0] == 0 ? (e1.getText()).toString() : "1");
                     int precursor = (alphabet.isEmpty() ? 0 : Integer.parseInt(alphabet));
                     boolean wild = (s22.getSelectedItemPosition() > 0);
 
@@ -1022,7 +1020,7 @@ public class Report extends AppCompatActivity {
                 .setView(yourCustomView)
                 .setPositiveButton("OK", (dialog1, whichButton) -> {
                     String intermediate = (e6.getText()).toString();
-                    String alphabets = (lengthIndex[0] == 0 ? (e7.getText()).toString() : "-1");
+                    String alphabets = (lengthIndex[0] == 0 ? (e7.getText()).toString() : "1");
                     int temporary = (alphabets.isEmpty() ? 0 : Integer.parseInt(alphabets));
                     boolean wilds = (s23.getSelectedItemPosition() > 0);
 
@@ -1173,6 +1171,7 @@ public class Report extends AppCompatActivity {
         rows = dimensions.get(0);
         font = dimensions.get(2);
         combo = dimensions.get(3);
+        loader = dimensions.get(4);
         maximumWordLength = db.getMaximumWordLength(false);
         maximumBlankLength = db.getMaximumWordLength(true);
 
@@ -1235,14 +1234,17 @@ public class Report extends AppCompatActivity {
         EditText e8 = yourCustomView.findViewById(R.id.edittext15);
         EditText e9 = yourCustomView.findViewById(R.id.edittext16);
         EditText e13 = yourCustomView.findViewById(R.id.edittext31);
+        EditText e15 = yourCustomView.findViewById(R.id.edittext39);
 
         e8.setHint("Enter a value greater than 0");
         e9.setHint("Enter a value greater than 11");
         e13.setHint("Enter a value greater than 11");
+        e15.setHint("Enter a value greater than 11");
 
         e8.setText(Integer.toString(rows));
         e9.setText(Integer.toString(font));
         e13.setText(Integer.toString(combo));
+        e15.setText(Integer.toString(loader));
 
         AlertDialog dialog = new AlertDialog.Builder(Report.this)
                 .setTitle("Change rows and font sizes")
@@ -1251,16 +1253,18 @@ public class Report extends AppCompatActivity {
                     String old_rows = (e8.getText()).toString();
                     String old_font = (e9.getText()).toString();
                     String old_combo = (e13.getText()).toString();
+                    String old_loader = (e15.getText()).toString();
 
                     int new_rows = (old_rows.isEmpty() ? 0 : Integer.parseInt(old_rows));
                     int new_font = (old_font.isEmpty() ? 0 : Integer.parseInt(old_font));
                     int new_combo = (old_combo.isEmpty() ? 0 : Integer.parseInt(old_combo));
+                    int new_loader = (old_loader.isEmpty() ? 0 : Integer.parseInt(old_loader));
 
                     StringBuilder sb = new StringBuilder();
                     if (new_rows < 1) {
                         sb.append("Rows should be ≥ 1");
                     }
-                    if (new_font < 11 || new_combo < 11) {
+                    if (new_font < 11 || new_combo < 11 || new_loader < 11) {
                         if (sb.length() > 0) {
                             sb.append("\n");
                         }
@@ -1274,7 +1278,7 @@ public class Report extends AppCompatActivity {
                     }
                     else
                     {
-                        db.setMagnify("List", new_rows, new_font, new_combo);
+                        db.setMagnify("List", new_rows, new_font, new_combo, new_loader);
                         refresh();
                     }
                 }).create();
@@ -1706,31 +1710,37 @@ public class Report extends AppCompatActivity {
             String customQuery = new String(theQuery);
             boolean wildsIndex = (blankIndex > 0);
             String subanagramIndex = sortBy(sortIndex, wildsIndex);
-            Cursor resultSet = db.getSqlQuery(customQuery, Report.this, solved[0], subanagramIndex, wildsIndex);
+            execute(false, customQuery, subanagramIndex, solved[0], wildsIndex);
+        }
+    }
 
-            if (resultSet != null) {
-                label = customQuery;
-                letters = 0;
-                solvedStatus = solved[0];
-                orderBy = subanagramIndex;
-                blank = wildsIndex;
+    public void execute(boolean autoUnderscores, String permanentQuery, String orderingIndex, int solvedIndex, boolean blankQuizzes)
+    {
+        String processingQuery = (autoUnderscores ? db.addUnderscores(permanentQuery) : permanentQuery);
+        Cursor resultSet = db.getSqlQuery(processingQuery, Report.this, solvedIndex, orderingIndex, blankQuizzes);
 
-                closeCursor();
-                anagrams = resultSet;
-                words = anagrams.getCount();
+        if (resultSet != null) {
+            label = processingQuery;
+            letters = 0;
+            solvedStatus = solvedIndex;
+            orderBy = orderingIndex;
+            blank = blankQuizzes;
 
-                int exists = db.existLabel(letters, label, orderBy, blank);
-                filterSerial = (exists == 0 ? db.insertLabel(letters, label, orderBy, blank) : exists);
-                counter = (exists == 0 ? 0 : db.getPage(letters, label, solvedStatus, orderBy, blank));
+            closeCursor();
+            anagrams = resultSet;
+            words = anagrams.getCount();
 
-                int apex = (words - 1) / rows;
-                if (counter > apex && words > 0) {
-                    counter = apex;
-                    db.updatePage(letters, label, counter, solvedStatus, orderBy, blank);
-                }
+            int exists = db.existLabel(letters, label, orderBy, blank);
+            filterSerial = (exists == 0 ? db.insertLabel(letters, label, orderBy, blank) : exists);
+            counter = (exists == 0 ? 0 : db.getPage(letters, label, solvedStatus, orderBy, blank));
 
-                nextWord();
+            int highest = (words - 1) / rows;
+            if (counter > highest && words > 0) {
+                counter = highest;
+                db.updatePage(letters, label, counter, solvedStatus, orderBy, blank);
             }
+
+            nextWord();
         }
     }
 
