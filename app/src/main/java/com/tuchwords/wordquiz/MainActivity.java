@@ -561,26 +561,44 @@ public class MainActivity extends AppCompatActivity {
                     // Show a Toast message for the Load saved word list item
                     LayoutInflater inflater6 = LayoutInflater.from(MainActivity.this);
                     final View yourCustomView7 = inflater6.inflate(R.layout.list, null);
+                    EditText e19 = yourCustomView7.findViewById(R.id.edittext40);
 
                     RecyclerView g2 = yourCustomView7.findViewById(R.id.gridview4);
                     RecyclerView.LayoutManager listManager = new LinearLayoutManager(MainActivity.this, LinearLayoutManager.VERTICAL, false);
                     g2.setLayoutManager(listManager);
 
-                    FilterAdapter filterAdapter = new FilterAdapter(MainActivity.this, R.layout.list, db.loadFilter(), loader);
-                    g2.setAdapter(filterAdapter);
+                    final FilterAdapter[] filterAdapter = {new FilterAdapter(MainActivity.this, R.layout.list, db.loadFilter(""), loader, db)};
+                    g2.setAdapter(filterAdapter[0]);
 
                     Spinner s27 = yourCustomView7.findViewById(R.id.spinner46);
                     ArrayAdapter<String> selectionAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, solvedList);
+                    selectionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                     s27.setAdapter(selectionAdapter);
                     s27.setSelection(2);
+
+                    e19.addTextChangedListener(new TextWatcher() {
+                        @Override
+                        public void afterTextChanged(Editable s) {
+                        }
+
+                        @Override
+                        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                        }
+
+                        @Override
+                        public void onTextChanged(CharSequence s, int start, int before, int count) {
+                            filterAdapter[0] = new FilterAdapter(MainActivity.this, R.layout.list, db.loadFilter(s.toString()), loader, db);
+                            g2.setAdapter(filterAdapter[0]);
+                        }
+                    });
 
                     AlertDialog dialog8 = new AlertDialog.Builder(MainActivity.this)
                             .setTitle("Load saved word list")
                             .setView(yourCustomView7)
                             .setPositiveButton("OK", (dialog9, whichButton3) -> {
-                                Filter filterObject = filterAdapter.getSelection();
+                                Filter filterObject = filterAdapter[0].getSelection();
                                 if (filterObject == null) {
-                                    db.alertBox("Load saved word list", "No item selected.", MainActivity.this);
+                                    db.alertBox("Load saved word list", "No item had been selected.", MainActivity.this);
                                 }
                                 else {
                                     int numberOfLetters = filterObject.getLength();
@@ -817,7 +835,7 @@ public class MainActivity extends AppCompatActivity {
             e17.setText(db.getFilterName(filterSerial));
 
             AlertDialog dialog6 = new AlertDialog.Builder(MainActivity.this)
-                    .setTitle("List name")
+                    .setTitle("Save word list")
                     .setView(yourCustomView6)
                     .setPositiveButton("OK", (dialog7, whichButton2) -> {
                         db.saveFilter(filterSerial, ((e17.getText()).toString()).replace("\"", "'"));
@@ -1178,6 +1196,7 @@ public class MainActivity extends AppCompatActivity {
             db.updateCounter(letters, label, counter, solvedStatus, orderBy, old_blank);
         }
 
+        db.emptyTable(MainActivity.this, old_blank);
         nextWord(old_blank);
     }
 
@@ -2298,6 +2317,7 @@ public class MainActivity extends AppCompatActivity {
                 db.updateCounter(letters, label, counter, solvedStatus, orderBy, blankQuizzes);
             }
 
+            db.emptyTable(MainActivity.this, blankQuizzes);
             nextWord(blankQuizzes);
         }
     }

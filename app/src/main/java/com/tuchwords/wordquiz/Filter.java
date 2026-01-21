@@ -36,4 +36,8 @@ public class Filter {
     public boolean getBlank() {
         return (blank != 0);
     }
+
+    public int getSerial() {
+        return serial;
+    }
 }

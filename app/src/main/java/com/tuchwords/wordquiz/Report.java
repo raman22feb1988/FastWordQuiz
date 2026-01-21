@@ -565,26 +565,44 @@ public class Report extends AppCompatActivity {
                     // Show a Toast message for the Load saved word list item
                     LayoutInflater inflater6 = LayoutInflater.from(Report.this);
                     final View yourCustomView8 = inflater6.inflate(R.layout.list, null);
+                    EditText e16 = yourCustomView8.findViewById(R.id.edittext40);
 
                     RecyclerView g2 = yourCustomView8.findViewById(R.id.gridview4);
                     RecyclerView.LayoutManager listManager = new LinearLayoutManager(Report.this, LinearLayoutManager.VERTICAL, false);
                     g2.setLayoutManager(listManager);
 
-                    FilterAdapter filterAdapter = new FilterAdapter(Report.this, R.layout.list, db.loadFilter(), loader);
-                    g2.setAdapter(filterAdapter);
+                    final FilterAdapter[] filterAdapter = {new FilterAdapter(Report.this, R.layout.list, db.loadFilter(""), loader, db)};
+                    g2.setAdapter(filterAdapter[0]);
 
                     Spinner s27 = yourCustomView8.findViewById(R.id.spinner46);
                     ArrayAdapter<String> selectionAdapter = new ArrayAdapter<>(Report.this, android.R.layout.simple_spinner_item, solvedList);
+                    selectionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                     s27.setAdapter(selectionAdapter);
                     s27.setSelection(0);
+
+                    e16.addTextChangedListener(new TextWatcher() {
+                        @Override
+                        public void afterTextChanged(Editable s) {
+                        }
+
+                        @Override
+                        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                        }
+
+                        @Override
+                        public void onTextChanged(CharSequence s, int start, int before, int count) {
+                            filterAdapter[0] = new FilterAdapter(Report.this, R.layout.list, db.loadFilter(s.toString()), loader, db);
+                            g2.setAdapter(filterAdapter[0]);
+                        }
+                    });
 
                     AlertDialog dialog9 = new AlertDialog.Builder(Report.this)
                             .setTitle("Load saved word list")
                             .setView(yourCustomView8)
                             .setPositiveButton("OK", (dialog10, whichButton3) -> {
-                                Filter filterObject = filterAdapter.getSelection();
+                                Filter filterObject = filterAdapter[0].getSelection();
                                 if (filterObject == null) {
-                                    db.alertBox("Load saved word list", "No item selected.", Report.this);
+                                    db.alertBox("Load saved word list", "No item had been selected.", Report.this);
                                 }
                                 else {
                                     int numberOfLetters = filterObject.getLength();
@@ -708,7 +726,7 @@ public class Report extends AppCompatActivity {
             e14.setText(db.getFilterName(filterSerial));
 
             AlertDialog dialog7 = new AlertDialog.Builder(Report.this)
-                    .setTitle("List name")
+                    .setTitle("Save word list")
                     .setView(yourCustomView7)
                     .setPositiveButton("OK", (dialog8, whichButton2) -> {
                         db.saveFilter(filterSerial, ((e14.getText()).toString()).replace("\"", "'"));
@@ -1062,6 +1080,7 @@ public class Report extends AppCompatActivity {
             db.updatePage(letters, label, counter, solvedStatus, orderBy, blank);
         }
 
+        db.emptyTable(Report.this, blank);
         nextWord();
     }
 
@@ -1740,6 +1759,7 @@ public class Report extends AppCompatActivity {
                 db.updatePage(letters, label, counter, solvedStatus, orderBy, blank);
             }
 
+            db.emptyTable(Report.this, blank);
             nextWord();
         }
     }
