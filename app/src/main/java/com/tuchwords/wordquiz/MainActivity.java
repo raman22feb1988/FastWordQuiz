@@ -1239,8 +1239,11 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        HashMap<String, ArrayList<String>> answers = db.getUnsolvedAnswers(jumbles, blank);
+        Pair<HashMap<String, ArrayList<String>>, Integer> myPair = db.getUnsolvedAnswers(jumbles, blank);
+        HashMap<String, ArrayList<String>> answers = myPair.first;
+        int solvedAnswers = myPair.second;
         HashMap<String, Integer> allList = db.getAllAnswers(jumbles, blank);
+
         for (int total = 0; total < jumbles.size(); total++)
         {
             String answer = jumbles.get(total);
@@ -1262,15 +1265,17 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             }
-            else {
+            else
+            {
                 totals.add(0);
             }
+
             int pageScore = allList.get(answer);
             amounts.add(pageScore);
             denominator += pageScore;
         }
 
-        numerator = denominator - replies.size();
+        numerator = denominator - solvedAnswers;
 
         b1.setEnabled(true);
         b2.setEnabled(true);
@@ -1716,11 +1721,11 @@ public class MainActivity extends AppCompatActivity {
         try
         {
             if (started) {
-                int[] pair3 = (letters == 1 ? db.getCustomScore(label, solvedStatus, blank) : db.getScore(letters, label, solvedStatus, blank));
+                int[] pair3 = (letters == 0 ? db.getCustomScore(label, solvedStatus, blank) : db.getScore(letters, label, solvedStatus, blank));
                 score = pair3[0];
 
                 closeCursor();
-                anagrams = (letters == 1 ? db.getCustomQuiz(label, MainActivity.this, solvedStatus, orderBy, blank) : db.getAllAnagrams(letters, label, solvedStatus, orderBy, blank));
+                anagrams = (letters == 0 ? db.getCustomQuiz(label, MainActivity.this, solvedStatus, orderBy, blank) : db.getAllAnagrams(letters, label, solvedStatus, orderBy, blank));
                 words = anagrams.getCount();
 
                 counter = db.getCounter(letters, label, solvedStatus, orderBy, blank);

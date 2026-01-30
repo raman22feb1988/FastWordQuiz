@@ -1482,13 +1482,14 @@ public class sqliteDB extends SQLiteOpenHelper {
         }
     }
 
-    public HashMap<String, ArrayList<String>> getUnsolvedAnswers(ArrayList<String> jumbles, boolean blank)
+    public Pair<HashMap<String, ArrayList<String>>, Integer> getUnsolvedAnswers(ArrayList<String> jumbles, boolean blank)
     {
         HashMap<String, ArrayList<String>> answerList = new HashMap<>();
         String jumble = (((jumbles.toString()).replace("[", "(\"")).replace("]", "\")")).replace(", ", "\", \"");
 
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery((blank ? "SELECT _anagram_, _word_ FROM blanks WHERE _anagram_ IN " : "SELECT _alphagram_, _word_ FROM words WHERE _alphagram_ IN ") + jumble + " AND _solved_ = 0", null);
+        int solvedAnswers = cursor.getCount();
 
         if (cursor.moveToFirst()) {
             do {
@@ -1509,7 +1510,7 @@ public class sqliteDB extends SQLiteOpenHelper {
         }
 
         cursor.close();
-        return answerList;
+        return new Pair<>(answerList, solvedAnswers);
     }
 
     public HashMap<String, Integer> getAllAnswers(ArrayList<String> jumbles, boolean blank)
