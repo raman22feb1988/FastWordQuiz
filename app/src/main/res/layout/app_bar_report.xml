@@ -101,7 +101,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Click on any of grid cells to set tags for words"
+        android:text="Click on any of grid cells to change tags of words"
         android:textStyle="bold"
         android:id="@+id/textview24">
     </TextView>

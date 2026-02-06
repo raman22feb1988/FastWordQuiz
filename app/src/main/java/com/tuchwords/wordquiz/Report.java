@@ -558,7 +558,7 @@ public class Report extends AppCompatActivity {
                     db.messageBox("View all tables and columns", db.getSchema(), Report.this);
                     break;
                 case R.id.button105:
-                    // Show a Toast message for the Letter distribution item
+                    // Show a Toast message for the View letter distribution item
                     db.letterDistribution(Report.this);
                     break;
                 case R.id.button107:

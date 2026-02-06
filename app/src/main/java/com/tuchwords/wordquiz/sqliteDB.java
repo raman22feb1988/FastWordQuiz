@@ -3763,7 +3763,7 @@ public class sqliteDB extends SQLiteOpenHelper {
         tileDistribution(g1, parentContext);
 
         AlertDialog dialog = new AlertDialog.Builder(parentContext)
-                .setTitle("Letter distribution")
+                .setTitle("View letter distribution")
                 .setView(yourCustomView)
                 .setPositiveButton("OK", (dialog1, whichButton) -> {
                 }).create();

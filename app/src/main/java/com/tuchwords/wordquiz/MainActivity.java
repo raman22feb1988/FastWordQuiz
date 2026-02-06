@@ -371,7 +371,7 @@ public class MainActivity extends AppCompatActivity {
                         editor.apply();
                         if (cusadapter != null) {
                             cusadapter.setHidden(false);
-                            cusadapter.notifyDataSetChanged();
+                            refresh();
                         }
                     } else {
                         hidden = true;
@@ -381,7 +381,7 @@ public class MainActivity extends AppCompatActivity {
                         editor.apply();
                         if (cusadapter != null) {
                             cusadapter.setHidden(true);
-                            cusadapter.notifyDataSetChanged();
+                            refresh();
                         }
                     }
                     break;
@@ -554,7 +554,7 @@ public class MainActivity extends AppCompatActivity {
                     db.messageBox("View all tables and columns", db.getSchema(), MainActivity.this);
                     break;
                 case R.id.button104:
-                    // Show a Toast message for the Letter distribution item
+                    // Show a Toast message for the View letter distribution item
                     db.letterDistribution(MainActivity.this);
                     break;
                 case R.id.button106:
