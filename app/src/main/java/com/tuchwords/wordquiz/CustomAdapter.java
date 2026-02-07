@@ -95,7 +95,7 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
 
         if (li == 0 && !hide)
         {
-            l1.setBackgroundColor(Color.GREEN);
+            l1.setBackgroundColor(Color.rgb(0, 128, 0));
         }
 
         v.setOnClickListener(v1 -> {
