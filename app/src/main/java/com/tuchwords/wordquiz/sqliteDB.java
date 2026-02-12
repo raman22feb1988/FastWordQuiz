@@ -2289,7 +2289,7 @@ public class sqliteDB extends SQLiteOpenHelper {
 
         Spinner s1 = yourCustomView.findViewById(R.id.spinner11);
         List<Pair<String, String>> tagsList = getAllLabels();
-        tagsList.add(0, new Pair<>("(All Tags)", null));
+        tagsList.add(0, new Pair<>("(All tags)", null));
 
         s12.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override

@@ -53,7 +53,7 @@ public class Report extends AppCompatActivity {
     int letters = 0;
     int columns = 18;
     String label = "*";
-    String tag = "(No Action)";
+    String tag = "(No action)";
     int solvedStatus = 0;
     boolean hidden;
     boolean detail;
@@ -982,7 +982,7 @@ public class Report extends AppCompatActivity {
 
         Spinner s1 = yourCustomView.findViewById(R.id.spinner1);
         List<Pair<String, String>> labelList = new ArrayList<>(labelsList.subList(1, labelsList.size()));
-        labelList.add(0, new Pair<>("(All Tags)", null));
+        labelList.add(0, new Pair<>("(All tags)", null));
 
         ColourAdapter spinnerAdapter = new ColourAdapter(Report.this, R.layout.colour, R.id.textview62, labelList, Report.this, true, combo);
         s1.setAdapter(spinnerAdapter);
@@ -1227,7 +1227,7 @@ public class Report extends AppCompatActivity {
     public void refreshSpinner()
     {
         labelsList = db.getAllLabels();
-        labelsList.add(0, new Pair<>("(No Action)", null));
+        labelsList.add(0, new Pair<>("(No action)", null));
         colourList = db.getColours();
 
         ColourAdapter comboBoxAdapter = new ColourAdapter(Report.this, R.layout.colour, R.id.textview62, labelsList, Report.this, true, combo);
@@ -1306,7 +1306,7 @@ public class Report extends AppCompatActivity {
 
     public void onItemClick(int position)
     {
-        if (!tag.equals("(No Action)")) {
+        if (!tag.equals("(No action)")) {
             int row = jumbles.size() / columns;
             int column = position % row;
 

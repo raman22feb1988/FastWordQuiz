@@ -2005,7 +2005,7 @@ public class MainActivity extends AppCompatActivity {
 
         Spinner s3 = yourCustomView.findViewById(R.id.spinner1);
         List<Pair<String, String>> tagsList = db.getAllLabels();
-        tagsList.add(0, new Pair<>("(All Tags)", null));
+        tagsList.add(0, new Pair<>("(All tags)", null));
 
         ColourAdapter spinnerAdapter = new ColourAdapter(MainActivity.this, R.layout.colour, R.id.textview62, tagsList, MainActivity.this, true, combo);
         s3.setAdapter(spinnerAdapter);
