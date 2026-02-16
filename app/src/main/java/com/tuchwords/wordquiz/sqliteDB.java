@@ -1590,15 +1590,15 @@ public class sqliteDB extends SQLiteOpenHelper {
                     String colour = (colours.containsKey(label) ? colours.get(label) : colours.get(""));
 
                     if (total == 1) {
-                        solved.append("<font color=\"").append(colour).append("\">").append(total).append(". <b><small>").append(front).append("</small> ").append(data).append(" <small>").append(back).append("</small></b> ").append(definition).append(" <b>").append(label.isEmpty() ? "(No Tag)" : label).append(" ").append(dictionaryList.get(0)).append(" ").append(dictionaryList.get(1)).append(" ").append(dictionaryList.get(2)).append(" ").append(dictionaryList.get(3)).append("</b></font>");
+                        solved.append("<font color=\"").append(colour).append("\">").append(total).append(". <b><small>").append(front).append("</small> ").append(data).append(" <small>").append(back).append("</small></b> ").append(definition).append(" <b>").append(label.isEmpty() ? "(No tag)" : label).append(" ").append(dictionaryList.get(0)).append(" ").append(dictionaryList.get(1)).append(" ").append(dictionaryList.get(2)).append(" ").append(dictionaryList.get(3)).append("</b></font>");
                     } else {
-                        solved.append("<br><font color=\"").append(colour).append("\">").append(total).append(". <b><small>").append(front).append("</small> ").append(data).append(" <small>").append(back).append("</small></b> ").append(definition).append(" <b>").append(label.isEmpty() ? "(No Tag)" : label).append(" ").append(dictionaryList.get(0)).append(" ").append(dictionaryList.get(1)).append(" ").append(dictionaryList.get(2)).append(" ").append(dictionaryList.get(3)).append("</b></font>");
+                        solved.append("<br><font color=\"").append(colour).append("\">").append(total).append(". <b><small>").append(front).append("</small> ").append(data).append(" <small>").append(back).append("</small></b> ").append(definition).append(" <b>").append(label.isEmpty() ? "(No tag)" : label).append(" ").append(dictionaryList.get(0)).append(" ").append(dictionaryList.get(1)).append(" ").append(dictionaryList.get(2)).append(" ").append(dictionaryList.get(3)).append("</b></font>");
                     }
                 } else {
                     if (total == 1) {
-                        solved.append(total).append(". <b><small>").append(front).append("</small> ").append(data).append(" <small>").append(back).append("</small></b> ").append(definition).append(" <b>").append(label.isEmpty() ? "(No Tag)" : label).append(" ").append(dictionaryList.get(0)).append(" ").append(dictionaryList.get(1)).append(" ").append(dictionaryList.get(2)).append(" ").append(dictionaryList.get(3)).append("</b>");
+                        solved.append(total).append(". <b><small>").append(front).append("</small> ").append(data).append(" <small>").append(back).append("</small></b> ").append(definition).append(" <b>").append(label.isEmpty() ? "(No tag)" : label).append(" ").append(dictionaryList.get(0)).append(" ").append(dictionaryList.get(1)).append(" ").append(dictionaryList.get(2)).append(" ").append(dictionaryList.get(3)).append("</b>");
                     } else {
-                        solved.append("<br>").append(total).append(". <b><small>").append(front).append("</small> ").append(data).append(" <small>").append(back).append("</small></b> ").append(definition).append(" <b>").append(label.isEmpty() ? "(No Tag)" : label).append(" ").append(dictionaryList.get(0)).append(" ").append(dictionaryList.get(1)).append(" ").append(dictionaryList.get(2)).append(" ").append(dictionaryList.get(3)).append("</b>");
+                        solved.append("<br>").append(total).append(". <b><small>").append(front).append("</small> ").append(data).append(" <small>").append(back).append("</small></b> ").append(definition).append(" <b>").append(label.isEmpty() ? "(No tag)" : label).append(" ").append(dictionaryList.get(0)).append(" ").append(dictionaryList.get(1)).append(" ").append(dictionaryList.get(2)).append(" ").append(dictionaryList.get(3)).append("</b>");
                     }
                 }
 
@@ -1872,15 +1872,15 @@ public class sqliteDB extends SQLiteOpenHelper {
                 String colour = (colours.containsKey(key) ? colours.get(key) : colours.get(""));
 
                 if (serial == 0) {
-                    revision.append("<font color=\"").append(colour).append("\"><b>").append(key.isEmpty() ? "(No Tag)" : key).append(": ").append(aerolith).append("</b></font>");
+                    revision.append("<font color=\"").append(colour).append("\"><b>").append(key.isEmpty() ? "(No tag)" : key).append(": ").append(aerolith).append("</b></font>");
                 } else {
-                    revision.append("<br><font color=\"").append(colour).append("\"><b>").append(key.isEmpty() ? "(No Tag)" : key).append(": ").append(aerolith).append("</b></font>");
+                    revision.append("<br><font color=\"").append(colour).append("\"><b>").append(key.isEmpty() ? "(No tag)" : key).append(": ").append(aerolith).append("</b></font>");
                 }
             } else {
                 if (serial == 0) {
-                    revision.append("<b>").append(key.isEmpty() ? "(No Tag)" : key).append(": ").append(aerolith).append("</b>");
+                    revision.append("<b>").append(key.isEmpty() ? "(No tag)" : key).append(": ").append(aerolith).append("</b>");
                 } else {
-                    revision.append("<br><b>").append(key.isEmpty() ? "(No Tag)" : key).append(": ").append(aerolith).append("</b>");
+                    revision.append("<br><b>").append(key.isEmpty() ? "(No tag)" : key).append(": ").append(aerolith).append("</b>");
                 }
             }
 
@@ -2155,7 +2155,7 @@ public class sqliteDB extends SQLiteOpenHelper {
                     wordList.add("<font color=\"" + colourMap + "\">" + answers + "</font>");
                     wordList.add("<font color=\"" + colourMap + "\"><b>" + alphagram + "</b></font>");
                     wordList.add("<font color=\"" + colourMap + "\">Page " + page + "</font>");
-                    wordList.add("<font color=\"" + colourMap + "\"><b>" + (label.isEmpty() ? "(No Tag)" : label) + "</b></font>");
+                    wordList.add("<font color=\"" + colourMap + "\"><b>" + (label.isEmpty() ? "(No tag)" : label) + "</b></font>");
                     wordList.add("<font color=\"" + colourMap + "\">" + convert(time) + "</font>");
                     wordList.add("<font color=\"" + colourMap + "\">" + lexicons.get(0) + "</font>");
                     wordList.add("<font color=\"" + colourMap + "\">" + lexicons.get(1) + "</font>");
@@ -2175,7 +2175,7 @@ public class sqliteDB extends SQLiteOpenHelper {
                     wordList.add(answers);
                     wordList.add("<b>" + alphagram + "</b>");
                     wordList.add("Page " + page);
-                    wordList.add("<b>" + (label.isEmpty() ? "(No Tag)" : label) + "</b>");
+                    wordList.add("<b>" + (label.isEmpty() ? "(No tag)" : label) + "</b>");
                     wordList.add(convert(time));
                     wordList.add(lexicons.get(0));
                     wordList.add(lexicons.get(1));

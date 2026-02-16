@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -76,6 +77,7 @@ public class Report extends AppCompatActivity {
     ReportAdapter reportAdapter;
     SharedPreferences pref;
 
+    MyViewModel viewModel;
     TextView t1;
     Button b1;
     Button b2;
@@ -108,6 +110,9 @@ public class Report extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.report);
+
+        // Standard ViewModel instantiation works automatically
+        viewModel = new ViewModelProvider(this).get(MyViewModel.class);
 
         // Initialize the DrawerLayout, NavigationView and Toolbar
         drawerLayout = findViewById(R.id.drawer_layout_report);
@@ -1376,9 +1381,9 @@ public class Report extends AppCompatActivity {
 
             if (colours.containsKey(listbox) || colours.containsKey("")) {
                 String colour = (colours.containsKey(listbox) ? colours.get(listbox) : colours.get(""));
-                amount = "<font color=\"" + colour + "\"><b><small>" + front + "</small> " + word + " <small>" + back + "</small></b> " + meaning + " <b>" + (listbox.isEmpty() ? "(No Tag)" : listbox) + " " + lexicons + "</b>" + db.getFullDetails(word) + "</font>";
+                amount = "<font color=\"" + colour + "\"><b><small>" + front + "</small> " + word + " <small>" + back + "</small></b> " + meaning + " <b>" + (listbox.isEmpty() ? "(No tag)" : listbox) + " " + lexicons + "</b>" + db.getFullDetails(word) + "</font>";
             } else {
-                amount = "<b><small>" + front + "</small> " + word + " <small>" + back + "</small></b> " + meaning + " <b>" + (listbox.isEmpty() ? "(No Tag)" : listbox) + " " + lexicons + "</b>" + db.getFullDetails(word);
+                amount = "<b><small>" + front + "</small> " + word + " <small>" + back + "</small></b> " + meaning + " <b>" + (listbox.isEmpty() ? "(No tag)" : listbox) + " " + lexicons + "</b>" + db.getFullDetails(word);
             }
 
             db.messageBox("Similar words for " + word, amount, Report.this);
