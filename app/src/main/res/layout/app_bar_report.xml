@@ -98,26 +98,35 @@
                 android:layout_height="wrap_content" />
         </FrameLayout>
     </LinearLayout>
-    <TextView
-        android:layout_width="wrap_content"
+    <HorizontalScrollView
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Click on any of grid cells to change tags of words"
-        android:textStyle="bold"
-        android:id="@+id/textview24">
-    </TextView>
-    <TextView
-        android:layout_width="wrap_content"
+        android:scrollbars="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Click on any of the words to change the tags of words"
+            android:textStyle="bold"
+            android:id="@+id/textview24">
+        </TextView>
+    </HorizontalScrollView>
+    <HorizontalScrollView
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Long click on grid cells to see similar words"
-        android:textStyle="bold"
-        android:id="@+id/textview25">
-    </TextView>
+        android:scrollbars="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Long click on any of words to see all its similar words"
+            android:textStyle="bold"
+            android:id="@+id/textview25">
+        </TextView>
+    </HorizontalScrollView>
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/gridview2"
-            android:clipToPadding="false"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
     </androidx.core.widget.NestedScrollView>

@@ -1,12 +1,12 @@
 package com.tuchwords.wordquiz;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -85,7 +85,6 @@ public class MainActivity extends AppCompatActivity {
     String ultimate;
     String selectedAnagram;
 
-    MyViewModel viewModel;
     TextView t1;
     RecyclerView g1;
     TextView t2;
@@ -132,9 +131,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        // Standard ViewModel instantiation works automatically
-        viewModel = new ViewModelProvider(this).get(MyViewModel.class);
 
         // Initialize the DrawerLayout, NavigationView and Toolbar
         drawerLayout = findViewById(R.id.drawer_layout_main);
@@ -861,6 +857,22 @@ public class MainActivity extends AppCompatActivity {
         if (!prepared) {
             promptDictionary(false, false);
         }
+
+        if (savedInstanceState != null) {
+            // Restore your data from the Bundle
+            letters = savedInstanceState.getInt("letters");
+            label = savedInstanceState.getString("label");
+            solvedStatus = savedInstanceState.getInt("solvedStatus");
+            lastWord = savedInstanceState.getString("lastWord");
+            started = savedInstanceState.getBoolean("started");
+            orderBy = savedInstanceState.getString("orderBy");
+            mode = savedInstanceState.getInt("mode");
+            ultimate = savedInstanceState.getString("ultimate");
+            selectedAnagram = savedInstanceState.getString("selectedAnagram");
+            blank = savedInstanceState.getBoolean("blank");
+
+            refresh();
+        }
     }
 
     public void promptDictionary(boolean deleteTable, boolean joker)
@@ -1207,10 +1219,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void nextWord(boolean new_blank)
     {
-        if (started) {
-            cumulativeTime(null, false, null);
-        }
-
+        cumulativeTime(null, false, null);
         begin = System.currentTimeMillis();
         started = true;
         blank = new_blank;
@@ -2357,5 +2366,23 @@ public class MainActivity extends AppCompatActivity {
         cumulativeTime(null, false, null);
         closeCursor();
         finish();
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        cumulativeTime(null, false, null);
+
+        // Save your custom data to the Bundle
+        outState.putInt("letters", letters);
+        outState.putString("label", label);
+        outState.putInt("solvedStatus", solvedStatus);
+        outState.putString("lastWord", lastWord);
+        outState.putBoolean("started", started);
+        outState.putString("orderBy", orderBy);
+        outState.putInt("mode", mode);
+        outState.putString("ultimate", ultimate);
+        outState.putString("selectedAnagram", selectedAnagram);
+        outState.putBoolean("blank", blank);
     }
 }

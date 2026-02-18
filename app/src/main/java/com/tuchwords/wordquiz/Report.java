@@ -1,12 +1,12 @@
 package com.tuchwords.wordquiz;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -77,7 +77,6 @@ public class Report extends AppCompatActivity {
     ReportAdapter reportAdapter;
     SharedPreferences pref;
 
-    MyViewModel viewModel;
     TextView t1;
     Button b1;
     Button b2;
@@ -110,9 +109,6 @@ public class Report extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.report);
-
-        // Standard ViewModel instantiation works automatically
-        viewModel = new ViewModelProvider(this).get(MyViewModel.class);
 
         // Initialize the DrawerLayout, NavigationView and Toolbar
         drawerLayout = findViewById(R.id.drawer_layout_report);
@@ -741,6 +737,19 @@ public class Report extends AppCompatActivity {
 
         if (!prepared) {
             promptDictionary(false, false);
+        }
+
+        if (savedInstanceState != null) {
+            // Restore your data from the Bundle
+            letters = savedInstanceState.getInt("letters");
+            label = savedInstanceState.getString("label");
+            tag = savedInstanceState.getString("tag");
+            solvedStatus = savedInstanceState.getInt("solvedStatus");
+            started = savedInstanceState.getBoolean("started");
+            orderBy = savedInstanceState.getString("orderBy");
+            blank = savedInstanceState.getBoolean("blank");
+
+            refresh();
         }
     }
 
@@ -1775,5 +1784,19 @@ public class Report extends AppCompatActivity {
             case 1: return " ORDER BY RANDOM()" + (selection[1] == 1 ? " DESC" : "");
             default: return " ORDER BY _" + (isBlank ? blankColumns.get(selection[0]) : allColumns.get(selection[0])) + "_" + (selection[1] == 1 ? " DESC" : "");
         }
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        // Save your custom data to the Bundle
+        outState.putInt("letters", letters);
+        outState.putString("label", label);
+        outState.putString("tag", tag);
+        outState.putInt("solvedStatus", solvedStatus);
+        outState.putBoolean("started", started);
+        outState.putString("orderBy", orderBy);
+        outState.putBoolean("blank", blank);
     }
 }
