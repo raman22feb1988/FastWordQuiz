@@ -6,9 +6,9 @@ public class Filter {
     String sort;
     int blank;
     String name;
-    int serial;
+    long serial;
 
-    public Filter(int length, String query, String sort, int blank, String name, int serial) {
+    public Filter(int length, String query, String sort, int blank, String name, long serial) {
         this.length = length;
         this.query = query;
         this.sort = sort;
@@ -37,7 +37,7 @@ public class Filter {
         return (blank != 0);
     }
 
-    public int getSerial() {
+    public long getSerial() {
         return serial;
     }
 }

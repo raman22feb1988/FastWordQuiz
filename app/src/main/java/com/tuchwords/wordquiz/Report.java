@@ -100,7 +100,7 @@ public class Report extends AppCompatActivity {
     int loader;
     int maximumWordLength;
     int maximumBlankLength;
-    int filterSerial;
+    long filterSerial;
 
     // Declare the DrawerLayout, NavigationView and Toolbar
     private DrawerLayout drawerLayout;
@@ -748,6 +748,7 @@ public class Report extends AppCompatActivity {
             started = savedInstanceState.getBoolean("started");
             orderBy = savedInstanceState.getString("orderBy");
             blank = savedInstanceState.getBoolean("blank");
+            filterSerial = savedInstanceState.getLong("filterSerial");
 
             refresh();
         }
@@ -1080,18 +1081,18 @@ public class Report extends AppCompatActivity {
 
         if (checkExist)
         {
-            int exist = db.existLabel(letters, label, orderBy, blank);
+            long exist = db.existLabel(letters, label, orderBy, blank);
             filterSerial = (exist == 0 ? db.insertLabel(letters, label, orderBy, blank) : exist);
         }
 
         anagrams = (label.equals("*") ? db.getSolvedWords(letters, solvedStatus, orderBy, blank) : db.getLabelledWords(letters, label, solvedStatus, orderBy, blank));
         words = anagrams.getCount();
-        counter = db.getPage(letters, label, solvedStatus, orderBy, blank);
+        counter = db.getPage(filterSerial, solvedStatus);
 
         int high = (words - 1) / rows;
         if (counter > high && words > 0) {
             counter = high;
-            db.updatePage(letters, label, counter, solvedStatus, orderBy, blank);
+            db.updatePage(filterSerial, counter, solvedStatus);
         }
 
         db.emptyTable(Report.this, blank);
@@ -1151,7 +1152,7 @@ public class Report extends AppCompatActivity {
                 if (counter < 0) {
                     counter = (words - 1) / rows;
                 }
-                db.updatePage(letters, label, counter, solvedStatus, orderBy, blank);
+                db.updatePage(filterSerial, counter, solvedStatus);
                 nextWord();
             }
         });
@@ -1162,7 +1163,7 @@ public class Report extends AppCompatActivity {
                 if (counter == ((words - 1) / rows) + 1) {
                     counter = 0;
                 }
-                db.updatePage(letters, label, counter, solvedStatus, orderBy, blank);
+                db.updatePage(filterSerial, counter, solvedStatus);
                 nextWord();
             }
         });
@@ -1189,7 +1190,7 @@ public class Report extends AppCompatActivity {
                             else
                             {
                                 counter = page - 1;
-                                db.updatePage(letters, label, counter, solvedStatus, orderBy, blank);
+                                db.updatePage(filterSerial, counter, solvedStatus);
                                 nextWord();
                             }
                         }
@@ -1219,14 +1220,14 @@ public class Report extends AppCompatActivity {
                     anagrams = resultSet;
                     words = anagrams.getCount();
 
-                    int exists = db.existLabel(letters, label, orderBy, blank);
+                    long exists = db.existLabel(letters, label, orderBy, blank);
                     filterSerial = (exists == 0 ? db.insertLabel(letters, label, orderBy, blank) : exists);
-                    counter = (exists == 0 ? 0 : db.getPage(letters, label, solvedStatus, orderBy, blank));
+                    counter = (exists == 0 ? 0 : db.getPage(filterSerial, solvedStatus));
 
                     int peak = (words - 1) / rows;
                     if (counter > peak && words > 0) {
                         counter = peak;
-                        db.updatePage(letters, label, counter, solvedStatus, orderBy, blank);
+                        db.updatePage(filterSerial, counter, solvedStatus);
                     }
 
                     nextWord();
@@ -1763,14 +1764,14 @@ public class Report extends AppCompatActivity {
             anagrams = resultSet;
             words = anagrams.getCount();
 
-            int exists = db.existLabel(letters, label, orderBy, blank);
+            long exists = db.existLabel(letters, label, orderBy, blank);
             filterSerial = (exists == 0 ? db.insertLabel(letters, label, orderBy, blank) : exists);
-            counter = (exists == 0 ? 0 : db.getPage(letters, label, solvedStatus, orderBy, blank));
+            counter = (exists == 0 ? 0 : db.getPage(filterSerial, solvedStatus));
 
             int highest = (words - 1) / rows;
             if (counter > highest && words > 0) {
                 counter = highest;
-                db.updatePage(letters, label, counter, solvedStatus, orderBy, blank);
+                db.updatePage(filterSerial, counter, solvedStatus);
             }
 
             db.emptyTable(Report.this, blank);
@@ -1798,5 +1799,6 @@ public class Report extends AppCompatActivity {
         outState.putBoolean("started", started);
         outState.putString("orderBy", orderBy);
         outState.putBoolean("blank", blank);
+        outState.putLong("filterSerial", filterSerial);
     }
 }

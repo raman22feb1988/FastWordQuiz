@@ -122,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
     int loader;
     int maximumWordLength;
     int maximumBlankLength;
-    int filterSerial;
+    long filterSerial;
 
     // Declare the DrawerLayout, NavigationView and Toolbar
     private DrawerLayout drawerLayout;
@@ -870,6 +870,7 @@ public class MainActivity extends AppCompatActivity {
             ultimate = savedInstanceState.getString("ultimate");
             selectedAnagram = savedInstanceState.getString("selectedAnagram");
             blank = savedInstanceState.getBoolean("blank");
+            filterSerial = savedInstanceState.getLong("filterSerial");
 
             refresh();
         }
@@ -1196,21 +1197,21 @@ public class MainActivity extends AppCompatActivity {
     {
         closeCursor();
 
-        int exist = db.existLabel(letters, label, orderBy, old_blank);
+        long exist = db.existLabel(letters, label, orderBy, old_blank);
         filterSerial = (exist == 0 ? db.insertLabel(letters, label, orderBy, old_blank) : exist);
 
         anagrams = db.getAllAnagrams(letters, label, solvedStatus, orderBy, old_blank);
         words = anagrams.getCount();
         int[] pair2 = db.getScore(letters, label, solvedStatus, old_blank);
         score = pair2[0];
-        counter = db.getCounter(letters, label, solvedStatus, orderBy, old_blank);
+        counter = db.getCounter(filterSerial, solvedStatus);
         number = pair2[1];
 
         int high = (words - 1) / (rows * columns);
         if (counter > high && words > 0)
         {
             counter = high;
-            db.updateCounter(letters, label, counter, solvedStatus, orderBy, old_blank);
+            db.updateCounter(filterSerial, counter, solvedStatus);
         }
 
         db.emptyTable(MainActivity.this, old_blank);
@@ -1462,7 +1463,7 @@ public class MainActivity extends AppCompatActivity {
             else {
                 counter++;
             }
-            db.updateCounter(letters, label, counter, solvedStatus, orderBy, blank);
+            db.updateCounter(filterSerial, counter, solvedStatus);
             nextWord(blank);
         });
 
@@ -1479,7 +1480,7 @@ public class MainActivity extends AppCompatActivity {
             else {
                 counter--;
             }
-            db.updateCounter(letters, label, counter, solvedStatus, orderBy, blank);
+            db.updateCounter(filterSerial, counter, solvedStatus);
             nextWord(blank);
         });
 
@@ -1681,7 +1682,7 @@ public class MainActivity extends AppCompatActivity {
                                 selectedAnagram = null;
 
                                 counter = page - 1;
-                                db.updateCounter(letters, label, counter, solvedStatus, orderBy, blank);
+                                db.updateCounter(filterSerial, counter, solvedStatus);
                                 nextWord(blank);
                             }
                         }
@@ -1742,13 +1743,13 @@ public class MainActivity extends AppCompatActivity {
                 anagrams = (letters == 0 ? db.getCustomQuiz(label, MainActivity.this, solvedStatus, orderBy, blank) : db.getAllAnagrams(letters, label, solvedStatus, orderBy, blank));
                 words = anagrams.getCount();
 
-                counter = db.getCounter(letters, label, solvedStatus, orderBy, blank);
+                counter = db.getCounter(filterSerial, solvedStatus);
                 number = pair3[1];
 
                 int peak = (words - 1) / (rows * columns);
                 if (counter > peak && words > 0) {
                     counter = peak;
-                    db.updateCounter(letters, label, counter, solvedStatus, orderBy, blank);
+                    db.updateCounter(filterSerial, counter, solvedStatus);
                 }
 
                 nextWord(blank);
@@ -2326,14 +2327,14 @@ public class MainActivity extends AppCompatActivity {
             score = pair1[0];
             number = pair1[1];
 
-            int exists = db.existLabel(letters, label, orderBy, blankQuizzes);
+            long exists = db.existLabel(letters, label, orderBy, blankQuizzes);
             filterSerial = (exists == 0 ? db.insertLabel(letters, label, orderBy, blankQuizzes) : exists);
-            counter = (exists == 0 ? 0 : db.getCounter(letters, label, solvedStatus, orderBy, blankQuizzes));
+            counter = (exists == 0 ? 0 : db.getCounter(filterSerial, solvedStatus));
 
             int highest = (words - 1) / (rows * columns);
             if (counter > highest && words > 0) {
                 counter = highest;
-                db.updateCounter(letters, label, counter, solvedStatus, orderBy, blankQuizzes);
+                db.updateCounter(filterSerial, counter, solvedStatus);
             }
 
             db.emptyTable(MainActivity.this, blankQuizzes);
@@ -2384,5 +2385,6 @@ public class MainActivity extends AppCompatActivity {
         outState.putString("ultimate", ultimate);
         outState.putString("selectedAnagram", selectedAnagram);
         outState.putBoolean("blank", blank);
+        outState.putLong("filterSerial", filterSerial);
     }
 }
