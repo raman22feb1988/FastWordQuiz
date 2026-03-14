@@ -30,6 +30,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.RadioButton;
@@ -563,6 +564,9 @@ public class MainActivity extends AppCompatActivity {
                     LayoutInflater inflater6 = LayoutInflater.from(MainActivity.this);
                     final View yourCustomView7 = inflater6.inflate(R.layout.list, null);
                     EditText e19 = yourCustomView7.findViewById(R.id.edittext40);
+                    CheckBox c5 = yourCustomView7.findViewById(R.id.checkbox13);
+                    Button b14 = yourCustomView7.findViewById(R.id.button108);
+                    Button b15 = yourCustomView7.findViewById(R.id.button109);
 
                     RecyclerView g2 = yourCustomView7.findViewById(R.id.gridview4);
                     RecyclerView.LayoutManager listManager = new LinearLayoutManager(MainActivity.this, LinearLayoutManager.VERTICAL, false);
@@ -588,7 +592,29 @@ public class MainActivity extends AppCompatActivity {
 
                         @Override
                         public void onTextChanged(CharSequence s, int start, int before, int count) {
-                            filterAdapter[0] = new FilterAdapter(MainActivity.this, R.layout.list, db.loadFilter(s.toString()), loader, db);
+                            if (c5.isChecked()) {
+                                filterAdapter[0] = new FilterAdapter(MainActivity.this, R.layout.list, db.loadFilter(s.toString()), loader, db);
+                                g2.setAdapter(filterAdapter[0]);
+                            }
+                        }
+                    });
+
+                    b14.setOnClickListener(v -> {
+                        filterAdapter[0] = new FilterAdapter(MainActivity.this, R.layout.list, db.loadFilter((e19.getText()).toString()), loader, db);
+                        g2.setAdapter(filterAdapter[0]);
+                    });
+
+                    b15.setOnClickListener(v -> {
+                        e19.setText("");
+                        if (c5.isChecked()) {
+                            filterAdapter[0] = new FilterAdapter(MainActivity.this, R.layout.list, db.loadFilter((e19.getText()).toString()), loader, db);
+                            g2.setAdapter(filterAdapter[0]);
+                        }
+                    });
+
+                    c5.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                        if (isChecked) {
+                            filterAdapter[0] = new FilterAdapter(MainActivity.this, R.layout.list, db.loadFilter((e19.getText()).toString()), loader, db);
                             g2.setAdapter(filterAdapter[0]);
                         }
                     });

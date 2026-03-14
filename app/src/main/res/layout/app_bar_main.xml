@@ -148,7 +148,7 @@
                     android:id="@+id/button1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
                     android:enabled="false"
                     android:text="Submit">
                 </Button>
@@ -156,14 +156,14 @@
                     android:id="@+id/button86"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_toLeftOf="@+id/button1"
+                    android:layout_toStartOf="@+id/button1"
                     android:text="Last word">
                 </Button>
                 <EditText
                     android:id="@+id/edittext2"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_toLeftOf="@+id/button86"
+                    android:layout_toStartOf="@+id/button86"
                     android:layout_centerVertical="true"
                     android:hint="Enter answer"
                     android:textSize="20sp"

@@ -88,7 +88,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Single word or number"
-                android:layout_toLeftOf="@+id/button94"
+                android:layout_toStartOf="@+id/button94"
                 android:layout_centerVertical="true"
                 android:background="@drawable/rectangle">
             </EditText>
@@ -146,7 +146,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Comma separated values"
-                android:layout_toLeftOf="@+id/button95"
+                android:layout_toStartOf="@+id/button95"
                 android:layout_centerVertical="true"
                 android:background="@drawable/rectangle">
             </EditText>
@@ -200,7 +200,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="_ for 1 letter, % for ≥ 0 letters"
-                android:layout_toLeftOf="@+id/button96"
+                android:layout_toStartOf="@+id/button96"
                 android:layout_centerVertical="true"
                 android:background="@drawable/rectangle">
             </EditText>
