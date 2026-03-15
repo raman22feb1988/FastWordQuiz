@@ -52,7 +52,7 @@ import java.util.List;
 public class Report extends AppCompatActivity {
     sqliteDB db;
     int letters = 0;
-    int columns = 18;
+    int columns = 20;
     String label = "*";
     String tag = "(No action)";
     int solvedStatus = 0;
@@ -1409,16 +1409,17 @@ public class Report extends AppCompatActivity {
             String back = hook.get(1);
             String front = hook.get(2);
             String lexicons = hook.get(3);
-            String listbox = hook.get(4);
+            String serialNumber = hook.get(4);
+            String listbox = hook.get(5);
 
             HashMap<String, String> colours = db.getColours();
             String amount;
 
             if (colours.containsKey(listbox) || colours.containsKey("")) {
                 String colour = (colours.containsKey(listbox) ? colours.get(listbox) : colours.get(""));
-                amount = "<font color=\"" + colour + "\"><b><small>" + front + "</small> " + word + " <small>" + back + "</small></b> " + meaning + " <b>" + (listbox.isEmpty() ? "(No tag)" : listbox) + " " + lexicons + "</b>" + db.getFullDetails(word) + "</font>";
+                amount = "<font color=\"" + colour + "\"><b><small>" + front + "</small> " + word + " <small>" + back + "</small></b> " + meaning + " <b>" + (listbox.isEmpty() ? "(No tag)" : listbox) + " " + lexicons + "</b> " + serialNumber + db.getFullDetails(word) + "</font>";
             } else {
-                amount = "<b><small>" + front + "</small> " + word + " <small>" + back + "</small></b> " + meaning + " <b>" + (listbox.isEmpty() ? "(No tag)" : listbox) + " " + lexicons + "</b>" + db.getFullDetails(word);
+                amount = "<b><small>" + front + "</small> " + word + " <small>" + back + "</small></b> " + meaning + " <b>" + (listbox.isEmpty() ? "(No tag)" : listbox) + " " + lexicons + "</b> " + serialNumber + db.getFullDetails(word);
             }
 
             db.messageBox("Similar words for " + word, amount, Report.this);

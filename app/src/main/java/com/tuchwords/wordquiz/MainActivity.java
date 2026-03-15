@@ -1382,15 +1382,16 @@ public class MainActivity extends AppCompatActivity {
                 String back = hook.get(1);
                 String front = hook.get(2);
                 String lexicons = hook.get(3);
+                String serialNumber = hook.get(4);
                 HashMap<String, String> colourList = db.getColours();
                 String coloursList = db.getLabel(blankMaps, blank);
                 String amount;
 
                 if (colourList.containsKey(coloursList) || colourList.containsKey("")) {
                     String coloured = (colourList.containsKey(coloursList) ? colourList.get(coloursList) : colourList.get(""));
-                    amount = "<font color=\"" + coloured + "\"><b><small>" + front + "</small> " + guess + " <small>" + back + "</small></b> " + meaning + " <b>" + (coloursList.isEmpty() ? "(No tag)" : coloursList) + " " + lexicons + "</b>" + (detail ? db.getFullDetails(guess) : "") + "</font>";
+                    amount = "<font color=\"" + coloured + "\"><b><small>" + front + "</small> " + guess + " <small>" + back + "</small></b> " + meaning + " <b>" + (coloursList.isEmpty() ? "(No tag)" : coloursList) + " " + lexicons + "</b> " + serialNumber + (detail ? db.getFullDetails(guess) : "") + "</font>";
                 } else {
-                    amount = "<b><small>" + front + "</small> " + guess + " <small>" + back + "</small></b> " + meaning + " <b>" + (coloursList.isEmpty() ? "(No tag)" : coloursList) + " " + lexicons + "</b>" + (detail ? db.getFullDetails(guess) : "");
+                    amount = "<b><small>" + front + "</small> " + guess + " <small>" + back + "</small></b> " + meaning + " <b>" + (coloursList.isEmpty() ? "(No tag)" : coloursList) + " " + lexicons + "</b> " + serialNumber + (detail ? db.getFullDetails(guess) : "");
                 }
 
                 t5.setText(Html.fromHtml(amount));
@@ -1816,15 +1817,16 @@ public class MainActivity extends AppCompatActivity {
         String back = hook.get(1);
         String front = hook.get(2);
         String lexicons = hook.get(3);
+        String serialNumber = hook.get(4);
 
         HashMap<String, String> colours = db.getColours();
         String amount;
 
         if (colours.containsKey(listbox) || colours.containsKey("")) {
             String colour = (colours.containsKey(listbox) ? colours.get(listbox) : colours.get(""));
-            amount = "<font color=\"" + colour + "\"><b><small>" + front + "</small> " + ultimate + " <small>" + back + "</small></b> " + meaning + " <b>" + (listbox.isEmpty() ? "(No tag)" : listbox) + " " + lexicons + "</b>" + (detail ? db.getFullDetails(ultimate) : "") + "</font>";
+            amount = "<font color=\"" + colour + "\"><b><small>" + front + "</small> " + ultimate + " <small>" + back + "</small></b> " + meaning + " <b>" + (listbox.isEmpty() ? "(No tag)" : listbox) + " " + lexicons + "</b> " + serialNumber + (detail ? db.getFullDetails(ultimate) : "") + "</font>";
         } else {
-            amount = "<b><small>" + front + "</small> " + ultimate + " <small>" + back + "</small></b> " + meaning + " <b>" + (listbox.isEmpty() ? "(No tag)" : listbox) + " " + lexicons + "</b>" + (detail ? db.getFullDetails(ultimate) : "");
+            amount = "<b><small>" + front + "</small> " + ultimate + " <small>" + back + "</small></b> " + meaning + " <b>" + (listbox.isEmpty() ? "(No tag)" : listbox) + " " + lexicons + "</b> " + serialNumber + (detail ? db.getFullDetails(ultimate) : "");
         }
 
         t5.setText(Html.fromHtml(amount));

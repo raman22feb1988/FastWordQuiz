@@ -1561,7 +1561,7 @@ public class sqliteDB extends SQLiteOpenHelper {
         int total = 1;
 
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT _word_, _definition_, _back_, _front_, _tag_, _length_, _csw24_, _csw19_, _csw15_, _csw12_, _csw07_, _nwl23_, _nwl18_, _twl06_, _nswl23_, _wims_, _cel21_ FROM " + (blank ? "blanks WHERE _anagram_ = \"" : "words WHERE _alphagram_ = \"") + jumble + "\" AND _solved_ = 1 ORDER BY _time_", null);
+        Cursor cursor = db.rawQuery("SELECT _word_, _definition_, _back_, _front_, _tag_, _length_, _page_, _position_, _serial_, _csw24_, _csw19_, _csw15_, _csw12_, _csw07_, _nwl23_, _nwl18_, _twl06_, _nswl23_, _wims_, _cel21_ FROM " + (blank ? "blanks WHERE _anagram_ = \"" : "words WHERE _alphagram_ = \"") + jumble + "\" AND _solved_ = 1 ORDER BY _time_", null);
 
         if (cursor.moveToFirst()) {
             do {
@@ -1571,17 +1571,20 @@ public class sqliteDB extends SQLiteOpenHelper {
                 String front = cursor.getString(3);
                 String label = cursor.getString(4);
                 int length = cursor.getInt(5);
-                int csw24 = cursor.getInt(6);
-                int csw19 = cursor.getInt(7);
-                int csw15 = cursor.getInt(8);
-                int csw12 = cursor.getInt(9);
-                int csw07 = cursor.getInt(10);
-                int nwl23 = cursor.getInt(11);
-                int nwl18 = cursor.getInt(12);
-                int twl06 = cursor.getInt(13);
-                int nswl23 = cursor.getInt(14);
-                int cel21 = cursor.getInt(15);
-                int wims = cursor.getInt(16);
+                int page = cursor.getInt(6);
+                int position = cursor.getInt(7);
+                int serial = cursor.getInt(8);
+                int csw24 = cursor.getInt(9);
+                int csw19 = cursor.getInt(10);
+                int csw15 = cursor.getInt(11);
+                int csw12 = cursor.getInt(12);
+                int csw07 = cursor.getInt(13);
+                int nwl23 = cursor.getInt(14);
+                int nwl18 = cursor.getInt(15);
+                int twl06 = cursor.getInt(16);
+                int nswl23 = cursor.getInt(17);
+                int cel21 = cursor.getInt(18);
+                int wims = cursor.getInt(19);
 
                 ArrayList<String> dictionaryList = dictionaries(length, csw24, csw19, csw15, csw12, csw07, nwl23, nwl18, twl06, nswl23, wims, cel21);
                 HashMap<String, String> colours = getColours();
@@ -1590,15 +1593,15 @@ public class sqliteDB extends SQLiteOpenHelper {
                     String colour = (colours.containsKey(label) ? colours.get(label) : colours.get(""));
 
                     if (total == 1) {
-                        solved.append("<font color=\"").append(colour).append("\">").append(total).append(". <b><small>").append(front).append("</small> ").append(data).append(" <small>").append(back).append("</small></b> ").append(definition).append(" <b>").append(label.isEmpty() ? "(No tag)" : label).append(" ").append(dictionaryList.get(0)).append(" ").append(dictionaryList.get(1)).append(" ").append(dictionaryList.get(2)).append(" ").append(dictionaryList.get(3)).append("</b></font>");
+                        solved.append("<font color=\"").append(colour).append("\">").append(total).append(". <b><small>").append(front).append("</small> ").append(data).append(" <small>").append(back).append("</small></b> ").append(definition).append(" <b>").append(label.isEmpty() ? "(No tag)" : label).append(" ").append(dictionaryList.get(0)).append(" ").append(dictionaryList.get(1)).append(" ").append(dictionaryList.get(2)).append(" ").append(dictionaryList.get(3)).append("</b> Order ").append(serial).append(" (Anagram ").append(position).append(" in Page ").append(page).append(")</font>");
                     } else {
-                        solved.append("<br><font color=\"").append(colour).append("\">").append(total).append(". <b><small>").append(front).append("</small> ").append(data).append(" <small>").append(back).append("</small></b> ").append(definition).append(" <b>").append(label.isEmpty() ? "(No tag)" : label).append(" ").append(dictionaryList.get(0)).append(" ").append(dictionaryList.get(1)).append(" ").append(dictionaryList.get(2)).append(" ").append(dictionaryList.get(3)).append("</b></font>");
+                        solved.append("<br><font color=\"").append(colour).append("\">").append(total).append(". <b><small>").append(front).append("</small> ").append(data).append(" <small>").append(back).append("</small></b> ").append(definition).append(" <b>").append(label.isEmpty() ? "(No tag)" : label).append(" ").append(dictionaryList.get(0)).append(" ").append(dictionaryList.get(1)).append(" ").append(dictionaryList.get(2)).append(" ").append(dictionaryList.get(3)).append("</b> Order ").append(serial).append(" (Anagram ").append(position).append(" in Page ").append(page).append(")</font>");
                     }
                 } else {
                     if (total == 1) {
-                        solved.append(total).append(". <b><small>").append(front).append("</small> ").append(data).append(" <small>").append(back).append("</small></b> ").append(definition).append(" <b>").append(label.isEmpty() ? "(No tag)" : label).append(" ").append(dictionaryList.get(0)).append(" ").append(dictionaryList.get(1)).append(" ").append(dictionaryList.get(2)).append(" ").append(dictionaryList.get(3)).append("</b>");
+                        solved.append(total).append(". <b><small>").append(front).append("</small> ").append(data).append(" <small>").append(back).append("</small></b> ").append(definition).append(" <b>").append(label.isEmpty() ? "(No tag)" : label).append(" ").append(dictionaryList.get(0)).append(" ").append(dictionaryList.get(1)).append(" ").append(dictionaryList.get(2)).append(" ").append(dictionaryList.get(3)).append("</b> Order ").append(serial).append(" (Anagram ").append(position).append(" in Page ").append(page).append(")");
                     } else {
-                        solved.append("<br>").append(total).append(". <b><small>").append(front).append("</small> ").append(data).append(" <small>").append(back).append("</small></b> ").append(definition).append(" <b>").append(label.isEmpty() ? "(No tag)" : label).append(" ").append(dictionaryList.get(0)).append(" ").append(dictionaryList.get(1)).append(" ").append(dictionaryList.get(2)).append(" ").append(dictionaryList.get(3)).append("</b>");
+                        solved.append("<br>").append(total).append(". <b><small>").append(front).append("</small> ").append(data).append(" <small>").append(back).append("</small></b> ").append(definition).append(" <b>").append(label.isEmpty() ? "(No tag)" : label).append(" ").append(dictionaryList.get(0)).append(" ").append(dictionaryList.get(1)).append(" ").append(dictionaryList.get(2)).append(" ").append(dictionaryList.get(3)).append("</b> Order ").append(serial).append(" (Anagram ").append(position).append(" in Page ").append(page).append(")");
                     }
                 }
 
@@ -1616,7 +1619,7 @@ public class sqliteDB extends SQLiteOpenHelper {
         int total = 1;
 
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT _word_, _definition_, _back_, _front_, _length_, _csw24_, _csw19_, _csw15_, _csw12_, _csw07_, _nwl23_, _nwl18_, _twl06_, _nswl23_, _wims_, _cel21_ FROM " + (blank ? "blanks WHERE _anagram_ = \"" : "words WHERE _alphagram_ = \"") + unsolved + "\" AND _solved_ = 0", null);
+        Cursor cursor = db.rawQuery("SELECT _word_, _definition_, _back_, _front_, _length_, _page_, _position_, _serial_, _csw24_, _csw19_, _csw15_, _csw12_, _csw07_, _nwl23_, _nwl18_, _twl06_, _nswl23_, _wims_, _cel21_ FROM " + (blank ? "blanks WHERE _anagram_ = \"" : "words WHERE _alphagram_ = \"") + unsolved + "\" AND _solved_ = 0", null);
 
         if (cursor.moveToFirst()) {
             do {
@@ -1625,25 +1628,28 @@ public class sqliteDB extends SQLiteOpenHelper {
                 String back = cursor.getString(2);
                 String front = cursor.getString(3);
                 int length = cursor.getInt(4);
-                int csw24 = cursor.getInt(5);
-                int csw19 = cursor.getInt(6);
-                int csw15 = cursor.getInt(7);
-                int csw12 = cursor.getInt(8);
-                int csw07 = cursor.getInt(9);
-                int nwl23 = cursor.getInt(10);
-                int nwl18 = cursor.getInt(11);
-                int twl06 = cursor.getInt(12);
-                int nswl23 = cursor.getInt(13);
-                int cel21 = cursor.getInt(14);
-                int wims = cursor.getInt(15);
+                int page = cursor.getInt(5);
+                int position = cursor.getInt(6);
+                int serial = cursor.getInt(7);
+                int csw24 = cursor.getInt(8);
+                int csw19 = cursor.getInt(9);
+                int csw15 = cursor.getInt(10);
+                int csw12 = cursor.getInt(11);
+                int csw07 = cursor.getInt(12);
+                int nwl23 = cursor.getInt(13);
+                int nwl18 = cursor.getInt(14);
+                int twl06 = cursor.getInt(15);
+                int nswl23 = cursor.getInt(16);
+                int cel21 = cursor.getInt(17);
+                int wims = cursor.getInt(18);
 
                 ArrayList<String> dictionaryList = dictionaries(length, csw24, csw19, csw15, csw12, csw07, nwl23, nwl18, twl06, nswl23, wims, cel21);
 
                 if (total == 1) {
-                    unsolvedAnswers.append(total).append(". <b><small>").append(front).append("</small> ").append(data).append(" <small>").append(back).append("</small></b> ").append(definition).append(" <b>").append(dictionaryList.get(0)).append(" ").append(dictionaryList.get(1)).append(" ").append(dictionaryList.get(2)).append(" ").append(dictionaryList.get(3)).append("</b>");
+                    unsolvedAnswers.append(total).append(". <b><small>").append(front).append("</small> ").append(data).append(" <small>").append(back).append("</small></b> ").append(definition).append(" <b>").append(dictionaryList.get(0)).append(" ").append(dictionaryList.get(1)).append(" ").append(dictionaryList.get(2)).append(" ").append(dictionaryList.get(3)).append("</b> Order ").append(serial).append(" (Anagram ").append(position).append(" in Page ").append(page).append(")");
                 }
                 else {
-                    unsolvedAnswers.append("<br>").append(total).append(". <b><small>").append(front).append("</small> ").append(data).append(" <small>").append(back).append("</small></b> ").append(definition).append(" <b>").append(dictionaryList.get(0)).append(" ").append(dictionaryList.get(1)).append(" ").append(dictionaryList.get(2)).append(" ").append(dictionaryList.get(3)).append("</b>");
+                    unsolvedAnswers.append("<br>").append(total).append(". <b><small>").append(front).append("</small> ").append(data).append(" <small>").append(back).append("</small></b> ").append(definition).append(" <b>").append(dictionaryList.get(0)).append(" ").append(dictionaryList.get(1)).append(" ").append(dictionaryList.get(2)).append(" ").append(dictionaryList.get(3)).append("</b> Order ").append(serial).append(" (Anagram ").append(position).append(" in Page ").append(page).append(")");
                 }
 
                 total++;
@@ -1659,13 +1665,14 @@ public class sqliteDB extends SQLiteOpenHelper {
         ArrayList<String> hookList = new ArrayList<>();
 
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT _definition_, _back_, _front_, _length_, _csw24_, _csw19_, _csw15_, _csw12_, _csw07_, _nwl23_, _nwl18_, _twl06_, _nswl23_, _wims_, _cel21_, _tag_ FROM " + (blank ? "blanks WHERE _identity_ = \"" : "words WHERE _word_ = \"") + guess + "\"", null);
+        Cursor cursor = db.rawQuery("SELECT _definition_, _back_, _front_, _length_, _page_, _position_, _serial_, _csw24_, _csw19_, _csw15_, _csw12_, _csw07_, _nwl23_, _nwl18_, _twl06_, _nswl23_, _wims_, _cel21_, _tag_ FROM " + (blank ? "blanks WHERE _identity_ = \"" : "words WHERE _word_ = \"") + guess + "\"", null);
 
         String meaning = null;
         String back = null;
         String front = null;
         String lexicons = null;
         String label = null;
+        String serialNumber = null;
 
         if (cursor.moveToFirst()) {
             do {
@@ -1673,21 +1680,25 @@ public class sqliteDB extends SQLiteOpenHelper {
                 back = cursor.getString(1);
                 front = cursor.getString(2);
                 int length = cursor.getInt(3);
-                int csw24 = cursor.getInt(4);
-                int csw19 = cursor.getInt(5);
-                int csw15 = cursor.getInt(6);
-                int csw12 = cursor.getInt(7);
-                int csw07 = cursor.getInt(8);
-                int nwl23 = cursor.getInt(9);
-                int nwl18 = cursor.getInt(10);
-                int twl06 = cursor.getInt(11);
-                int nswl23 = cursor.getInt(12);
-                int cel21 = cursor.getInt(13);
-                int wims = cursor.getInt(14);
-                label = cursor.getString(15);
+                int page = cursor.getInt(4);
+                int position = cursor.getInt(5);
+                int serial = cursor.getInt(6);
+                int csw24 = cursor.getInt(7);
+                int csw19 = cursor.getInt(8);
+                int csw15 = cursor.getInt(9);
+                int csw12 = cursor.getInt(10);
+                int csw07 = cursor.getInt(11);
+                int nwl23 = cursor.getInt(12);
+                int nwl18 = cursor.getInt(13);
+                int twl06 = cursor.getInt(14);
+                int nswl23 = cursor.getInt(15);
+                int cel21 = cursor.getInt(16);
+                int wims = cursor.getInt(17);
+                label = cursor.getString(18);
 
                 ArrayList<String> dictionaryList = dictionaries(length, csw24, csw19, csw15, csw12, csw07, nwl23, nwl18, twl06, nswl23, wims, cel21);
                 lexicons = dictionaryList.get(0) + " " + dictionaryList.get(1) + " " + dictionaryList.get(2) + " " + dictionaryList.get(3);
+                serialNumber = "Order " + serial + " (Anagram " + position + " in Page " + page + ")";
             } while (cursor.moveToNext());
         }
 
@@ -1697,6 +1708,7 @@ public class sqliteDB extends SQLiteOpenHelper {
         hookList.add(back);
         hookList.add(front);
         hookList.add(lexicons);
+        hookList.add(serialNumber);
         hookList.add(label);
 
         return hookList;
@@ -2096,9 +2108,11 @@ public class sqliteDB extends SQLiteOpenHelper {
             wordList.add("<b>Back</b>");
             wordList.add("<b>Ans</b>");
             wordList.add("<b>Anagram</b>");
-            wordList.add("<b>Page</b>");
+            wordList.add("<b>Order</b>");
             wordList.add("<b>Tag</b>");
             wordList.add("<b>Time</b>");
+            wordList.add("<b>Page</b>");
+            wordList.add("<b>Grid</b>");
             wordList.add("<b>CSW</b>");
             wordList.add("<b>NWL</b>");
             wordList.add("<b>CEL</b>");
@@ -2114,7 +2128,7 @@ public class sqliteDB extends SQLiteOpenHelper {
         HashMap<String, String> coloursMap = getColours();
 
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT _word_, _definition_, _time_, _solved_, _back_, _front_, _answers_, _page_, " + (blank ? "_anagram_" : "_alphagram_") + ", _timestamp_, _csw24_, _csw19_, _csw15_, _csw12_, _csw07_, _nwl23_, _nwl18_, _twl06_, _nswl23_, _wims_, _cel21_, _incorrect_, _wrong_, _tag_ FROM " + (blank ? "blanks WHERE _identity_ IN " : "words WHERE _word_ IN ") + jumbleList + (orderBy.charAt(0) == ' ' ? orderBy : ""), null);
+        Cursor cursor = db.rawQuery("SELECT _word_, _definition_, _time_, _solved_, _back_, _front_, _answers_, _page_, _position_, _serial_, " + (blank ? "_anagram_" : "_alphagram_") + ", _timestamp_, _csw24_, _csw19_, _csw15_, _csw12_, _csw07_, _nwl23_, _nwl18_, _twl06_, _nswl23_, _wims_, _cel21_, _incorrect_, _wrong_, _tag_ FROM " + (blank ? "blanks WHERE _identity_ IN " : "words WHERE _word_ IN ") + jumbleList + (orderBy.charAt(0) == ' ' ? orderBy : ""), null);
 
         if (orderBy.equals("DESC") ? cursor.moveToLast() : cursor.moveToFirst()) {
             do {
@@ -2126,22 +2140,24 @@ public class sqliteDB extends SQLiteOpenHelper {
                 String front = cursor.getString(5);
                 String answers = cursor.getString(6);
                 String page = cursor.getString(7);
-                String alphagram = cursor.getString(8);
-                String timestamp = cursor.getString(9);
-                int csw24 = cursor.getInt(10);
-                int csw19 = cursor.getInt(11);
-                int csw15 = cursor.getInt(12);
-                int csw12 = cursor.getInt(13);
-                int csw07 = cursor.getInt(14);
-                int nwl23 = cursor.getInt(15);
-                int nwl18 = cursor.getInt(16);
-                int twl06 = cursor.getInt(17);
-                int nswl23 = cursor.getInt(18);
-                int wims = cursor.getInt(19);
-                int cel21 = cursor.getInt(20);
-                String incorrect = cursor.getString(21);
-                String wrong = cursor.getString(22);
-                String label = cursor.getString(23);
+                String position = cursor.getString(8);
+                String serial = cursor.getString(9);
+                String alphagram = cursor.getString(10);
+                String timestamp = cursor.getString(11);
+                int csw24 = cursor.getInt(12);
+                int csw19 = cursor.getInt(13);
+                int csw15 = cursor.getInt(14);
+                int csw12 = cursor.getInt(15);
+                int csw07 = cursor.getInt(16);
+                int nwl23 = cursor.getInt(17);
+                int nwl18 = cursor.getInt(18);
+                int twl06 = cursor.getInt(19);
+                int nswl23 = cursor.getInt(20);
+                int wims = cursor.getInt(21);
+                int cel21 = cursor.getInt(22);
+                String incorrect = cursor.getString(23);
+                String wrong = cursor.getString(24);
+                String label = cursor.getString(25);
 
                 ArrayList<String> lexicons = dictionaries(data.length(), csw24, csw19, csw15, csw12, csw07, nwl23, nwl18, twl06, nswl23, wims, cel21);
 
@@ -2154,9 +2170,11 @@ public class sqliteDB extends SQLiteOpenHelper {
                     wordList.add("<font color=\"" + colourMap + "\"><b><small>" + back + "</small></b></font>");
                     wordList.add("<font color=\"" + colourMap + "\">" + answers + "</font>");
                     wordList.add("<font color=\"" + colourMap + "\"><b>" + alphagram + "</b></font>");
-                    wordList.add("<font color=\"" + colourMap + "\">Page " + page + "</font>");
+                    wordList.add("<font color=\"" + colourMap + "\">" + serial + "</font>");
                     wordList.add("<font color=\"" + colourMap + "\"><b>" + (label.isEmpty() ? "(No tag)" : label) + "</b></font>");
                     wordList.add("<font color=\"" + colourMap + "\">" + convert(time) + "</font>");
+                    wordList.add("<font color=\"" + colourMap + "\">" + page + "</font>");
+                    wordList.add("<font color=\"" + colourMap + "\">" + position + "</font>");
                     wordList.add("<font color=\"" + colourMap + "\">" + lexicons.get(0) + "</font>");
                     wordList.add("<font color=\"" + colourMap + "\">" + lexicons.get(1) + "</font>");
                     wordList.add("<font color=\"" + colourMap + "\">" + lexicons.get(2) + "</font>");
@@ -2174,9 +2192,11 @@ public class sqliteDB extends SQLiteOpenHelper {
                     wordList.add("<b><small>" + back + "</small></b>");
                     wordList.add(answers);
                     wordList.add("<b>" + alphagram + "</b>");
-                    wordList.add("Page " + page);
+                    wordList.add(serial);
                     wordList.add("<b>" + (label.isEmpty() ? "(No tag)" : label) + "</b>");
                     wordList.add(convert(time));
+                    wordList.add(page);
+                    wordList.add(position);
                     wordList.add(lexicons.get(0));
                     wordList.add(lexicons.get(1));
                     wordList.add(lexicons.get(2));
